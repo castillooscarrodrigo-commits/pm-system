@@ -139,7 +139,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <i class="fas fa-project-diagram text-blue-600 text-2xl"></i>
-            <span class="text-xl font-bold text-gray-800">PM System v2.7</span>
+            <span class="text-xl font-bold text-gray-800">PM System v2.8</span>
         </div>
         <div class="flex items-center gap-4">
             <span class="text-sm text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -589,31 +589,40 @@ function calcularFechaFin() {
 }
 
 // ============================================
-// CALCULAR PROGRESO POR FASES (CORREGIDO - V2.7)
+// CALCULAR PROGRESO POR FASES (V2.8 - CORREGIDO)
 // ============================================
 function calcularProgresoPorFases(tareas, metodologia) {
     const fasesMetodologia = FASES_POR_METODOLOGIA[metodologia]?.fases || [];
-
+    
+    // Si no hay metodología definida, calcular por tareas
     if (fasesMetodologia.length === 0) {
         const total = tareas.length;
         const completadas = tareas.filter(t => t.estado === 'Completado').length;
         return total > 0 ? Math.round((completadas / total) * 100) : 0;
     }
 
-    let tareasTotales = 0;
-    let tareasCompletadas = 0;
-
+    let fasesCompletas = 0;
+    const totalFases = fasesMetodologia.length;
+    
+    // Evaluar CADA fase de la metodología
     fasesMetodologia.forEach(fase => {
         const tareasFase = tareas.filter(t => t.fase === fase);
-        tareasTotales += tareasFase.length;
-        tareasCompletadas += tareasFase.filter(t => t.estado === 'Completado').length;
+        
+        // Si no tiene tareas → NO está completa (0%)
+        if (tareasFase.length === 0) {
+            return; // no suma, queda incompleta
+        }
+        
+        // Si tiene tareas, verificar que TODAS estén completadas
+        const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
+        if (todasCompletas) {
+            fasesCompletas++;
+        }
+        // Si no todas están completas, no suma
     });
 
-    const sinFase = tareas.filter(t => !t.fase || t.fase === '');
-    tareasTotales += sinFase.length;
-    tareasCompletadas += sinFase.filter(t => t.estado === 'Completado').length;
-
-    return tareasTotales > 0 ? Math.round((tareasCompletadas / tareasTotales) * 100) : 0;
+    // Calcular porcentaje sobre el TOTAL de fases
+    return Math.round((fasesCompletas / totalFases) * 100);
 }
 
 // ============================================
@@ -943,7 +952,7 @@ function renderVistaGantt(tareas, proyecto) {
 }
 
 // ============================================
-// TOGGLE DETALLE CON VISTA GANTT (CORREGIDO V2.7)
+// TOGGLE DETALLE CON VISTA GANTT (V2.8)
 // ============================================
 let detallesAbiertos = {};
 
