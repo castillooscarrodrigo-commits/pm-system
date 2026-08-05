@@ -50,13 +50,11 @@
         .prioridad-media { background: #fef3c7; color: #d97706; }
         .prioridad-alta { background: #fee2e2; color: #dc2626; }
         .prioridad-critica { background: #7f1d1d; color: #fecaca; }
-        .comentario-item { border-left: 3px solid #93c5fd; padding-left: 12px; margin-bottom: 8px; }
-        .comentario-item .texto { font-size: 13px; }
-        .comentario-item .meta { font-size: 10px; color: #9ca3af; }
         .fecha-vencimiento { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
         .fecha-vencimiento.vencida { background: #fee2e2; color: #dc2626; }
         .fecha-vencimiento.proxima { background: #fef3c7; color: #d97706; }
         .fecha-vencimiento.futura { background: #d1fae5; color: #059669; }
+        .area-badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; background: #e0e7ff; color: #4338ca; }
     </style>
 </head>
 <body>
@@ -200,12 +198,11 @@ const PRIORIDAD_COLORS = {
             </div>
         </div>
 
-        <!-- Proyectos -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="px-6 py-4 border-b flex flex-wrap justify-between items-center gap-3">
                 <h2 class="text-lg font-semibold text-gray-800">Proyectos</h2>
                 <div class="flex flex-wrap items-center gap-2">
-                    <div class="flex gap-1">
+                    <div class="flex gap-1 flex-wrap">
                         <button onclick="filtrarProyectos('todos')" class="filtro-btn active" id="filtro-todos">Todos</button>
                         <button onclick="filtrarProyectos('Activo')" class="filtro-btn" id="filtro-Activo">Activos</button>
                         <button onclick="filtrarProyectos('Ejecutando')" class="filtro-btn" id="filtro-Ejecutando">Ejecutando</button>
@@ -342,7 +339,9 @@ const PRIORIDAD_COLORS = {
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Responsable</label>
-                        <select id="tar-responsable" class="w-full border rounded-lg px-3 py-2 text-sm"></select>
+                        <select id="tar-responsable" class="w-full border rounded-lg px-3 py-2 text-sm">
+                            <option value="">Sin asignar</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Prioridad</label>
@@ -364,16 +363,6 @@ const PRIORIDAD_COLORS = {
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
                         <input id="tar-fecha-vencimiento" type="date" class="w-full border rounded-lg px-3 py-2 text-sm">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Horas estimadas</label>
-                        <input id="tar-horas" type="number" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="8">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Horas reales</label>
-                        <input id="tar-horas-reales" type="number" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="0" step="0.5">
                     </div>
                 </div>
                 <div>
@@ -412,16 +401,22 @@ const PRIORIDAD_COLORS = {
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input id="usr-email" type="email" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="correo@ejemplo.com">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-                    <select id="usr-rol" class="w-full border rounded-lg px-3 py-2 text-sm">
-                        <option value="Project Manager">Project Manager</option>
-                        <option value="Desarrollador">Desarrollador</option>
-                        <option value="Diseñador">Diseñador</option>
-                        <option value="QA">QA</option>
-                        <option value="Analista">Analista</option>
-                        <option value="Colaborador">Colaborador</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                        <select id="usr-rol" class="w-full border rounded-lg px-3 py-2 text-sm">
+                            <option value="Project Manager">Project Manager</option>
+                            <option value="Desarrollador">Desarrollador</option>
+                            <option value="Diseñador">Diseñador</option>
+                            <option value="QA">QA</option>
+                            <option value="Analista">Analista</option>
+                            <option value="Colaborador">Colaborador</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Área</label>
+                        <input id="usr-area" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Ej: Tecnología, Marketing, etc.">
+                    </div>
                 </div>
             </div>
             <div class="flex gap-3 pt-4 mt-3 border-t">
@@ -573,13 +568,14 @@ async function cargarDashboard() {
         document.getElementById('kpi-recursos').textContent = usuariosCache.length;
         document.getElementById('kpi-completadas').textContent = completadasTotal;
 
-        // Llenar selects de proyectos y responsables
+        // Llenar selects de proyectos
         const selectProyecto = document.getElementById('tar-proyecto');
         selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
+        // Llenar select de responsables
         const selectResponsable = document.getElementById('tar-responsable');
         selectResponsable.innerHTML = '<option value="">Sin asignar</option>' +
-            usuariosCache.map(u => `<option value="${u.id}">${u.nombre}</option>`).join('');
+            usuariosCache.map(u => `<option value="${u.id}">${u.nombre} ${u.area ? '· ' + u.area : ''}</option>`).join('');
 
         renderizarProyectos(proyectosConProgreso);
 
@@ -730,7 +726,6 @@ async function toggleDetalle(id) {
         const completadas = tareas.filter(t => t.estado === 'Completado').length;
         const progreso = total > 0 ? Math.round((completadas / total) * 100) : 0;
 
-        // Agrupar tareas por fase
         const fases = {};
         tareas.forEach(t => {
             const fase = t.fase || 'Sin fase';
@@ -758,17 +753,6 @@ async function toggleDetalle(id) {
                     </div>
                 `).join('');
             }
-        }
-
-        // Comentarios (simplificado)
-        let comentariosHTML = '';
-        if (tareas.length > 0) {
-            comentariosHTML = `
-                <div class="mt-3 pt-3 border-t">
-                    <h5 class="font-semibold text-sm text-gray-700 mb-2"><i class="fas fa-comment mr-1"></i>Comentarios recientes</h5>
-                    <div class="text-xs text-gray-400">Funcionalidad en desarrollo</div>
-                </div>
-            `;
         }
 
         detalleDiv.innerHTML = `
@@ -810,7 +794,6 @@ async function toggleDetalle(id) {
                         ${tareasHTML}
                     </div>
                 </div>
-                ${comentariosHTML}
             </div>
         `;
 
@@ -821,12 +804,11 @@ async function toggleDetalle(id) {
 }
 
 // ============================================
-// RENDER TAREA ITEM
+// RENDER TAREA ITEM (SIN HORAS)
 // ============================================
 function renderTareaItem(t, badgeEstado) {
     const prioridadClass = PRIORIDAD_COLORS[t.prioridad] || 'prioridad-media';
 
-    // Calcular estado de vencimiento
     let vencimientoHTML = '';
     if (t.fecha_vencimiento) {
         const hoy = new Date();
@@ -840,14 +822,20 @@ function renderTareaItem(t, badgeEstado) {
     }
 
     const responsable = usuariosCache.find(u => u.id === t.responsable_id);
-    const responsableHTML = responsable ? `<span class="text-xs text-gray-500"><i class="fas fa-user mr-1"></i>${responsable.nombre}</span>` : '';
+    let responsableHTML = '';
+    if (responsable) {
+        responsableHTML = `<span class="text-xs text-gray-500"><i class="fas fa-user mr-1"></i>${responsable.nombre}</span>`;
+        if (responsable.area) {
+            responsableHTML += ` <span class="area-badge">${responsable.area}</span>`;
+        }
+    }
 
     return `
         <div class="tarea-item flex flex-wrap justify-between items-center p-3 border-b last:border-b-0 hover:bg-gray-50 rounded">
             <div class="flex-1 min-w-[150px]">
                 <div class="font-medium text-sm">${t.titulo}</div>
                 <div class="text-xs text-gray-400 flex flex-wrap items-center gap-2">
-                    ${t.descripcion || 'Sin descripción'} • ${t.horas_estimadas || 0}h estimadas • ${t.horas_reales || 0}h reales
+                    ${t.descripcion || 'Sin descripción'}
                 </div>
                 <div class="flex flex-wrap items-center gap-2 mt-1">
                     ${responsableHTML}
@@ -894,7 +882,7 @@ function editarProyecto(id) {
 }
 
 // ============================================
-// EDITAR TAREA
+// EDITAR TAREA (SIN HORAS)
 // ============================================
 function editarTarea(id) {
     const tarea = tareasCache.find(t => t.id === id);
@@ -908,11 +896,8 @@ function editarTarea(id) {
     document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
     document.getElementById('tar-fase').value = tarea.fase || '';
     document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
-    document.getElementById('tar-horas').value = tarea.horas_estimadas || '';
-    document.getElementById('tar-horas-reales').value = tarea.horas_reales || '';
     document.getElementById('tar-descripcion').value = tarea.descripcion || '';
 
-    // Cargar fases según metodología del proyecto
     const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
     const fasesSelect = document.getElementById('tar-fase');
     if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
@@ -965,7 +950,7 @@ async function guardarProyecto(e) {
 }
 
 // ============================================
-// GUARDAR TAREA
+// GUARDAR TAREA (SIN HORAS)
 // ============================================
 async function guardarTarea(e) {
     e.preventDefault();
@@ -976,8 +961,6 @@ async function guardarTarea(e) {
     const prioridad = document.getElementById('tar-prioridad').value;
     const fase = document.getElementById('tar-fase').value;
     const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
-    const horas_estimadas = parseFloat(document.getElementById('tar-horas').value) || 0;
-    const horas_reales = parseFloat(document.getElementById('tar-horas-reales').value) || 0;
     const descripcion = document.getElementById('tar-descripcion').value;
 
     if (!titulo || !proyecto_id) {
@@ -992,8 +975,6 @@ async function guardarTarea(e) {
         prioridad,
         fase: fase || null,
         fecha_vencimiento,
-        horas_estimadas,
-        horas_reales,
         descripcion,
         fecha_actualizacion: new Date().toISOString()
     };
@@ -1017,13 +998,14 @@ async function guardarTarea(e) {
 }
 
 // ============================================
-// GUARDAR USUARIO
+// GUARDAR USUARIO (CON ÁREA)
 // ============================================
 async function guardarUsuario(e) {
     e.preventDefault();
     const nombre = document.getElementById('usr-nombre').value;
     const email = document.getElementById('usr-email').value;
     const rol = document.getElementById('usr-rol').value;
+    const area = document.getElementById('usr-area').value;
 
     if (!nombre) {
         showToast('El nombre es obligatorio', 'error');
@@ -1031,7 +1013,7 @@ async function guardarUsuario(e) {
     }
 
     try {
-        await supabaseInsert('usuarios', { nombre, email: email || null, rol });
+        await supabaseInsert('usuarios', { nombre, email: email || null, rol, area: area || null });
         showToast('✅ Recurso agregado');
         cerrarModal('modal-usuario');
         document.getElementById('form-usuario').reset();
@@ -1096,8 +1078,6 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
     document.getElementById('tar-responsable').value = '';
     document.getElementById('tar-prioridad').value = 'Media';
     document.getElementById('tar-fecha-vencimiento').value = '';
-    document.getElementById('tar-horas').value = '';
-    document.getElementById('tar-horas-reales').value = '';
     document.getElementById('tar-descripcion').value = '';
 
     const proyecto = proyectosCache.find(p => p.id === proyectoId);
@@ -1132,6 +1112,7 @@ async function cargarRecursos() {
                             <th class="px-4 py-2 text-left">Nombre</th>
                             <th class="px-4 py-2 text-left">Email</th>
                             <th class="px-4 py-2 text-left">Rol</th>
+                            <th class="px-4 py-2 text-left">Área</th>
                             <th class="px-4 py-2 text-left">Tareas asignadas</th>
                         </tr>
                     </thead>
@@ -1143,6 +1124,7 @@ async function cargarRecursos() {
                                 <td class="px-4 py-2 font-medium">${u.nombre}</td>
                                 <td class="px-4 py-2 text-gray-500">${u.email || '-'}</td>
                                 <td class="px-4 py-2"><span class="status-badge bg-blue-100 text-blue-700">${u.rol || 'Colaborador'}</span></td>
+                                <td class="px-4 py-2">${u.area ? `<span class="area-badge">${u.area}</span>` : '-'}</td>
                                 <td class="px-4 py-2">${tareasAsignadas} tareas</td>
                             </tr>
                         `}).join('')}
@@ -1196,48 +1178,4 @@ function generarReportes() {
                         <div>
                             <div class="flex justify-between">
                                 <span>${p.nombre}</span>
-                                <span>${p.completadas}/${p.total}</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill bg-blue-600" style="width:${p.total > 0 ? (p.completadas/p.total)*100 : 0}%"></div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// ============================================
-// INICIALIZAR
-// ============================================
-document.addEventListener('DOMContentLoaded', () => {
-    cargarDashboard();
-
-    // Cerrar modales al hacer clic fuera
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('show');
-                document.getElementById('tar-proyecto').disabled = false;
-                document.getElementById('proy-id').value = '';
-                document.getElementById('tar-id').value = '';
-                document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
-                document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
-            }
-        });
-    });
-
-    // Recargar al cambiar de tab
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (btn.textContent.includes('Recursos')) cargarRecursos();
-            if (btn.textContent.includes('Reportes')) generarReportes();
-        });
-    });
-});
-</script>
-
-</body>
-</html>
+                                <span>${p.complet
