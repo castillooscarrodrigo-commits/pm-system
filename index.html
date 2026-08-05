@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v2.5</title>
+    <title>PM System v2.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -59,10 +59,6 @@
         .metodologia-desc { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #166534; margin-top: 6px; display: none; }
         .metodologia-desc.show { display: block; }
         .metodologia-desc i { margin-right: 6px; }
-        .fase-completada { color: #059669; }
-        .fase-incompleta { color: #dc2626; }
-
-        /* ===== ESTILOS GANTT ===== */
         .gantt-container { overflow-x: auto; }
         .gantt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .gantt-table th { text-align: left; padding: 6px 8px; background: #f3f4f6; border-bottom: 2px solid #d1d5db; font-weight: 600; }
@@ -80,7 +76,7 @@
         .gantt-check { width: 18px; text-align: center; }
         .gantt-check .completado { color: #22c55e; }
         .gantt-check .pendiente { color: #9ca3af; }
-        .gantt-acciones { display: flex; gap: 4px; }
+        .gantt-acciones { display: flex; gap: 4px; flex-wrap: wrap; }
         .gantt-acciones button { background: none; border: none; cursor: pointer; padding: 2px 4px; border-radius: 4px; font-size: 11px; }
         .gantt-acciones .edit:hover { background: #fef3c7; color: #d97706; }
         .gantt-acciones .delete:hover { background: #fee2e2; color: #dc2626; }
@@ -92,6 +88,7 @@
         .gantt-fila-fase .fase-completa { color: #059669; }
         .gantt-fila-fase .fase-incompleta { color: #dc2626; }
         .gantt-fila-vacia { color: #9ca3af; text-align: center; padding: 20px; font-size: 13px; }
+        .fase-sin-tareas { background: #e5e7eb; color: #6b7280; font-size: 10px; padding: 2px 8px; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -143,7 +140,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <i class="fas fa-project-diagram text-blue-600 text-2xl"></i>
-            <span class="text-xl font-bold text-gray-800">PM System v2.5</span>
+            <span class="text-xl font-bold text-gray-800">PM System v2.6</span>
         </div>
         <div class="flex items-center gap-4">
             <span class="text-sm text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -593,7 +590,7 @@ function calcularFechaFin() {
 }
 
 // ============================================
-// CALCULAR PROGRESO POR FASES
+// CALCULAR PROGRESO POR FASES (CORREGIDO)
 // ============================================
 function calcularProgresoPorFases(tareas, metodologia) {
     const fasesMetodologia = FASES_POR_METODOLOGIA[metodologia]?.fases || [];
@@ -605,21 +602,28 @@ function calcularProgresoPorFases(tareas, metodologia) {
     }
 
     let fasesCompletas = 0;
+    let fasesConTareas = 0;
+    
     fasesMetodologia.forEach(fase => {
         const tareasFase = tareas.filter(t => t.fase === fase);
-        if (tareasFase.length === 0) {
-            fasesCompletas++;
-        } else {
+        
+        // SOLO contar fases que TIENEN tareas
+        if (tareasFase.length > 0) {
+            fasesConTareas++;
             const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
             if (todasCompletas) {
                 fasesCompletas++;
             }
         }
+        // Si no tiene tareas, NO cuenta (ni completa ni incompleta)
     });
 
-    return fasesMetodologia.length > 0 
-        ? Math.round((fasesCompletas / fasesMetodologia.length) * 100) 
-        : 0;
+    // Si no hay fases con tareas, progreso = 0
+    if (fasesConTareas === 0) {
+        return 0;
+    }
+
+    return Math.round((fasesCompletas / fasesConTareas) * 100);
 }
 
 // ============================================
@@ -722,13 +726,17 @@ function renderizarProyectos(proyectos) {
         let fasesInfo = '';
         if (fasesMetodologia.length > 0) {
             let completas = 0;
+            let conTareas = 0;
             fasesMetodologia.forEach(fase => {
                 const tareasFase = tareasProyecto.filter(t => t.fase === fase);
-                if (tareasFase.length === 0 || tareasFase.every(t => t.estado === 'Completado')) {
-                    completas++;
+                if (tareasFase.length > 0) {
+                    conTareas++;
+                    if (tareasFase.every(t => t.estado === 'Completado')) {
+                        completas++;
+                    }
                 }
             });
-            fasesInfo = ` • ${completas}/${fasesMetodologia.length} fases completas`;
+            fasesInfo = ` • ${conTareas > 0 ? `${completas}/${conTareas} fases completas` : 'Sin tareas en fases'}`;
         }
 
         return `
@@ -796,7 +804,6 @@ function renderVistaGantt(tareas, proyecto) {
         return `<div class="gantt-fila-vacia">No hay tareas aún</div>`;
     }
 
-    // Agrupar tareas por fase
     const tareasPorFase = {};
     tareas.forEach(t => {
         const fase = t.fase || 'Sin fase';
@@ -804,11 +811,9 @@ function renderVistaGantt(tareas, proyecto) {
         tareasPorFase[fase].push(t);
     });
 
-    // Ordenar fases según metodología o alfabéticamente
     let fasesOrdenadas = Object.keys(tareasPorFase);
     if (fasesMetodologia.length > 0) {
         fasesOrdenadas = fasesMetodologia.filter(f => tareasPorFase[f]);
-        // Agregar fases que no están en la metodología
         Object.keys(tareasPorFase).forEach(f => {
             if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
         });
@@ -816,7 +821,6 @@ function renderVistaGantt(tareas, proyecto) {
         fasesOrdenadas.sort();
     }
 
-    // Función para obtener clase de barra según estado
     function getBarraClase(estado) {
         const clases = {
             'Pendiente': 'pendiente',
@@ -828,7 +832,6 @@ function renderVistaGantt(tareas, proyecto) {
         return clases[estado] || 'pendiente';
     }
 
-    // Función para obtener icono de estado
     function getEstadoIcono(estado) {
         const iconos = {
             'Pendiente': '⏳',
@@ -840,14 +843,12 @@ function renderVistaGantt(tareas, proyecto) {
         return iconos[estado] || '⏳';
     }
 
-    // Calcular total de días para escala
     let todasFechas = tareas.filter(t => t.fecha_vencimiento).map(t => new Date(t.fecha_vencimiento));
     let fechaMin = new Date();
     let fechaMax = new Date();
     if (todasFechas.length > 0) {
         fechaMin = new Date(Math.min(...todasFechas));
         fechaMax = new Date(Math.max(...todasFechas));
-        // Agregar margen
         fechaMin.setDate(fechaMin.getDate() - 5);
         fechaMax.setDate(fechaMax.getDate() + 5);
     } else {
@@ -856,7 +857,6 @@ function renderVistaGantt(tareas, proyecto) {
     }
     const totalDias = Math.ceil((fechaMax - fechaMin) / (1000 * 60 * 60 * 24)) || 30;
 
-    // Función para calcular posición de barra
     function getPosicionBarra(fechaVencimiento) {
         if (!fechaVencimiento) return 0;
         const fecha = new Date(fechaVencimiento);
@@ -870,24 +870,22 @@ function renderVistaGantt(tareas, proyecto) {
                 <thead>
                     <tr>
                         <th style="width:25%;">Tarea</th>
-                        <th style="width:15%;">Responsable</th>
+                        <th style="width:12%;">Responsable</th>
                         <th style="width:8%;">Prioridad</th>
                         <th style="width:5%;">Estado</th>
-                        <th style="width:37%;">Cronograma</th>
+                        <th style="width:40%;">Cronograma</th>
                         <th style="width:10%;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
     `;
 
-    // Renderizar por fases
     fasesOrdenadas.forEach(fase => {
         const tareasFase = tareasPorFase[fase] || [];
         const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
         const totalTareasFase = tareasFase.length;
         const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
 
-        // Fila de fase
         html += `
             <tr class="gantt-fila-fase">
                 <td colspan="6">
@@ -900,7 +898,6 @@ function renderVistaGantt(tareas, proyecto) {
             </tr>
         `;
 
-        // Tareas de la fase
         tareasFase.forEach(t => {
             const barraClase = getBarraClase(t.estado);
             const posicion = getPosicionBarra(t.fecha_vencimiento);
@@ -959,7 +956,7 @@ function renderVistaGantt(tareas, proyecto) {
 }
 
 // ============================================
-// TOGGLE DETALLE CON VISTA GANTT
+// TOGGLE DETALLE CON VISTA GANTT (CORREGIDO)
 // ============================================
 let detallesAbiertos = {};
 
@@ -992,38 +989,53 @@ async function toggleDetalle(id) {
         fasesMetodologia.forEach(fase => {
             const tareasFase = tareas.filter(t => t.fase === fase);
             const completas = tareasFase.every(t => t.estado === 'Completado');
-            const vacia = tareasFase.length === 0;
             fasesStatus.push({
                 nombre: fase,
-                completada: vacia || completas,
+                completada: completas && tareasFase.length > 0,
                 total: tareasFase.length,
                 completadas: tareasFase.filter(t => t.estado === 'Completado').length
             });
         });
 
-        // Renderizar Gantt
-        const ganttHTML = renderVistaGantt(tareas, proyecto);
+        const tareasSinFase = tareas.filter(t => !t.fase || t.fase === '');
+        if (tareasSinFase.length > 0) {
+            fasesStatus.push({
+                nombre: 'Sin fase',
+                completada: tareasSinFase.every(t => t.estado === 'Completado'),
+                total: tareasSinFase.length,
+                completadas: tareasSinFase.filter(t => t.estado === 'Completado').length
+            });
+        }
 
-        // Resumen de fases
+        let fasesConTareas = fasesStatus.filter(f => f.total > 0);
+        let completasFases = fasesConTareas.filter(f => f.completada).length;
+        let totalConTareas = fasesConTareas.length;
+
         let resumenFasesHTML = '';
         if (fasesStatus.length > 0) {
-            const completas = fasesStatus.filter(f => f.completada).length;
             resumenFasesHTML = `
                 <div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <div class="flex flex-wrap justify-between items-center gap-2">
                         <span class="font-semibold text-sm">📊 Progreso por Fases</span>
-                        <span class="text-sm font-bold">${completas}/${fasesStatus.length} fases completas (${Math.round((completas/fasesStatus.length)*100)}%)</span>
+                        <span class="text-sm font-bold">${totalConTareas > 0 ? `${completasFases}/${totalConTareas} fases completas (${Math.round((completasFases/totalConTareas)*100)}%)` : 'Sin tareas en fases'}</span>
                     </div>
                     <div class="flex flex-wrap gap-1 mt-2">
-                        ${fasesStatus.map(f => `
-                            <span class="text-xs px-2 py-1 rounded ${f.completada ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
-                                ${f.nombre} ${f.completada ? '✅' : '⏳'}
-                            </span>
-                        `).join('')}
+                        ${fasesStatus.map(f => {
+                            if (f.total === 0) {
+                                return `<span class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-400">${f.nombre} (sin tareas)</span>`;
+                            }
+                            return `
+                                <span class="text-xs px-2 py-1 rounded ${f.completada ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                                    ${f.nombre} ${f.completada ? '✅' : `⏳ ${f.completadas}/${f.total}`}
+                                </span>
+                            `;
+                        }).join('')}
                     </div>
                 </div>
             `;
         }
+
+        const ganttHTML = renderVistaGantt(tareas, proyecto);
 
         detalleDiv.innerHTML = `
             <div class="bg-gray-50 p-4 rounded-lg mt-2">
@@ -1049,7 +1061,7 @@ async function toggleDetalle(id) {
                                 <div class="progress-fill ${progreso < 40 ? 'bg-red-500' : progreso < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progreso}%"></div>
                             </div>
                             <div class="text-xs text-gray-400 mt-1">
-                                ${fasesStatus.length > 0 ? `${fasesStatus.filter(f => f.completada).length} de ${fasesStatus.length} fases completas` : `${completadas} de ${total} tareas completadas`}
+                                ${totalConTareas > 0 ? `${completasFases} de ${totalConTareas} fases completas` : `${completadas} de ${total} tareas completadas`}
                             </div>
                         </div>
                     </div>
@@ -1077,7 +1089,7 @@ async function toggleDetalle(id) {
 }
 
 // ============================================
-// RENDER TAREA ITEM (para otros usos)
+// RENDER TAREA ITEM
 // ============================================
 function renderTareaItem(t, badgeEstado) {
     const prioridadClass = PRIORIDAD_COLORS[t.prioridad] || 'prioridad-media';
