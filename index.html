@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v2.8</title>
+    <title>PM System v2.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -88,6 +88,13 @@
         .gantt-fila-fase .fase-completa { color: #059669; }
         .gantt-fila-fase .fase-incompleta { color: #dc2626; }
         .gantt-fila-vacia { color: #9ca3af; text-align: center; padding: 20px; font-size: 13px; }
+        .fase-item { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
+        .fase-item.completa { background: #d1fae5; color: #065f46; }
+        .fase-item.incompleta { background: #fee2e2; color: #991b1b; }
+        .fase-item.sin-tareas { background: #e5e7eb; color: #6b7280; }
+        .fase-item .fase-check { font-size: 14px; }
+        .fase-item .fase-nombre { font-weight: 500; }
+        .fase-item .fase-detalle { font-size: 10px; opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -139,7 +146,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <i class="fas fa-project-diagram text-blue-600 text-2xl"></i>
-            <span class="text-xl font-bold text-gray-800">PM System v2.8</span>
+            <span class="text-xl font-bold text-gray-800">PM System v2.9</span>
         </div>
         <div class="flex items-center gap-4">
             <span class="text-sm text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -161,6 +168,9 @@ const PRIORIDAD_COLORS = {
         </button>
         <button onclick="showTab('reportes')" id="tab-reportes" class="tab-btn">
             <i class="fas fa-chart-bar mr-1"></i> Reportes
+        </button>
+        <button onclick="showTab('proveedores')" id="tab-proveedores" class="tab-btn">
+            <i class="fas fa-handshake mr-1"></i> Proveedores
         </button>
     </div>
 
@@ -277,6 +287,18 @@ const PRIORIDAD_COLORS = {
         <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-xl font-bold mb-4"><i class="fas fa-chart-bar mr-2"></i>Reportes</h2>
             <div id="contenido-reportes"></div>
+        </div>
+    </div>
+
+    <div id="content-proveedores" class="tab-content">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold"><i class="fas fa-handshake mr-2"></i>Evaluación de Proveedores</h2>
+                <button onclick="abrirModal('modal-proveedor')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                    <i class="fas fa-plus mr-1"></i> Agregar Proveedor
+                </button>
+            </div>
+            <div id="lista-proveedores"></div>
         </div>
     </div>
 
@@ -471,6 +493,67 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
+<!-- MODAL: NUEVO PROVEEDOR -->
+<div id="modal-proveedor" class="modal">
+    <div class="modal-box">
+        <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-bold">🏢 Nuevo Proveedor</h3>
+            <button onclick="cerrarModal('modal-proveedor')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="form-proveedor" onsubmit="guardarProveedor(event)">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Proveedor *</label>
+                    <input id="prov-nombre" type="text" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nombre del proveedor">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contacto</label>
+                    <input id="prov-contacto" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nombre del contacto">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                        <input id="prov-telefono" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Teléfono">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input id="prov-email" type="email" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="correo@proveedor.com">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Proyecto</label>
+                    <select id="prov-proyecto" class="w-full border rounded-lg px-3 py-2 text-sm"></select>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-4 mt-3 border-t">
+                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                    <i class="fas fa-save mr-1"></i> Guardar
+                </button>
+                <button type="button" onclick="cerrarModal('modal-proveedor')" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: DETALLE PROVEEDOR -->
+<div id="modal-detalle-proveedor" class="modal">
+    <div class="modal-box" style="max-width: 600px;">
+        <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-bold">📋 Detalle del Proveedor</h3>
+            <button onclick="cerrarModal('modal-detalle-proveedor')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="detalle-proveedor-contenido">
+            <div class="text-center py-4 text-gray-500">Cargando...</div>
+        </div>
+    </div>
+</div>
+
 <!-- ============================================ -->
 <!-- SCRIPT PRINCIPAL -->
 <!-- ============================================ -->
@@ -553,6 +636,7 @@ function showTab(tab) {
     document.getElementById('tab-' + tab).classList.add('active');
     if (tab === 'recursos') cargarRecursos();
     if (tab === 'reportes') generarReportes();
+    if (tab === 'proveedores') cargarProveedores();
 }
 
 // ============================================
@@ -589,12 +673,11 @@ function calcularFechaFin() {
 }
 
 // ============================================
-// CALCULAR PROGRESO POR FASES (V2.8 - CORREGIDO)
+// CALCULAR PROGRESO POR FASES (CORREGIDO)
 // ============================================
 function calcularProgresoPorFases(tareas, metodologia) {
     const fasesMetodologia = FASES_POR_METODOLOGIA[metodologia]?.fases || [];
     
-    // Si no hay metodología definida, calcular por tareas
     if (fasesMetodologia.length === 0) {
         const total = tareas.length;
         const completadas = tareas.filter(t => t.estado === 'Completado').length;
@@ -604,24 +687,19 @@ function calcularProgresoPorFases(tareas, metodologia) {
     let fasesCompletas = 0;
     const totalFases = fasesMetodologia.length;
     
-    // Evaluar CADA fase de la metodología
     fasesMetodologia.forEach(fase => {
         const tareasFase = tareas.filter(t => t.fase === fase);
         
-        // Si no tiene tareas → NO está completa (0%)
         if (tareasFase.length === 0) {
-            return; // no suma, queda incompleta
+            return;
         }
         
-        // Si tiene tareas, verificar que TODAS estén completadas
         const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
         if (todasCompletas) {
             fasesCompletas++;
         }
-        // Si no todas están completas, no suma
     });
 
-    // Calcular porcentaje sobre el TOTAL de fases
     return Math.round((fasesCompletas / totalFases) * 100);
 }
 
@@ -791,7 +869,7 @@ function renderizarProyectos(proyectos) {
 }
 
 // ============================================
-// RENDER VISTA GANTT
+// RENDER VISTA GANTT CON FASES VISIBLES
 // ============================================
 function renderVistaGantt(tareas, proyecto) {
     const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
@@ -952,7 +1030,7 @@ function renderVistaGantt(tareas, proyecto) {
 }
 
 // ============================================
-// TOGGLE DETALLE CON VISTA GANTT (V2.8)
+// TOGGLE DETALLE CON VISTA DE FASES
 // ============================================
 let detallesAbiertos = {};
 
@@ -1009,30 +1087,43 @@ async function toggleDetalle(id) {
         let completasFases = fasesStatus.filter(f => f.completada).length;
         let totalFases = fasesStatus.length;
 
-        let resumenFasesHTML = '';
+        // ============================================
+        // RENDER DE FASES CON ESTILOS VISUALES
+        // ============================================
+        let fasesVisualHTML = '';
         if (fasesStatus.length > 0) {
-            resumenFasesHTML = `
-                <div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div class="flex flex-wrap justify-between items-center gap-2">
-                        <span class="font-semibold text-sm">📊 Progreso por Fases</span>
+            fasesVisualHTML = `
+                <div class="mb-4 p-4 bg-white rounded-lg border border-gray-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-semibold text-sm text-gray-700">📊 Progreso por Fases</span>
                         <span class="text-sm font-bold">${completasFases}/${totalFases} fases completas (${Math.round((completasFases/totalFases)*100)}%)</span>
                     </div>
-                    <div class="flex flex-wrap gap-1 mt-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         ${fasesStatus.map(f => {
-                            if (f.total === 0) {
-                                return `<span class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-500">${f.nombre} (sin tareas) ❌</span>`;
+                            let clase = 'sin-tareas';
+                            let icono = '❌';
+                            let detalle = 'sin tareas';
+                            if (f.total > 0 && f.completada) {
+                                clase = 'completa';
+                                icono = '✅';
+                                detalle = `${f.completadas}/${f.total} tareas completas`;
+                            } else if (f.total > 0 && !f.completada) {
+                                clase = 'incompleta';
+                                icono = '⏳';
+                                detalle = `${f.completadas}/${f.total} tareas`;
                             }
                             return `
-                                <span class="text-xs px-2 py-1 rounded ${f.completada ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
-                                    ${f.nombre} ${f.completada ? '✅' : `⏳ ${f.completadas}/${f.total}`}
-                                </span>
+                                <div class="fase-item ${clase}">
+                                    <span class="fase-check">${icono}</span>
+                                    <span class="fase-nombre">${f.nombre}</span>
+                                    <span class="fase-detalle">${detalle}</span>
+                                </div>
                             `;
                         }).join('')}
                     </div>
-                    <div class="text-xs text-gray-400 mt-2">
+                    <div class="text-xs text-gray-400 mt-3">
                         <i class="fas fa-info-circle mr-1"></i>
-                        ${fasesStatus.filter(f => f.total === 0).length} fases sin tareas se consideran incompletas
-                    </div>
+                        ${fasesStatus.filter(f => f.total === 0).length} fases sin tareas se consideran incompletas                    </div>
                 </div>
             `;
         }
@@ -1072,7 +1163,7 @@ async function toggleDetalle(id) {
                     </button>
                 </div>
 
-                ${resumenFasesHTML}
+                ${fasesVisualHTML}
 
                 <div class="border-t pt-3 mt-3">
                     <h4 class="font-semibold text-gray-700 mb-3 text-sm">
@@ -1230,8 +1321,10 @@ async function guardarProyecto(e) {
             await supabaseUpdate('proyectos', id, data);
             showToast('✅ Proyecto actualizado');
         } else {
-            await supabaseInsert('proyectos', { ...data, estado: 'Activo' });
-            showToast('✅ Proyecto creado');
+            const nuevoProyecto = await supabaseInsert('proyectos', { ...data, estado: 'Activo' });
+            // Crear criterios por defecto para evaluación de proveedores
+            await crearCriteriosPorDefecto(nuevoProyecto[0].id);
+            showToast('✅ Proyecto creado con criterios de evaluación');
         }
         cerrarModal('modal-proyecto');
         document.getElementById('form-proyecto').reset();
@@ -1241,6 +1334,26 @@ async function guardarProyecto(e) {
         cargarDashboard();
     } catch (e) {
         showToast('Error: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// CREAR CRITERIOS POR DEFECTO PARA PROVEEDORES
+// ============================================
+async function crearCriteriosPorDefecto(proyectoId) {
+    const criteriosDefecto = [
+        { nombre: 'Precio', descripcion: 'Competitividad del precio ofertado', peso: 1.5 },
+        { nombre: 'Calidad', descripcion: 'Calidad del producto/servicio', peso: 1.8 },
+        { nombre: 'Tiempo de entrega', descripcion: 'Plazo de entrega ofrecido', peso: 1.2 },
+        { nombre: 'Soporte', descripcion: 'Soporte post-venta', peso: 1.0 },
+        { nombre: 'Experiencia', descripcion: 'Reputación y trayectoria en el mercado', peso: 1.3 }
+    ];
+
+    for (const c of criteriosDefecto) {
+        await supabaseInsert('criterios', {
+            ...c,
+            proyecto_id: proyectoId
+        });
     }
 }
 
@@ -1389,6 +1502,359 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
 }
 
 // ============================================
+// PROVEEDORES
+// ============================================
+async function cargarProveedores() {
+    try {
+        const proveedores = await supabaseFetch('proveedores?select=*,proyectos(nombre)');
+        const criterios = await supabaseFetch('criterios?select=*');
+        const calificaciones = await supabaseFetch('calificaciones?select=*');
+        
+        const lista = document.getElementById('lista-proveedores');
+        if (proveedores.length === 0) {
+            lista.innerHTML = '<div class="text-center py-8 text-gray-500">No hay proveedores registrados</div>';
+            return;
+        }
+
+        const ranking = proveedores.map(prov => {
+            const califs = calificaciones.filter(c => c.proveedor_id === prov.id);
+            let puntajeTotal = 0;
+            let pesoTotal = 0;
+            
+            califs.forEach(cal => {
+                const criterio = criterios.find(c => c.id === cal.criterio_id);
+                if (criterio) {
+                    const peso = parseFloat(criterio.peso) || 1;
+                    puntajeTotal += cal.puntaje * peso;
+                    pesoTotal += peso;
+                }
+            });
+            
+            const promedio = pesoTotal > 0 ? (puntajeTotal / pesoTotal) : 0;
+            const porcentaje = Math.round((promedio / 10) * 100);
+            
+            let nivel = '';
+            let color = '';
+            if (porcentaje >= 80) { nivel = 'Excelente'; color = 'text-green-600'; }
+            else if (porcentaje >= 60) { nivel = 'Bueno'; color = 'text-blue-600'; }
+            else if (porcentaje >= 40) { nivel = 'Regular'; color = 'text-yellow-600'; }
+            else { nivel = 'Bajo'; color = 'text-red-600'; }
+            
+            return {
+                ...prov,
+                puntaje: Math.round(promedio * 10) / 10,
+                porcentaje,
+                nivel,
+                color,
+                totalCriterios: califs.length,
+                proyecto: prov.proyectos?.nombre || 'Sin proyecto'
+            };
+        });
+
+        ranking.sort((a, b) => b.puntaje - a.puntaje);
+
+        lista.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left">#</th>
+                            <th class="px-4 py-2 text-left">Proveedor</th>
+                            <th class="px-4 py-2 text-left">Proyecto</th>
+                            <th class="px-4 py-2 text-left">Contacto</th>
+                            <th class="px-4 py-2 text-left">Criterios</th>
+                            <th class="px-4 py-2 text-left">Puntaje</th>
+                            <th class="px-4 py-2 text-left">Nivel</th>
+                            <th class="px-4 py-2 text-left">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${ranking.map((prov, index) => `
+                            <tr class="border-t hover:bg-gray-50 ${index === 0 ? 'bg-green-50' : ''}">
+                                <td class="px-4 py-2 font-bold">${index === 0 ? '🏆' : index + 1}</td>
+                                <td class="px-4 py-2 font-medium">${prov.nombre}</td>
+                                <td class="px-4 py-2 text-gray-500">${prov.proyecto}</td>
+                                <td class="px-4 py-2 text-gray-500">${prov.contacto || '-'}</td>
+                                <td class="px-4 py-2 text-center">${prov.totalCriterios}</td>
+                                <td class="px-4 py-2 font-bold">${prov.puntaje}/10</td>
+                                <td class="px-4 py-2"><span class="font-semibold ${prov.color}">${prov.nivel} (${prov.porcentaje}%)</span></td>
+                                <td class="px-4 py-2">
+                                    <button onclick="verDetalleProveedor(${prov.id})" class="text-blue-500 hover:text-blue-700 text-xs" title="Ver detalle">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button onclick="calificarProveedor(${prov.id})" class="text-green-500 hover:text-green-700 text-xs ml-2" title="Calificar">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                    <button onclick="eliminarProveedor(${prov.id})" class="text-red-500 hover:text-red-700 text-xs ml-2" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-3 text-xs text-gray-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                ${ranking.length} proveedores evaluados • ⭐ El mejor proveedor aparece destacado
+            </div>
+        `;
+
+        const selectProyecto = document.getElementById('prov-proyecto');
+        selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+
+    } catch (e) {
+        console.error('Error:', e);
+        document.getElementById('lista-proveedores').innerHTML = '<div class="text-red-500">Error cargando proveedores</div>';
+    }
+}
+
+// Guardar proveedor
+async function guardarProveedor(e) {
+    e.preventDefault();
+    const nombre = document.getElementById('prov-nombre').value;
+    const contacto = document.getElementById('prov-contacto').value;
+    const telefono = document.getElementById('prov-telefono').value;
+    const email = document.getElementById('prov-email').value;
+    const proyecto_id = parseInt(document.getElementById('prov-proyecto').value);
+
+    if (!nombre || !proyecto_id) {
+        showToast('Nombre y proyecto son obligatorios', 'error');
+        return;
+    }
+
+    try {
+        await supabaseInsert('proveedores', {
+            nombre,
+            contacto: contacto || null,
+            telefono: telefono || null,
+            email: email || null,
+            proyecto_id
+        });
+        showToast('✅ Proveedor agregado');
+        cerrarModal('modal-proveedor');
+        document.getElementById('form-proveedor').reset();
+        cargarProveedores();
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+    }
+}
+
+// Eliminar proveedor
+async function eliminarProveedor(id) {
+    if (!confirm('¿Eliminar este proveedor?')) return;
+    try {
+        await supabaseDelete('proveedores', id);
+        showToast('Proveedor eliminado');
+        cargarProveedores();
+    } catch (e) {
+        showToast('Error al eliminar', 'error');
+    }
+}
+
+// Calificar proveedor
+async function calificarProveedor(proveedorId) {
+    const proveedores = await supabaseFetch(`proveedores?select=*,proyecto_id&id=eq.${proveedorId}`);
+    const proveedor = proveedores[0];
+    
+    if (!proveedor) {
+        showToast('Proveedor no encontrado', 'error');
+        return;
+    }
+
+    const criterios = await supabaseFetch(`criterios?proyecto_id=eq.${proveedor.proyecto_id}&select=*`);
+    
+    if (criterios.length === 0) {
+        showToast('No hay criterios definidos para este proyecto.', 'error');
+        return;
+    }
+
+    let html = `
+        <div class="modal-box" style="max-width: 500px;">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold">⭐ Calificar: ${proveedor.nombre}</h3>
+                <button onclick="cerrarModal('modal-calificacion')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="form-calificacion" onsubmit="guardarCalificacion(event, ${proveedorId})">
+                <input type="hidden" id="cal-proveedor" value="${proveedorId}">
+                <div class="space-y-3">
+    `;
+
+    criterios.forEach(c => {
+        html += `
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    ${c.nombre} (peso: ${c.peso})
+                    <span class="text-xs text-gray-400">${c.descripcion || ''}</span>
+                </label>
+                <div class="flex items-center gap-2">
+                    <input type="range" id="cal-${c.id}" min="1" max="10" value="5" 
+                           class="w-full" oninput="document.getElementById('val-${c.id}').textContent = this.value">
+                    <span id="val-${c.id}" class="font-bold text-blue-600 w-8 text-center">5</span>
+                </div>
+                <input type="hidden" id="cal-criterio-${c.id}" value="${c.id}">
+            </div>
+        `;
+    });
+
+    html += `
+                </div>
+                <div class="flex gap-3 pt-4 mt-3 border-t">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                        <i class="fas fa-save mr-1"></i> Guardar Calificación
+                    </button>
+                    <button type="button" onclick="cerrarModal('modal-calificacion')" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    const modal = document.createElement('div');
+    modal.id = 'modal-calificacion';
+    modal.className = 'modal show';
+    modal.innerHTML = html;
+    document.body.appendChild(modal);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// Guardar calificación
+async function guardarCalificacion(e, proveedorId) {
+    e.preventDefault();
+    
+    try {
+        const inputs = document.querySelectorAll('#form-calificacion input[type="range"]');
+        
+        for (const input of inputs) {
+            const criterioId = parseInt(input.id.replace('cal-', ''));
+            const puntaje = parseInt(input.value);
+            
+            const existentes = await supabaseFetch(
+                `calificaciones?proveedor_id=eq.${proveedorId}&criterio_id=eq.${criterioId}&select=id`
+            );
+            
+            if (existentes.length > 0) {
+                await supabaseUpdate('calificaciones', existentes[0].id, { puntaje });
+            } else {
+                await supabaseInsert('calificaciones', {
+                    proveedor_id: proveedorId,
+                    criterio_id: criterioId,
+                    puntaje
+                });
+            }
+        }
+        
+        showToast('✅ Calificaciones guardadas');
+        document.getElementById('modal-calificacion')?.remove();
+        cargarProveedores();
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+    }
+}
+
+// Ver detalle del proveedor
+async function verDetalleProveedor(proveedorId) {
+    try {
+        const proveedores = await supabaseFetch(`proveedores?select=*,proyectos(nombre)&id=eq.${proveedorId}`);
+        const proveedor = proveedores[0];
+        
+        if (!proveedor) {
+            showToast('Proveedor no encontrado', 'error');
+            return;
+        }
+
+        const calificaciones = await supabaseFetch(`calificaciones?proveedor_id=eq.${proveedorId}&select=*,criterios(*)`);
+        const criterios = await supabaseFetch(`criterios?proyecto_id=eq.${proveedor.proyecto_id}&select=*`);
+
+        let puntajeTotal = 0;
+        let pesoTotal = 0;
+        let detalles = [];
+
+        calificaciones.forEach(cal => {
+            const criterio = criterios.find(c => c.id === cal.criterio_id);
+            if (criterio) {
+                const peso = parseFloat(criterio.peso) || 1;
+                const ponderado = cal.puntaje * peso;
+                puntajeTotal += ponderado;
+                pesoTotal += peso;
+                detalles.push({
+                    criterio: criterio.nombre,
+                    puntaje: cal.puntaje,
+                    peso: peso,
+                    ponderado: Math.round(ponderado * 10) / 10
+                });
+            }
+        });
+
+        const promedio = pesoTotal > 0 ? Math.round((puntajeTotal / pesoTotal) * 10) / 10 : 0;
+        const porcentaje = Math.round((promedio / 10) * 100);
+
+        let nivel = '';
+        let color = '';
+        if (porcentaje >= 80) { nivel = 'Excelente'; color = 'text-green-600'; }
+        else if (porcentaje >= 60) { nivel = 'Bueno'; color = 'text-blue-600'; }
+        else if (porcentaje >= 40) { nivel = 'Regular'; color = 'text-yellow-600'; }
+        else { nivel = 'Bajo'; color = 'text-red-600'; }
+
+        let detallesHTML = detalles.map(d => `
+            <div class="flex justify-between items-center p-2 border-b text-sm">
+                <span>${d.criterio}</span>
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-400">Peso: ${d.peso}</span>
+                    <span class="font-bold">${d.puntaje}/10</span>
+                </div>
+            </div>
+        `).join('');
+
+        const contenido = document.getElementById('detalle-proveedor-contenido');
+        contenido.innerHTML = `
+            <div class="space-y-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-xl font-bold">${proveedor.nombre}</h3>
+                            <p class="text-sm text-gray-500">Proyecto: ${proveedor.proyectos?.nombre || 'Sin proyecto'}</p>
+                            <p class="text-sm text-gray-500">Contacto: ${proveedor.contacto || 'No especificado'}</p>
+                            <p class="text-sm text-gray-500">Teléfono: ${proveedor.telefono || 'No especificado'}</p>
+                            <p class="text-sm text-gray-500">Email: ${proveedor.email || 'No especificado'}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-bold ${color}">${promedio}</div>
+                            <div class="text-sm text-gray-500">de 10</div>
+                            <div class="text-sm font-semibold ${color}">${nivel} (${porcentaje}%)</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t pt-3">
+                    <h4 class="font-semibold mb-2">📋 Detalle de Calificaciones</h4>
+                    <div class="border rounded-lg overflow-hidden">
+                        ${detallesHTML || '<div class="p-3 text-gray-400">No hay calificaciones</div>'}
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Puntaje ponderado = (Calificación × Peso)
+                    </div>
+                </div>
+            </div>
+        `;
+
+        abrirModal('modal-detalle-proveedor');
+
+    } catch (e) {
+        console.error('Error:', e);
+        showToast('Error cargando detalle', 'error');
+    }
+}
+
+// ============================================
 // RECURSOS
 // ============================================
 async function cargarRecursos() {
@@ -1512,6 +1978,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
             if (btn.textContent.includes('Recursos')) cargarRecursos();
             if (btn.textContent.includes('Reportes')) generarReportes();
+            if (btn.textContent.includes('Proveedores')) cargarProveedores();
         });
     });
 });
