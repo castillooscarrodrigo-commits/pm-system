@@ -17,13 +17,21 @@
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
         .modal.show { display: flex; }
-        .modal-box { background: white; border-radius: 16px; max-width: 500px; width: 100%; padding: 24px; max-height: 90vh; overflow-y: auto; }
+        .modal-box { background: white; border-radius: 16px; max-width: 600px; width: 100%; padding: 24px; max-height: 90vh; overflow-y: auto; }
         .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; border-radius: 12px; color: white; z-index: 200; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
         .toast-success { background: #22c55e; }
         .toast-error { background: #ef4444; }
         .toast.show { display: block; }
+        .tarea-item { transition: background 0.2s; }
+        .tarea-item:hover { background: #f9fafb; }
+        .badge-estado { font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 500; }
+        .badge-pendiente { background: #fef3c7; color: #d97706; }
+        .badge-progreso { background: #dbeafe; color: #2563eb; }
+        .badge-completado { background: #d1fae5; color: #059669; }
+        .badge-bloqueada { background: #fee2e2; color: #dc2626; }
+        .badge-hold { background: #e5e7eb; color: #6b7280; }
     </style>
 </head>
 <body>
@@ -32,8 +40,7 @@
 <!-- CONFIGURACIÓN DE SUPABASE -->
 <!-- ============================================ -->
 <script>
-// 🔥 CAMBIA ESTOS DATOS CON LOS TUYOS 🔥
-const SUPABASE_URL = 'https://ryjbmqmbxeuigojztwym.supabase.co/';
+const SUPABASE_URL = 'https://ryjbmqmbxeuigojztwym.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5amJtcW1ieGV1aWdvanp0d3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NTYwNzMsImV4cCI6MjEwMTQzMjA3M30.QtdcGM6GegPlHmW9MEdHlsIwXEKsTQKrpUa1Y_B2ORc';
 </script>
 
@@ -282,6 +289,23 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 </div>
 
 <!-- ============================================ -->
+<!-- MODAL: DETALLE DE PROYECTO -->
+<!-- ============================================ -->
+<div id="modal-detalle" class="modal">
+    <div class="modal-box" style="max-width: 650px;">
+        <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-bold">📋 Detalle del Proyecto</h3>
+            <button onclick="cerrarModal('modal-detalle')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="detalle-contenido">
+            <div class="text-center py-8 text-gray-500">Cargando...</div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
 <!-- SCRIPT PRINCIPAL -->
 <!-- ============================================ -->
 <script>
@@ -327,6 +351,21 @@ async function supabaseDelete(table, id) {
     return res;
 }
 
+async function supabaseUpdate(table, id, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Error updating data');
+    return res.json();
+}
+
 // ============================================
 // TOAST
 // ============================================
@@ -365,10 +404,9 @@ function showTab(tab) {
 // ============================================
 async function cargarDashboard() {
     try {
-        const proyectos = await supabaseFetch('proyectos?select=*');
+        const proyectos = await supabaseFetch('proyectos?order=id.desc');
         const tareas = await supabaseFetch('tareas?select=*');
 
-        // KPIs
         const activos = proyectos.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
         const pendientes = tareas.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
         const bloqueadas = tareas.filter(t => t.estado === 'Bloqueada').length;
@@ -381,7 +419,6 @@ async function cargarDashboard() {
         document.getElementById('kpi-cambios').textContent = cambios;
         document.getElementById('kpi-riesgos').textContent = riesgos;
 
-        // Proyectos en el dashboard
         const lista = document.getElementById('lista-proyectos');
         if (proyectos.length === 0) {
             lista.innerHTML = `
@@ -435,7 +472,6 @@ async function cargarDashboard() {
             `).join('');
         }
 
-        // Llenar select de proyectos en modal de tarea
         const select = document.getElementById('tar-proyecto');
         select.innerHTML = proyectos.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
@@ -510,6 +546,7 @@ async function guardarTarea(e) {
         showToast('✅ Tarea creada exitosamente');
         cerrarModal('modal-tarea');
         document.getElementById('form-tarea').reset();
+        document.getElementById('tar-proyecto').disabled = false;
         cargarDashboard();
     } catch (e) {
         showToast('Error al crear tarea: ' + e.message, 'error');
@@ -531,10 +568,140 @@ async function eliminarProyecto(id) {
 }
 
 // ============================================
-// VER PROYECTO
+// VER PROYECTO (DETALLE COMPLETO)
 // ============================================
-function verProyecto(id) {
-    showToast('📋 Detalle del proyecto en desarrollo');
+let proyectoActualId = null;
+
+async function verProyecto(id) {
+    try {
+        proyectoActualId = id;
+        const proyectos = await supabaseFetch(`proyectos?id=eq.${id}&select=*`);
+        const proyecto = proyectos[0];
+        if (!proyecto) {
+            showToast('Proyecto no encontrado', 'error');
+            return;
+        }
+
+        const tareas = await supabaseFetch(`tareas?proyecto_id=eq.${id}&select=*`);
+
+        const badgeEstado = {
+            'Pendiente': 'badge-pendiente',
+            'En Progreso': 'badge-progreso',
+            'Completado': 'badge-completado',
+            'Bloqueada': 'badge-bloqueada',
+            'Hold': 'badge-hold'
+        };
+
+        let tareasHTML = '';
+        if (tareas.length === 0) {
+            tareasHTML = `<div class="text-gray-400 text-sm py-4 text-center">No hay tareas aún</div>`;
+        } else {
+            tareasHTML = tareas.map(t => `
+                <div class="tarea-item flex justify-between items-center p-3 border-b hover:bg-gray-50 rounded">
+                    <div class="flex-1">
+                        <div class="font-medium text-sm">${t.titulo}</div>
+                        <div class="text-xs text-gray-400">${t.descripcion || 'Sin descripción'} • ${t.horas_estimadas || 0}h</div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="badge-estado ${badgeEstado[t.estado] || 'badge-pendiente'}">${t.estado || 'Pendiente'}</span>
+                        <select onchange="cambiarEstadoTarea(${t.id}, this.value)" class="text-xs border rounded px-2 py-1 bg-white">
+                            <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>En Progreso</option>
+                            <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloqueada</option>
+                            <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Completado</option>
+                        </select>
+                        <button onclick="eliminarTarea(${t.id})" class="text-red-400 hover:text-red-600 text-xs" title="Eliminar tarea">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const contenido = document.getElementById('detalle-contenido');
+        contenido.innerHTML = `
+            <div class="space-y-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-xl font-bold text-gray-800">${proyecto.nombre}</h3>
+                    <div class="grid grid-cols-2 gap-2 mt-2 text-sm">
+                        <div><span class="text-gray-500">Cliente:</span> ${proyecto.cliente || 'Sin cliente'}</div>
+                        <div><span class="text-gray-500">Presupuesto:</span> $${proyecto.presupuesto || 0}</div>
+                        <div><span class="text-gray-500">Estado:</span> ${proyecto.estado || 'Activo'}</div>
+                        <div><span class="text-gray-500">Fecha fin:</span> ${proyecto.fecha_fin || 'No definida'}</div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-sm">
+                            <span>Progreso</span>
+                            <span class="font-semibold">${proyecto.progreso || 0}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${proyecto.progreso < 40 ? 'bg-red-500' : proyecto.progreso < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${proyecto.progreso || 0}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t pt-3">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-semibold text-gray-700"><i class="fas fa-tasks mr-2"></i>Tareas (${tareas.length})</h4>
+                        <button onclick="abrirModalTarea(${proyecto.id})" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded hover:bg-blue-700 transition">
+                            <i class="fas fa-plus mr-1"></i> Agregar Tarea
+                        </button>
+                    </div>
+                    <div class="border rounded-lg overflow-hidden">
+                        ${tareasHTML}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        abrirModal('modal-detalle');
+
+    } catch (e) {
+        console.error('Error:', e);
+        showToast('Error cargando detalle', 'error');
+    }
+}
+
+// ============================================
+// ABRIR MODAL TAREA DESDE DETALLE
+// ============================================
+function abrirModalTarea(proyectoId) {
+    const select = document.getElementById('tar-proyecto');
+    select.value = proyectoId;
+    select.disabled = true;
+    document.getElementById('tar-titulo').value = '';
+    document.getElementById('tar-horas').value = '';
+    document.getElementById('tar-descripcion').value = '';
+    abrirModal('modal-tarea');
+}
+
+// ============================================
+// CAMBIAR ESTADO DE TAREA
+// ============================================
+async function cambiarEstadoTarea(id, nuevoEstado) {
+    try {
+        await supabaseUpdate('tareas', id, { estado: nuevoEstado });
+        showToast('Estado actualizado');
+        if (proyectoActualId) verProyecto(proyectoActualId);
+        cargarDashboard();
+    } catch (e) {
+        showToast('Error al actualizar estado', 'error');
+    }
+}
+
+// ============================================
+// ELIMINAR TAREA
+// ============================================
+async function eliminarTarea(id) {
+    if (!confirm('¿Eliminar esta tarea?')) return;
+    try {
+        await supabaseDelete('tareas', id);
+        showToast('Tarea eliminada');
+        if (proyectoActualId) verProyecto(proyectoActualId);
+        cargarDashboard();
+    } catch (e) {
+        showToast('Error al eliminar tarea', 'error');
+    }
 }
 
 // ============================================
@@ -543,11 +710,11 @@ function verProyecto(id) {
 document.addEventListener('DOMContentLoaded', () => {
     cargarDashboard();
 
-    // Cerrar modales al hacer clic fuera
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.remove('show');
+                document.getElementById('tar-proyecto').disabled = false;
             }
         });
     });
