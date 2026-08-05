@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v2.0</title>
+    <title>PM System v2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -106,7 +106,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <i class="fas fa-project-diagram text-blue-600 text-2xl"></i>
-            <span class="text-xl font-bold text-gray-800">PM System v2.0</span>
+            <span class="text-xl font-bold text-gray-800">PM System v2.1</span>
         </div>
         <div class="flex items-center gap-4">
             <span class="text-sm text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -340,7 +340,7 @@ const PRIORIDAD_COLORS = {
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Responsable</label>
                         <select id="tar-responsable" class="w-full border rounded-lg px-3 py-2 text-sm">
-                            <option value="">Sin asignar</option>
+                            <!-- Se llena desde la base de datos, sin "Sin asignar" -->
                         </select>
                     </div>
                     <div>
@@ -572,10 +572,15 @@ async function cargarDashboard() {
         const selectProyecto = document.getElementById('tar-proyecto');
         selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
-        // Llenar select de responsables
+        // Llenar select de responsables (SOLO con recursos existentes, SIN "Sin asignar")
         const selectResponsable = document.getElementById('tar-responsable');
-        selectResponsable.innerHTML = '<option value="">Sin asignar</option>' +
-            usuariosCache.map(u => `<option value="${u.id}">${u.nombre} ${u.area ? '· ' + u.area : ''}</option>`).join('');
+        if (usuariosCache.length === 0) {
+            selectResponsable.innerHTML = `<option value="">No hay recursos disponibles</option>`;
+        } else {
+            selectResponsable.innerHTML = usuariosCache.map(u => 
+                `<option value="${u.id}">${u.nombre} ${u.area ? '· ' + u.area : ''}</option>`
+            ).join('');
+        }
 
         renderizarProyectos(proyectosConProgreso);
 
