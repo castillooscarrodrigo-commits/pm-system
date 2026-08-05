@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v2.8</title>
+    <title>PM System v2.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -589,31 +589,31 @@ function calcularFechaFin() {
 }
 
 // ============================================
-// CALCULAR PROGRESO POR FASES (ACTUALIZADO)
+// CALCULAR PROGRESO POR FASES (CORREGIDO - V2.7)
 // ============================================
 function calcularProgresoPorFases(tareas, metodologia) {
     const fasesMetodologia = FASES_POR_METODOLOGIA[metodologia]?.fases || [];
-    
+
     if (fasesMetodologia.length === 0) {
         const total = tareas.length;
         const completadas = tareas.filter(t => t.estado === 'Completado').length;
         return total > 0 ? Math.round((completadas / total) * 100) : 0;
     }
 
-    let porcentajeSuma = 0;
-    const totalFases = fasesMetodologia.length;
-    const valorPorFase = 100 / totalFases;
-    
+    let tareasTotales = 0;
+    let tareasCompletadas = 0;
+
     fasesMetodologia.forEach(fase => {
         const tareasFase = tareas.filter(t => t.fase === fase);
-        
-        // Si no tiene tareas o si alguna de sus tareas ya está completada
-        if (tareasFase.length === 0 || tareasFase.some(t => t.estado === 'Completado')) {
-            porcentajeSuma += valorPorFase;
-        }
+        tareasTotales += tareasFase.length;
+        tareasCompletadas += tareasFase.filter(t => t.estado === 'Completado').length;
     });
 
-    return Math.round(porcentajeSuma);
+    const sinFase = tareas.filter(t => !t.fase || t.fase === '');
+    tareasTotales += sinFase.length;
+    tareasCompletadas += sinFase.filter(t => t.estado === 'Completado').length;
+
+    return tareasTotales > 0 ? Math.round((tareasCompletadas / tareasTotales) * 100) : 0;
 }
 
 // ============================================
@@ -719,11 +719,11 @@ function renderizarProyectos(proyectos) {
             let total = fasesMetodologia.length;
             fasesMetodologia.forEach(fase => {
                 const tareasFase = tareasProyecto.filter(t => t.fase === fase);
-                if (tareasFase.length === 0 || tareasFase.some(t => t.estado === 'Completado')) {
+                if (tareasFase.length > 0 && tareasFase.every(t => t.estado === 'Completado')) {
                     completas++;
                 }
             });
-            fasesInfo = ` • ${completas}/${total} fases computadas`;
+            fasesInfo = ` • ${completas}/${total} fases completas`;
         }
 
         return `
@@ -869,7 +869,7 @@ function renderVistaGantt(tareas, proyecto) {
 
     fasesOrdenadas.forEach(fase => {
         const tareasFase = tareasPorFase[fase] || [];
-        const tieneCompletada = tareasFase.some(t => t.estado === 'Completado');
+        const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
         const totalTareasFase = tareasFase.length;
         const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
 
@@ -878,8 +878,8 @@ function renderVistaGantt(tareas, proyecto) {
                 <td colspan="6">
                     <span class="fase-icon"><i class="fas fa-flag"></i></span>
                     ${fase}
-                    <span class="fase-estado ${tieneCompletada ? 'fase-completa' : 'fase-incompleta'}">
-                        ${tieneCompletada ? '✅ Con avance' : `⏳ ${completadasFase}/${totalTareasFase} tareas completadas`}
+                    <span class="fase-estado ${todasCompletas ? 'fase-completa' : 'fase-incompleta'}">
+                        ${todasCompletas ? '✅ Completada' : `⏳ ${completadasFase}/${totalTareasFase} tareas`}
                     </span>
                 </td>
             </tr>
@@ -943,7 +943,7 @@ function renderVistaGantt(tareas, proyecto) {
 }
 
 // ============================================
-// TOGGLE DETALLE CON VISTA GANTT
+// TOGGLE DETALLE CON VISTA GANTT (CORREGIDO V2.7)
 // ============================================
 let detallesAbiertos = {};
 
@@ -977,10 +977,10 @@ async function toggleDetalle(id) {
         if (fasesMetodologia.length > 0) {
             fasesMetodologia.forEach(fase => {
                 const tareasFase = tareas.filter(t => t.fase === fase);
-                const computaCompletada = tareasFase.length === 0 || tareasFase.some(t => t.estado === 'Completado');
+                const todasCompletas = tareasFase.length > 0 && tareasFase.every(t => t.estado === 'Completado');
                 fasesStatus.push({
                     nombre: fase,
-                    completada: computaCompletada,
+                    completada: todasCompletas,
                     total: tareasFase.length,
                     completadas: tareasFase.filter(t => t.estado === 'Completado').length
                 });
@@ -991,7 +991,7 @@ async function toggleDetalle(id) {
         if (tareasSinFase.length > 0) {
             fasesStatus.push({
                 nombre: 'Sin fase',
-                completada: tareasSinFase.length === 0 || tareasSinFase.some(t => t.estado === 'Completado'),
+                completada: tareasSinFase.every(t => t.estado === 'Completado'),
                 total: tareasSinFase.length,
                 completadas: tareasSinFase.filter(t => t.estado === 'Completado').length
             });
@@ -1006,16 +1006,23 @@ async function toggleDetalle(id) {
                 <div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <div class="flex flex-wrap justify-between items-center gap-2">
                         <span class="font-semibold text-sm">📊 Progreso por Fases</span>
-                        <span class="text-sm font-bold">${completasFases}/${totalFases} fases computadas (${Math.round((completasFases/totalFases)*100)}%)</span>
+                        <span class="text-sm font-bold">${completasFases}/${totalFases} fases completas (${Math.round((completasFases/totalFases)*100)}%)</span>
                     </div>
                     <div class="flex flex-wrap gap-1 mt-2">
                         ${fasesStatus.map(f => {
+                            if (f.total === 0) {
+                                return `<span class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-500">${f.nombre} (sin tareas) ❌</span>`;
+                            }
                             return `
                                 <span class="text-xs px-2 py-1 rounded ${f.completada ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
                                     ${f.nombre} ${f.completada ? '✅' : `⏳ ${f.completadas}/${f.total}`}
                                 </span>
                             `;
                         }).join('')}
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        ${fasesStatus.filter(f => f.total === 0).length} fases sin tareas se consideran incompletas
                     </div>
                 </div>
             `;
@@ -1047,7 +1054,7 @@ async function toggleDetalle(id) {
                                 <div class="progress-fill ${progreso < 40 ? 'bg-red-500' : progreso < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progreso}%"></div>
                             </div>
                             <div class="text-xs text-gray-400 mt-1">
-                                ${totalFases > 0 ? `${completasFases} de ${totalFases} fases computadas` : `${completadas} de ${total} tareas completadas`}
+                                ${totalFases > 0 ? `${completasFases} de ${totalFases} fases completas` : `${completadas} de ${total} tareas completadas`}
                             </div>
                         </div>
                     </div>
