@@ -3,30 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v3.0</title>
+    <title>PM System v3.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background: #f3f4f6; font-family: 'Segoe UI', system-ui, sans-serif; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
-        .progress-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
-        .tab-btn { padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; background: #f3f4f6; color: #6b7280; cursor: pointer; border: none; }
+        .status-badge { padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; display: inline-block; }
+        .progress-bar { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+        .tab-btn { padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; background: #f3f4f6; color: #6b7280; cursor: pointer; border: none; }
         .tab-btn.active { background: #3b82f6; color: white; }
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
         .modal.show { display: flex; }
-        .modal-box { background: white; border-radius: 16px; max-width: 650px; width: 100%; padding: 24px; max-height: 90vh; overflow-y: auto; }
-        .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; border-radius: 12px; color: white; z-index: 200; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        .modal-box { background: white; border-radius: 16px; max-width: 600px; width: 100%; padding: 20px; max-height: 90vh; overflow-y: auto; }
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; border-radius: 10px; color: white; z-index: 200; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); font-size: 13px; }
         .toast-success { background: #22c55e; }
         .toast-error { background: #ef4444; }
         .toast.show { display: block; }
-        .tarea-item { transition: background 0.2s; }
-        .tarea-item:hover { background: #f9fafb; }
-        .badge-estado { font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 500; }
+        .badge-estado { font-size: 9px; padding: 1px 8px; border-radius: 10px; font-weight: 500; }
         .badge-pendiente { background: #fef3c7; color: #d97706; }
         .badge-progreso { background: #dbeafe; color: #2563eb; }
         .badge-completado { background: #d1fae5; color: #059669; }
@@ -36,67 +34,76 @@
         .badge-media { background: #fef3c7; color: #d97706; }
         .badge-alta { background: #fee2e2; color: #dc2626; }
         .badge-critica { background: #7f1d1d; color: #fecaca; }
-        .metodologia-badge { padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; background: #e0e7ff; color: #4338ca; }
-        .proyecto-detalle { display: none; margin-top: 16px; padding-top: 16px; border-top: 2px solid #e5e7eb; }
+        .metodologia-badge { padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; background: #e0e7ff; color: #4338ca; }
+        .proyecto-detalle { display: none; margin-top: 10px; padding-top: 10px; border-top: 2px solid #e5e7eb; }
         .proyecto-detalle.active { display: block; }
-        .filtro-btn { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; background: #f3f4f6; color: #6b7280; cursor: pointer; border: 1px solid transparent; }
+        .filtro-btn { padding: 3px 10px; border-radius: 16px; font-size: 11px; font-weight: 500; background: #f3f4f6; color: #6b7280; cursor: pointer; border: 1px solid transparent; }
         .filtro-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
         .filtro-btn:hover { background: #e5e7eb; }
         .filtro-btn.active:hover { background: #2563eb; }
-        .buscar-input { padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 20px; font-size: 13px; outline: none; width: 200px; }
-        .buscar-input:focus { border-color: #3b82f6; ring: 2px solid #93c5fd; }
-        .prioridad-badge { font-size: 9px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        .buscar-input { padding: 4px 10px; border: 1px solid #d1d5db; border-radius: 16px; font-size: 12px; outline: none; width: 160px; }
+        .buscar-input:focus { border-color: #3b82f6; }
+        .prioridad-badge { font-size: 8px; padding: 1px 6px; border-radius: 8px; font-weight: 600; }
         .prioridad-baja { background: #e5e7eb; color: #6b7280; }
         .prioridad-media { background: #fef3c7; color: #d97706; }
         .prioridad-alta { background: #fee2e2; color: #dc2626; }
         .prioridad-critica { background: #7f1d1d; color: #fecaca; }
-        .fecha-vencimiento { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+        .fecha-vencimiento { font-size: 10px; padding: 1px 8px; border-radius: 8px; }
         .fecha-vencimiento.vencida { background: #fee2e2; color: #dc2626; }
         .fecha-vencimiento.proxima { background: #fef3c7; color: #d97706; }
         .fecha-vencimiento.futura { background: #d1fae5; color: #059669; }
         .area-badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; background: #e0e7ff; color: #4338ca; }
-        .responsable-tag { background: #e0e7ff; color: #4338ca; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; display: inline-block; }
-        .metodologia-desc { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #166534; margin-top: 6px; display: none; }
+        .responsable-tag { background: #e0e7ff; color: #4338ca; padding: 1px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; display: inline-block; }
+        .metodologia-desc { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #166534; margin-top: 4px; display: none; }
         .metodologia-desc.show { display: block; }
-        .metodologia-desc i { margin-right: 6px; }
         .gantt-container { overflow-x: auto; }
-        .gantt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .gantt-table th { text-align: left; padding: 4px 6px; background: #f3f4f6; border-bottom: 2px solid #d1d5db; font-weight: 600; font-size: 11px; }
-        .gantt-table td { padding: 3px 6px; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
+        .gantt-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .gantt-table th { text-align: left; padding: 3px 5px; background: #f3f4f6; border-bottom: 2px solid #d1d5db; font-weight: 600; font-size: 10px; }
+        .gantt-table td { padding: 2px 5px; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
         .gantt-table tr:hover { background: #f9fafb; }
-        .gantt-barra { height: 16px; border-radius: 4px; position: relative; min-width: 20px; display: flex; align-items: center; padding: 0 6px; color: white; font-size: 8px; font-weight: 600; white-space: nowrap; }
+        .gantt-barra { height: 14px; border-radius: 3px; position: relative; min-width: 20px; display: flex; align-items: center; padding: 0 4px; color: white; font-size: 7px; font-weight: 600; white-space: nowrap; }
         .gantt-barra.pendiente { background: #fcd34d; color: #78350f; }
         .gantt-barra.progreso { background: #60a5fa; color: #1e3a5f; }
         .gantt-barra.completado { background: #34d399; color: #064e3b; }
         .gantt-barra.bloqueada { background: #f87171; color: #7f1d1d; }
         .gantt-barra.hold { background: #9ca3af; color: #1f2937; }
-        .gantt-titulo { font-weight: 500; font-size: 11px; }
-        .gantt-responsable { font-size: 9px; color: #6b7280; }
+        .gantt-titulo { font-weight: 500; font-size: 10px; }
+        .gantt-responsable { font-size: 8px; color: #6b7280; }
         .gantt-fecha { font-size: 8px; color: #9ca3af; }
-        .gantt-check { width: 16px; text-align: center; font-size: 11px; }
+        .gantt-check { width: 14px; text-align: center; font-size: 10px; }
         .gantt-check .completado { color: #22c55e; }
         .gantt-check .pendiente { color: #9ca3af; }
-        .gantt-acciones { display: flex; gap: 3px; flex-wrap: wrap; }
-        .gantt-acciones button { background: none; border: none; cursor: pointer; padding: 1px 3px; border-radius: 4px; font-size: 10px; }
+        .gantt-acciones { display: flex; gap: 2px; flex-wrap: wrap; }
+        .gantt-acciones button { background: none; border: none; cursor: pointer; padding: 1px 3px; border-radius: 3px; font-size: 9px; }
         .gantt-acciones .edit:hover { background: #fef3c7; color: #d97706; }
         .gantt-acciones .delete:hover { background: #fee2e2; color: #dc2626; }
-        .gantt-acciones .status-select { font-size: 8px; padding: 1px 3px; border: 1px solid #d1d5db; border-radius: 4px; background: white; }
-        .gantt-fila-fase { background: #f0fdf4; font-weight: 600; }
-        .gantt-fila-fase td { padding: 4px 6px; border-bottom: 2px solid #d1d5db; }
-        .gantt-fila-fase .fase-icon { margin-right: 4px; font-size: 11px; }
-        .gantt-fila-fase .fase-estado { font-size: 9px; font-weight: 400; }
+        .gantt-acciones .status-select { font-size: 8px; padding: 1px 3px; border: 1px solid #d1d5db; border-radius: 3px; background: white; }
+        .gantt-fila-fase { background: #f0fdf4; font-weight: 600; cursor: pointer; }
+        .gantt-fila-fase td { padding: 3px 5px; border-bottom: 2px solid #d1d5db; }
+        .gantt-fila-fase .fase-icon { margin-right: 3px; font-size: 10px; }
+        .gantt-fila-fase .fase-estado { font-size: 8px; font-weight: 400; }
         .gantt-fila-fase .fase-completa { color: #059669; }
         .gantt-fila-fase .fase-incompleta { color: #dc2626; }
-        .gantt-fila-vacia { color: #9ca3af; text-align: center; padding: 20px; font-size: 13px; }
-
-        /* Fases compactas */
-        .fases-compactas { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
-        .fase-item { display: flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; }
+        .gantt-fila-vacia { color: #9ca3af; text-align: center; padding: 12px; font-size: 11px; }
+        .gantt-fila-fase .fase-toggle { font-size: 10px; margin-right: 4px; transition: transform 0.2s; display: inline-block; }
+        .gantt-fila-fase .fase-toggle.collapsed { transform: rotate(-90deg); }
+        .gantt-fila-fase .fase-tareas-count { font-size: 8px; font-weight: 400; color: #6b7280; }
+        .tarea-row { transition: opacity 0.2s; }
+        .tarea-row.hidden { display: none; }
+        .orden-btn { padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 500; background: #e5e7eb; color: #374151; border: none; cursor: pointer; }
+        .orden-btn:hover { background: #d1d5db; }
+        .orden-btn.active { background: #3b82f6; color: white; }
+        .kpi-card { padding: 8px 12px; }
+        .kpi-card .numero { font-size: 20px; font-weight: 700; }
+        .kpi-card .label { font-size: 10px; color: #6b7280; }
+        .kpi-icon { padding: 6px; border-radius: 50%; font-size: 14px; }
+        .fases-compactas { display: flex; flex-wrap: wrap; gap: 3px; margin: 4px 0; }
+        .fase-item { display: flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 10px; font-size: 9px; font-weight: 500; }
         .fase-item.completa { background: #d1fae5; color: #065f46; }
         .fase-item.incompleta { background: #fee2e2; color: #991b1b; }
         .fase-item.sin-tareas { background: #e5e7eb; color: #6b7280; }
-        .fase-item .fase-check { font-size: 10px; }
-        .fase-item .fase-detalle { font-size: 8px; opacity: 0.7; }
+        .fase-item .fase-check { font-size: 9px; }
+        .fase-item .fase-detalle { font-size: 7px; opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -132,33 +139,25 @@ const FASES_POR_METODOLOGIA = {
     'ADKAR': { fases: ['Awareness', 'Desire', 'Knowledge', 'Ability', 'Reinforcement'], duracion_total: 80 }
 };
 const DURACION_DEFAULT = 60;
-
-const PRIORIDADES = ['Baja', 'Media', 'Alta', 'Crítica'];
-const PRIORIDAD_COLORS = {
-    'Baja': 'prioridad-baja',
-    'Media': 'prioridad-media',
-    'Alta': 'prioridad-alta',
-    'Crítica': 'prioridad-critica'
-};
 </script>
 
 <div id="toast" class="toast toast-success"></div>
 
 <nav class="bg-white shadow-md border-b sticky top-0 z-10">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <i class="fas fa-project-diagram text-blue-600 text-2xl"></i>
-            <span class="text-xl font-bold text-gray-800">PM System v3.0</span>
+    <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
+            <span class="text-lg font-bold text-gray-800">PM System v3.2</span>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
+        <div class="flex items-center gap-3">
+            <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
         </div>
     </div>
 </nav>
 
-<div class="max-w-7xl mx-auto px-4 py-6">
+<div class="max-w-7xl mx-auto px-4 py-4">
 
-    <div class="flex gap-2 mb-6 border-b pb-2 flex-wrap">
+    <div class="flex gap-1 mb-4 border-b pb-2 flex-wrap">
         <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn active">
             <i class="fas fa-chart-pie mr-1"></i> Dashboard
         </button>
@@ -178,74 +177,58 @@ const PRIORIDAD_COLORS = {
 
     <div id="content-dashboard" class="tab-content active">
 
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow p-4 card-hover">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+            <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="text-sm text-gray-500">Proyectos Activos</div>
-                        <div class="text-2xl font-bold text-blue-600" id="kpi-proyectos">0</div>
+                        <div class="numero text-blue-600" id="kpi-proyectos">0</div>
+                        <div class="label">Proyectos Activos</div>
                     </div>
-                    <div class="bg-blue-100 p-3 rounded-full">
-                        <i class="fas fa-folder-open text-blue-600"></i>
-                    </div>
+                    <div class="kpi-icon bg-blue-100 text-blue-600"><i class="fas fa-folder-open"></i></div>
                 </div>
             </div>
-
-            <div class="bg-white rounded-lg shadow p-4 card-hover">
+            <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="text-sm text-gray-500">Tareas Pendientes</div>
-                        <div class="text-2xl font-bold text-yellow-600" id="kpi-tareas">0</div>
+                        <div class="numero text-yellow-600" id="kpi-tareas">0</div>
+                        <div class="label">Tareas Pendientes</div>
                     </div>
-                    <div class="bg-yellow-100 p-3 rounded-full">
-                        <i class="fas fa-tasks text-yellow-600"></i>
-                    </div>
+                    <div class="kpi-icon bg-yellow-100 text-yellow-600"><i class="fas fa-tasks"></i></div>
                 </div>
-                <div class="text-xs text-red-600 mt-2"><i class="fas fa-exclamation-triangle"></i> <span id="kpi-bloqueadas">0</span> bloqueadas</div>
+                <div class="text-xs text-red-600 mt-1"><i class="fas fa-exclamation-triangle"></i> <span id="kpi-bloqueadas">0</span> bloqueadas</div>
             </div>
-
-            <div class="bg-white rounded-lg shadow p-4 card-hover">
+            <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="text-sm text-gray-500">Vencidas</div>
-                        <div class="text-2xl font-bold text-red-600" id="kpi-vencidas">0</div>
+                        <div class="numero text-red-600" id="kpi-vencidas">0</div>
+                        <div class="label">Vencidas</div>
                     </div>
-                    <div class="bg-red-100 p-3 rounded-full">
-                        <i class="fas fa-clock text-red-600"></i>
-                    </div>
+                    <div class="kpi-icon bg-red-100 text-red-600"><i class="fas fa-clock"></i></div>
                 </div>
-                <div class="text-xs text-gray-500 mt-2">Requieren atención</div>
             </div>
-
-            <div class="bg-white rounded-lg shadow p-4 card-hover">
+            <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="text-sm text-gray-500">Recursos</div>
-                        <div class="text-2xl font-bold text-purple-600" id="kpi-recursos">0</div>
+                        <div class="numero text-purple-600" id="kpi-recursos">0</div>
+                        <div class="label">Recursos</div>
                     </div>
-                    <div class="bg-purple-100 p-3 rounded-full">
-                        <i class="fas fa-users text-purple-600"></i>
-                    </div>
+                    <div class="kpi-icon bg-purple-100 text-purple-600"><i class="fas fa-users"></i></div>
                 </div>
-                <div class="text-xs text-gray-500 mt-2">En el equipo</div>
             </div>
-
-            <div class="bg-white rounded-lg shadow p-4 card-hover">
+            <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="text-sm text-gray-500">Tareas Completadas</div>
-                        <div class="text-2xl font-bold text-green-600" id="kpi-completadas">0</div>
+                        <div class="numero text-green-600" id="kpi-completadas">0</div>
+                        <div class="label">Completadas</div>
                     </div>
-                    <div class="bg-green-100 p-3 rounded-full">
-                        <i class="fas fa-check-circle text-green-600"></i>
-                    </div>
+                    <div class="kpi-icon bg-green-100 text-green-600"><i class="fas fa-check-circle"></i></div>
                 </div>
             </div>
         </div>
 
         <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-6 py-4 border-b flex flex-wrap justify-between items-center gap-3">
-                <h2 class="text-lg font-semibold text-gray-800">Proyectos</h2>
+            <div class="px-4 py-2 border-b flex flex-wrap justify-between items-center gap-2">
+                <h2 class="text-sm font-semibold text-gray-800">Proyectos</h2>
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="flex gap-1 flex-wrap">
                         <button onclick="filtrarProyectos('todos')" class="filtro-btn active" id="filtro-todos">Todos</button>
@@ -255,30 +238,30 @@ const PRIORIDAD_COLORS = {
                         <button onclick="filtrarProyectos('Cerrado')" class="filtro-btn" id="filtro-Cerrado">Cerrados</button>
                     </div>
                     <input id="buscar-proyectos" onkeyup="buscarProyectos()" class="buscar-input" placeholder="🔍 Buscar...">
-                    <button onclick="abrirModal('modal-proyecto')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
-                        <i class="fas fa-plus mr-1"></i> Nuevo Proyecto
+                    <button onclick="abrirModal('modal-proyecto')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 transition">
+                        <i class="fas fa-plus mr-1"></i> Nuevo
                     </button>
                 </div>
             </div>
-            <div class="p-6 space-y-4" id="lista-proyectos">
-                <div class="text-center py-8 text-gray-500">Cargando proyectos...</div>
+            <div class="p-4 space-y-3" id="lista-proyectos">
+                <div class="text-center py-6 text-gray-500 text-sm">Cargando proyectos...</div>
             </div>
         </div>
     </div>
 
     <div id="content-proyectos" class="tab-content">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Todos los Proyectos</h2>
+        <div class="bg-white rounded-lg shadow p-4">
+            <h2 class="text-lg font-bold mb-3">Todos los Proyectos</h2>
             <div id="lista-proyectos-completa"></div>
         </div>
     </div>
 
     <div id="content-recursos" class="tab-content">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold"><i class="fas fa-users mr-2"></i>Recursos del Equipo</h2>
-                <button onclick="abrirModal('modal-usuario')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
-                    <i class="fas fa-plus mr-1"></i> Agregar Recurso
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold"><i class="fas fa-users mr-2"></i>Recursos</h2>
+                <button onclick="abrirModal('modal-usuario')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
+                    <i class="fas fa-plus mr-1"></i> Agregar
                 </button>
             </div>
             <div id="lista-recursos"></div>
@@ -286,18 +269,18 @@ const PRIORIDAD_COLORS = {
     </div>
 
     <div id="content-reportes" class="tab-content">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4"><i class="fas fa-chart-bar mr-2"></i>Reportes</h2>
+        <div class="bg-white rounded-lg shadow p-4">
+            <h2 class="text-lg font-bold mb-3"><i class="fas fa-chart-bar mr-2"></i>Reportes</h2>
             <div id="contenido-reportes"></div>
         </div>
     </div>
 
     <div id="content-proveedores" class="tab-content">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold"><i class="fas fa-handshake mr-2"></i>Evaluación de Proveedores</h2>
-                <button onclick="abrirModal('modal-proveedor')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
-                    <i class="fas fa-plus mr-1"></i> Agregar Proveedor
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold"><i class="fas fa-handshake mr-2"></i>Proveedores</h2>
+                <button onclick="abrirModal('modal-proveedor')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
+                    <i class="fas fa-plus mr-1"></i> Agregar
                 </button>
             </div>
             <div id="lista-proveedores"></div>
@@ -310,71 +293,70 @@ const PRIORIDAD_COLORS = {
 <!-- MODALES -->
 <!-- ============================================ -->
 
-<!-- MODAL: NUEVO PROYECTO -->
 <div id="modal-proyecto" class="modal">
     <div class="modal-box">
-        <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-bold" id="modal-proyecto-titulo">🚀 Nuevo Proyecto</h3>
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold" id="modal-proyecto-titulo">🚀 Nuevo Proyecto</h3>
             <button onclick="cerrarModal('modal-proyecto')" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <form id="form-proyecto" onsubmit="guardarProyecto(event)">
             <input type="hidden" id="proy-id" value="">
-            <div class="space-y-3">
+            <div class="space-y-2">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Proyecto *</label>
-                    <input id="proy-nombre" type="text" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Ej: Implementación de ERP">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Nombre *</label>
+                    <input id="proy-nombre" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Nombre del proyecto">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
-                    <select id="proy-categoria" required class="w-full border rounded-lg px-3 py-2 text-sm" onchange="actualizarMetodologia()">
-                        <option value="">Selecciona una categoría...</option>
-                        <option value="Proyectos de Inversión">Proyectos de Inversión</option>
-                        <option value="Proyectos de Tecnología">Proyectos de Tecnología</option>
-                        <option value="Proyectos de Automatización">Proyectos de Automatización</option>
-                        <option value="Proyectos de Mejora Operativa">Proyectos de Mejora Operativa</option>
-                        <option value="Proyectos de Calidad">Proyectos de Calidad</option>
-                        <option value="Proyectos de Innovación">Proyectos de Innovación</option>
-                        <option value="Proyectos de Excelencia Operacional">Proyectos de Excelencia Operacional</option>
-                        <option value="Proyectos de Transformación Organizacional">Proyectos de Transformación Organizacional</option>
-                        <option value="Proyectos de Infraestructura">Proyectos de Infraestructura</option>
-                        <option value="Proyectos de Cumplimiento Normativo">Proyectos de Cumplimiento Normativo</option>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Categoría *</label>
+                    <select id="proy-categoria" required class="w-full border rounded-lg px-3 py-1.5 text-sm" onchange="actualizarMetodologia()">
+                        <option value="">Selecciona...</option>
+                        <option value="Proyectos de Inversión">Inversión</option>
+                        <option value="Proyectos de Tecnología">Tecnología</option>
+                        <option value="Proyectos de Automatización">Automatización</option>
+                        <option value="Proyectos de Mejora Operativa">Mejora Operativa</option>
+                        <option value="Proyectos de Calidad">Calidad</option>
+                        <option value="Proyectos de Innovación">Innovación</option>
+                        <option value="Proyectos de Excelencia Operacional">Excelencia Operacional</option>
+                        <option value="Proyectos de Transformación Organizacional">Transformación</option>
+                        <option value="Proyectos de Infraestructura">Infraestructura</option>
+                        <option value="Proyectos de Cumplimiento Normativo">Cumplimiento</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Metodología</label>
-                    <input id="proy-metodologia" type="text" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Metodología</label>
+                    <input id="proy-metodologia" type="text" readonly class="w-full border rounded-lg px-3 py-1.5 text-sm bg-gray-50">
                     <div id="metodologia-desc" class="metodologia-desc">
                         <i class="fas fa-info-circle"></i> <span id="metodologia-desc-texto"></span>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
-                        <input id="proy-empresa" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nombre de la empresa">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Empresa</label>
+                        <input id="proy-empresa" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Empresa">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Área</label>
-                        <input id="proy-area" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Ej: Tecnología, Operaciones, etc.">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
+                        <input id="proy-area" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Área">
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
-                        <input id="proy-inicio" type="date" class="w-full border rounded-lg px-3 py-2 text-sm" onchange="calcularFechaFin()">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                        <input id="proy-inicio" type="date" class="w-full border rounded-lg px-3 py-1.5 text-sm" onchange="calcularFechaFin()">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin (estimada)</label>
-                        <input id="proy-fecha" type="date" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Fecha Fin</label>
+                        <input id="proy-fecha" type="date" readonly class="w-full border rounded-lg px-3 py-1.5 text-sm bg-gray-50">
                     </div>
                 </div>
             </div>
-            <div class="flex gap-3 pt-4 mt-3 border-t">
-                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+            <div class="flex gap-2 pt-3 mt-2 border-t">
+                <button type="submit" class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
                     <i class="fas fa-save mr-1"></i> Guardar
                 </button>
-                <button type="button" onclick="cerrarModal('modal-proyecto')" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition">
+                <button type="button" onclick="cerrarModal('modal-proyecto')" class="flex-1 bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-300 transition">
                     Cancelar
                 </button>
             </div>
@@ -382,34 +364,33 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: NUEVA TAREA -->
 <div id="modal-tarea" class="modal">
     <div class="modal-box">
-        <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-bold" id="modal-tarea-titulo">📋 Nueva Tarea</h3>
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold" id="modal-tarea-titulo">📋 Nueva Tarea</h3>
             <button onclick="cerrarModal('modal-tarea')" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <form id="form-tarea" onsubmit="guardarTarea(event)">
             <input type="hidden" id="tar-id" value="">
-            <div class="space-y-3">
+            <div class="space-y-2">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Título *</label>
-                    <input id="tar-titulo" type="text" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Ej: Diseñar base de datos">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Título *</label>
+                    <input id="tar-titulo" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Título">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Proyecto</label>
-                    <select id="tar-proyecto" class="w-full border rounded-lg px-3 py-2 text-sm"></select>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Proyecto</label>
+                    <select id="tar-proyecto" class="w-full border rounded-lg px-3 py-1.5 text-sm"></select>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Responsable</label>
-                        <input id="tar-responsable" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Escribe el nombre del responsable">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Responsable</label>
+                        <input id="tar-responsable" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Responsable">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Prioridad</label>
-                        <select id="tar-prioridad" class="w-full border rounded-lg px-3 py-2 text-sm">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Prioridad</label>
+                        <select id="tar-prioridad" class="w-full border rounded-lg px-3 py-1.5 text-sm">
                             <option value="Baja">Baja</option>
                             <option value="Media" selected>Media</option>
                             <option value="Alta">Alta</option>
@@ -417,28 +398,28 @@ const PRIORIDAD_COLORS = {
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fase</label>
-                        <select id="tar-fase" class="w-full border rounded-lg px-3 py-2 text-sm">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Fase</label>
+                        <select id="tar-fase" class="w-full border rounded-lg px-3 py-1.5 text-sm">
                             <option value="">Sin fase</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
-                        <input id="tar-fecha-vencimiento" type="date" class="w-full border rounded-lg px-3 py-2 text-sm">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
+                        <input id="tar-fecha-vencimiento" type="date" class="w-full border rounded-lg px-3 py-1.5 text-sm">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                    <textarea id="tar-descripcion" class="w-full border rounded-lg px-3 py-2 text-sm" rows="2" placeholder="Descripción de la tarea"></textarea>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
+                    <textarea id="tar-descripcion" class="w-full border rounded-lg px-3 py-1.5 text-sm" rows="2" placeholder="Descripción"></textarea>
                 </div>
             </div>
-            <div class="flex gap-3 pt-4 mt-3 border-t">
-                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+            <div class="flex gap-2 pt-3 mt-2 border-t">
+                <button type="submit" class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
                     <i class="fas fa-save mr-1"></i> Guardar
                 </button>
-                <button type="button" onclick="cerrarModal('modal-tarea')" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition">
+                <button type="button" onclick="cerrarModal('modal-tarea')" class="flex-1 bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-300 transition">
                     Cancelar
                 </button>
             </div>
@@ -446,29 +427,28 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: NUEVO USUARIO -->
 <div id="modal-usuario" class="modal">
     <div class="modal-box">
-        <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-bold">👤 Agregar Recurso</h3>
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold">👤 Agregar Recurso</h3>
             <button onclick="cerrarModal('modal-usuario')" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <form id="form-usuario" onsubmit="guardarUsuario(event)">
-            <div class="space-y-3">
+            <div class="space-y-2">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
-                    <input id="usr-nombre" type="text" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nombre completo">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Nombre *</label>
+                    <input id="usr-nombre" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Nombre completo">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input id="usr-email" type="email" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="correo@ejemplo.com">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                    <input id="usr-email" type="email" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="correo@ejemplo.com">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-                        <select id="usr-rol" class="w-full border rounded-lg px-3 py-2 text-sm">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
+                        <select id="usr-rol" class="w-full border rounded-lg px-3 py-1.5 text-sm">
                             <option value="Project Manager">Project Manager</option>
                             <option value="Desarrollador">Desarrollador</option>
                             <option value="Diseñador">Diseñador</option>
@@ -478,16 +458,16 @@ const PRIORIDAD_COLORS = {
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Área</label>
-                        <input id="usr-area" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Ej: Tecnología, Marketing, etc.">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
+                        <input id="usr-area" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Ej: Tecnología">
                     </div>
                 </div>
             </div>
-            <div class="flex gap-3 pt-4 mt-3 border-t">
-                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+            <div class="flex gap-2 pt-3 mt-2 border-t">
+                <button type="submit" class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
                     <i class="fas fa-save mr-1"></i> Agregar
                 </button>
-                <button type="button" onclick="cerrarModal('modal-usuario')" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition">
+                <button type="button" onclick="cerrarModal('modal-usuario')" class="flex-1 bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-300 transition">
                     Cancelar
                 </button>
             </div>
@@ -495,45 +475,44 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: NUEVO PROVEEDOR -->
 <div id="modal-proveedor" class="modal">
     <div class="modal-box">
-        <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-bold">🏢 Nuevo Proveedor</h3>
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold">🏢 Nuevo Proveedor</h3>
             <button onclick="cerrarModal('modal-proveedor')" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <form id="form-proveedor" onsubmit="guardarProveedor(event)">
-            <div class="space-y-3">
+            <div class="space-y-2">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Proveedor *</label>
-                    <input id="prov-nombre" type="text" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nombre del proveedor">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Nombre *</label>
+                    <input id="prov-nombre" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Nombre del proveedor">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Contacto</label>
-                    <input id="prov-contacto" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nombre del contacto">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Contacto</label>
+                    <input id="prov-contacto" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Contacto">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                        <input id="prov-telefono" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Teléfono">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+                        <input id="prov-telefono" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Teléfono">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input id="prov-email" type="email" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="correo@proveedor.com">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                        <input id="prov-email" type="email" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="correo@proveedor.com">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Proyecto</label>
-                    <select id="prov-proyecto" class="w-full border rounded-lg px-3 py-2 text-sm"></select>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Proyecto</label>
+                    <select id="prov-proyecto" class="w-full border rounded-lg px-3 py-1.5 text-sm"></select>
                 </div>
             </div>
-            <div class="flex gap-3 pt-4 mt-3 border-t">
-                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+            <div class="flex gap-2 pt-3 mt-2 border-t">
+                <button type="submit" class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
                     <i class="fas fa-save mr-1"></i> Guardar
                 </button>
-                <button type="button" onclick="cerrarModal('modal-proveedor')" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition">
+                <button type="button" onclick="cerrarModal('modal-proveedor')" class="flex-1 bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-300 transition">
                     Cancelar
                 </button>
             </div>
@@ -541,17 +520,16 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: DETALLE PROVEEDOR -->
 <div id="modal-detalle-proveedor" class="modal">
     <div class="modal-box" style="max-width: 600px;">
-        <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-bold">📋 Detalle del Proveedor</h3>
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold">📋 Detalle del Proveedor</h3>
             <button onclick="cerrarModal('modal-detalle-proveedor')" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <div id="detalle-proveedor-contenido">
-            <div class="text-center py-4 text-gray-500">Cargando...</div>
+            <div class="text-center py-4 text-gray-500 text-sm">Cargando...</div>
         </div>
     </div>
 </div>
@@ -747,9 +725,9 @@ async function cargarDashboard() {
     } catch (e) {
         console.error('Error:', e);
         document.getElementById('lista-proyectos').innerHTML = `
-            <div class="text-center py-8 text-red-500">
-                <i class="fas fa-exclamation-circle text-4xl mb-2 block"></i>
-                Error cargando datos. Verifica Supabase.
+            <div class="text-center py-6 text-red-500 text-sm">
+                <i class="fas fa-exclamation-circle text-2xl mb-2 block"></i>
+                Error cargando datos
             </div>
         `;
     }
@@ -783,7 +761,7 @@ function buscarProyectos() {
 function renderizarProyectos(proyectos) {
     const lista = document.getElementById('lista-proyectos');
     if (proyectos.length === 0) {
-        lista.innerHTML = `<div class="text-center py-8 text-gray-500">No hay proyectos aún. Crea uno nuevo.</div>`;
+        lista.innerHTML = `<div class="text-center py-6 text-gray-500 text-sm">No hay proyectos aún. Crea uno nuevo.</div>`;
         return;
     }
 
@@ -793,7 +771,7 @@ function renderizarProyectos(proyectos) {
     }
 
     if (filtrados.length === 0) {
-        lista.innerHTML = `<div class="text-center py-8 text-gray-500">No hay proyectos con el filtro "${filtroActual}"</div>`;
+        lista.innerHTML = `<div class="text-center py-6 text-gray-500 text-sm">No hay proyectos con el filtro "${filtroActual}"</div>`;
         return;
     }
 
@@ -816,64 +794,62 @@ function renderizarProyectos(proyectos) {
         }
 
         return `
-        <div class="proyecto-card border rounded-lg p-4 hover:shadow-md transition ${p.estado === 'Crítico' ? 'border-l-4 border-l-red-500' : ''}">
-            <div class="flex flex-wrap justify-between items-start gap-4">
+        <div class="proyecto-card border rounded-lg p-3 hover:shadow-md transition ${p.estado === 'Crítico' ? 'border-l-4 border-l-red-500' : ''}">
+            <div class="flex flex-wrap justify-between items-start gap-3">
                 <div class="flex-1">
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <h3 class="proyecto-nombre font-semibold text-gray-800">${p.nombre}</h3>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="proyecto-nombre font-semibold text-gray-800 text-sm">${p.nombre}</h3>
                         <span class="status-badge ${p.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : p.estado === 'Crítico' ? 'bg-red-100 text-red-700' : p.estado === 'Monitoreo' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">${p.estado || 'Activo'}</span>
                         ${p.metodologia ? `<span class="metodologia-badge">${p.metodologia}</span>` : ''}
                     </div>
-                    <div class="proyecto-empresa text-sm text-gray-500 mt-1">${p.empresa || 'Sin empresa'}</div>
-                    <div class="text-sm text-gray-500">${p.area || 'Sin área'}</div>
-                    <div class="flex flex-wrap items-center gap-4 mt-2 text-sm">
+                    <div class="proyecto-empresa text-xs text-gray-500 mt-0.5">${p.empresa || 'Sin empresa'}</div>
+                    <div class="text-xs text-gray-500">${p.area || 'Sin área'}</div>
+                    <div class="flex flex-wrap items-center gap-3 mt-1 text-xs">
                         <span><i class="fas fa-calendar-plus text-gray-400"></i> ${p.fecha_inicio || 'No definida'}</span>
                         <span><i class="fas fa-calendar text-gray-400"></i> ${p.fecha_fin || 'No definida'}</span>
                         <span><i class="fas fa-clock text-gray-400"></i> ${duracion} días</span>
                     </div>
-                    <div class="text-xs text-gray-400 mt-1">
+                    <div class="text-xs text-gray-400 mt-0.5">
                         <i class="fas fa-tasks mr-1"></i>
                         ${p.total_tareas} tareas • ${completadas} completadas${fasesInfo}
                     </div>
                 </div>
-                <div class="w-full md:w-56">
-                    <div class="flex justify-between text-sm mb-1">
+                <div class="w-40">
+                    <div class="flex justify-between text-xs mb-1">
                         <span>Progreso</span>
                         <span class="font-semibold">${p.progreso_calculado}%</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill ${p.progreso_calculado < 30 ? 'bg-red-500' : p.progreso_calculado < 60 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${p.progreso_calculado}%"></div>
                     </div>
-                    <div class="text-xs text-gray-400 mt-1 text-center">
-                        ${fasesMetodologia.length > 0 ? `${fasesMetodologia.length} fases` : 'Tareas'}
-                    </div>
                 </div>
             </div>
-            <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t">
-                <button onclick="toggleDetalle(${p.id})" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100" id="btn-detalle-${p.id}">
+            <div class="flex flex-wrap gap-1.5 mt-2 pt-2 border-t">
+                <button onclick="toggleDetalle(${p.id})" class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded hover:bg-blue-100" id="btn-detalle-${p.id}">
                     <i class="fas fa-chevron-down"></i> Detalle
                 </button>
-                <button onclick="editarProyecto(${p.id})" class="text-xs bg-yellow-50 text-yellow-600 px-3 py-1 rounded hover:bg-yellow-100">
+                <button onclick="editarProyecto(${p.id})" class="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded hover:bg-yellow-100">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button onclick="eliminarProyecto(${p.id})" class="text-xs bg-red-50 text-red-600 px-3 py-1 rounded hover:bg-red-100">
+                <button onclick="eliminarProyecto(${p.id})" class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded hover:bg-red-100">
                     <i class="fas fa-trash"></i>
                 </button>
-                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-auto">
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded ml-auto">
                     <i class="fas fa-tasks"></i> ${p.total_tareas}
                 </span>
             </div>
             <div id="detalle-${p.id}" class="proyecto-detalle">
-                <div class="text-center py-4 text-gray-400">Cargando...</div>
+                <div class="text-center py-3 text-gray-400 text-sm">Cargando...</div>
             </div>
         </div>
     `}).join('');
 }
 
 // ============================================
-// TOGGLE DETALLE CON FASES COMPACTAS
+// TOGGLE DETALLE CON FASES COLAPSABLES Y BOTÓN ORDENAR
 // ============================================
 let detallesAbiertos = {};
+let ordenFechaActivo = {};
 
 async function toggleDetalle(id) {
     const detalleDiv = document.getElementById(`detalle-${id}`);
@@ -894,7 +870,7 @@ async function toggleDetalle(id) {
         const proyecto = proyectosCache.find(p => p.id === id);
         if (!proyecto) { detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Proyecto no encontrado</div>'; return; }
 
-        const tareas = tareasCache.filter(t => t.proyecto_id === id);
+        let tareas = tareasCache.filter(t => t.proyecto_id === id);
         const progreso = calcularProgresoPorFases(tareas, proyecto.metodologia);
         const total = tareas.length;
         const completadas = tareas.filter(t => t.estado === 'Completado').length;
@@ -918,11 +894,11 @@ async function toggleDetalle(id) {
             });
         }
 
-        // FASES COMPACTAS - una línea horizontal
+        // FASES COMPACTAS
         let fasesCompactasHTML = '';
         if (fasesStatus.length > 0) {
             fasesCompactasHTML = `
-                <div class="flex items-center gap-3 flex-wrap bg-gray-50 p-2 rounded-lg border border-gray-200">
+                <div class="flex items-center gap-2 flex-wrap bg-gray-50 p-1.5 rounded border border-gray-200">
                     <span class="text-xs font-semibold text-gray-600">${completasFases}/${totalFases} fases</span>
                     <span class="text-xs text-gray-400">|</span>
                     <div class="fases-compactas">
@@ -930,51 +906,34 @@ async function toggleDetalle(id) {
                             let clase = 'sin-tareas';
                             let icono = '⚪';
                             let detalle = '';
-                            if (f.total === 0) {
-                                clase = 'sin-tareas';
-                                icono = '⚪';
-                                detalle = 'sin tareas';
-                            } else if (f.completada) {
-                                clase = 'completa';
-                                icono = '✅';
-                                detalle = `${f.completadas}/${f.total}`;
-                            } else {
-                                clase = 'incompleta';
-                                icono = '⏳';
-                                detalle = `${f.completadas}/${f.total}`;
-                            }
-                            return `
-                                <span class="fase-item ${clase}">
-                                    <span class="fase-check">${icono}</span>
-                                    ${f.nombre}
-                                    <span class="fase-detalle">${detalle}</span>
-                                </span>
-                            `;
+                            if (f.total === 0) { clase = 'sin-tareas'; icono = '⚪'; detalle = ''; }
+                            else if (f.completada) { clase = 'completa'; icono = '✅'; detalle = `${f.completadas}/${f.total}`; }
+                            else { clase = 'incompleta'; icono = '⏳'; detalle = `${f.completadas}/${f.total}`; }
+                            return `<span class="fase-item ${clase}"><span class="fase-check">${icono}</span>${f.nombre} <span class="fase-detalle">${detalle}</span></span>`;
                         }).join('')}
                     </div>
-                    <span class="text-xs text-gray-400 ml-auto">${fasesStatus.filter(f => f.total === 0).length} sin tareas</span>
                 </div>
             `;
         }
 
-        // Gantt compacto
-        let ganttHTML = renderVistaGantt(tareas, proyecto);
+        // --- GANTT CON FASES COLAPSABLES ---
+        let ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
 
         detalleDiv.innerHTML = `
-            <div class="bg-gray-50 p-3 rounded-lg mt-2">
-                <div class="flex flex-wrap justify-between items-start gap-3">
-                    <div class="flex-1 min-w-[150px]">
+            <div class="bg-gray-50 p-2 rounded-lg mt-2">
+                <div class="flex flex-wrap justify-between items-start gap-2">
+                    <div class="flex-1 min-w-[120px]">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="status-badge ${proyecto.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : proyecto.estado === 'Crítico' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${proyecto.estado || 'Activo'}</span>
                             ${proyecto.metodologia ? `<span class="metodologia-badge">${proyecto.metodologia}</span>` : ''}
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-1 mt-1 text-xs">
-                            <span class="text-gray-500">${proyecto.empresa || 'Sin empresa'}</span>
-                            <span class="text-gray-500">${proyecto.area || 'Sin área'}</span>
-                            <span class="text-gray-500">${proyecto.fecha_inicio || 'No inicio'}</span>
-                            <span class="text-gray-500">${proyecto.fecha_fin || 'No fin'}</span>
+                        <div class="flex flex-wrap gap-2 mt-1 text-xs text-gray-500">
+                            <span>${proyecto.empresa || 'Sin empresa'}</span>
+                            <span>${proyecto.area || 'Sin área'}</span>
+                            <span>${proyecto.fecha_inicio || 'No inicio'}</span>
+                            <span>${proyecto.fecha_fin || 'No fin'}</span>
                         </div>
-                        <div class="mt-2 max-w-sm">
+                        <div class="mt-1 max-w-xs">
                             <div class="flex justify-between text-xs">
                                 <span>Progreso</span>
                                 <span class="font-semibold">${progreso}%</span>
@@ -984,15 +943,20 @@ async function toggleDetalle(id) {
                             </div>
                         </div>
                     </div>
-                    <button onclick="abrirModalTareaDesdeDetalle(${proyecto.id})" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded hover:bg-blue-700 transition flex-shrink-0">
-                        <i class="fas fa-plus mr-1"></i> Tarea
-                    </button>
+                    <div class="flex gap-1">
+                        <button onclick="ordenarPorFecha(${proyecto.id})" class="orden-btn" id="orden-btn-${proyecto.id}" title="Ordenar por fecha">
+                            <i class="fas fa-sort-amount-down-alt mr-1"></i> Fecha
+                        </button>
+                        <button onclick="abrirModalTareaDesdeDetalle(${proyecto.id})" class="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 transition">
+                            <i class="fas fa-plus mr-1"></i> Tarea
+                        </button>
+                    </div>
                 </div>
 
                 ${fasesCompactasHTML}
 
                 <div class="mt-2 pt-2 border-t">
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="flex justify-between items-center mb-1">
                         <span class="text-xs font-semibold text-gray-600"><i class="fas fa-tasks mr-1"></i>${tareas.length} tareas</span>
                         <span class="text-xs text-gray-400">Gantt</span>
                     </div>
@@ -1001,6 +965,24 @@ async function toggleDetalle(id) {
             </div>
         `;
 
+        // Inicializar estado de colapso (todas cerradas excepto la primera)
+        const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
+        if (fasesRows.length > 0) {
+            fasesRows.forEach((row, index) => {
+                const toggle = row.querySelector('.fase-toggle');
+                const tareasFila = row.nextElementSibling;
+                if (index === 0) {
+                    // Primera fase abierta por defecto
+                    if (toggle) toggle.classList.remove('collapsed');
+                    if (tareasFila) tareasFila.classList.remove('hidden');
+                } else {
+                    // Las demás cerradas
+                    if (toggle) toggle.classList.add('collapsed');
+                    if (tareasFila) tareasFila.classList.add('hidden');
+                }
+            });
+        }
+
     } catch (e) {
         console.error('Error:', e);
         detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Error cargando detalle</div>';
@@ -1008,9 +990,174 @@ async function toggleDetalle(id) {
 }
 
 // ============================================
-// RENDER VISTA GANTT COMPACTA
+// ORDENAR POR FECHA
 // ============================================
-function renderVistaGantt(tareas, proyecto) {
+function ordenarPorFecha(proyectoId) {
+    const btn = document.getElementById(`orden-btn-${proyectoId}`);
+    const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
+    
+    if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
+    
+    // Obtener todas las filas de tareas
+    const tareaRows = detalleDiv.querySelectorAll('.tarea-row');
+    const tareasArray = Array.from(tareaRows);
+    
+    // Obtener las tareas del proyecto
+    let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
+    
+    // Alternar orden
+    ordenFechaActivo[proyectoId] = !ordenFechaActivo[proyectoId];
+    const ascendente = ordenFechaActivo[proyectoId];
+    btn.innerHTML = ascendente ? '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
+    
+    // Ordenar tareas por fecha
+    tareas.sort((a, b) => {
+        const fechaA = a.fecha_vencimiento ? new Date(a.fecha_vencimiento) : new Date('2099-12-31');
+        const fechaB = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : new Date('2099-12-31');
+        return ascendente ? fechaA - fechaB : fechaB - fechaA;
+    });
+    
+    // Reordenar en el DOM
+    const fasesContainer = detalleDiv.querySelector('.gantt-container table tbody');
+    if (!fasesContainer) return;
+    
+    // Agrupar por fase
+    const fases = {};
+    tareas.forEach(t => {
+        const fase = t.fase || 'Sin fase';
+        if (!fases[fase]) fases[fase] = [];
+        fases[fase].push(t);
+    });
+    
+    // Reconstruir el HTML de las fases
+    const proyecto = proyectosCache.find(p => p.id === proyectoId);
+    const nuevasFases = FASES_POR_METODOLOGIA[proyecto?.metodologia]?.fases || [];
+    let fasesOrdenadas = Object.keys(fases);
+    if (nuevasFases.length > 0) {
+        fasesOrdenadas = nuevasFases.filter(f => fases[f]);
+        Object.keys(fases).forEach(f => {
+            if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
+        });
+    } else {
+        fasesOrdenadas.sort();
+    }
+    
+    let html = '';
+    fasesOrdenadas.forEach(fase => {
+        const tareasFase = fases[fase] || [];
+        const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
+        const totalTareasFase = tareasFase.length;
+        const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
+        
+        html += `
+            <tr class="gantt-fila-fase" onclick="toggleFase(this)">
+                <td colspan="6">
+                    <span class="fase-toggle">▼</span>
+                    <span class="fase-icon"><i class="fas fa-flag"></i></span>
+                    ${fase}
+                    <span class="fase-estado ${todasCompletas ? 'fase-completa' : 'fase-incompleta'}">
+                        ${todasCompletas ? '✅' : `⏳ ${completadasFase}/${totalTareasFase}`}
+                    </span>
+                    <span class="fase-tareas-count">(${totalTareasFase} tareas)</span>
+                </td>
+            </tr>
+            <tr class="tarea-row hidden">
+                <td colspan="6">
+                    <div class="gantt-container">
+                        <table class="gantt-table">
+                            <tbody>
+                                ${tareasFase.map(t => renderTareaFila(t)).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    fasesContainer.innerHTML = html;
+    
+    // Abrir la primera fase
+    const primerasFilas = fasesContainer.querySelectorAll('.gantt-fila-fase');
+    if (primerasFilas.length > 0) {
+        const toggle = primerasFilas[0].querySelector('.fase-toggle');
+        const tareasFila = primerasFilas[0].nextElementSibling;
+        if (toggle) toggle.classList.remove('collapsed');
+        if (tareasFila) tareasFila.classList.remove('hidden');
+    }
+}
+
+// ============================================
+// TOGGLE FASE (colapsar/expandir)
+// ============================================
+function toggleFase(row) {
+    const toggle = row.querySelector('.fase-toggle');
+    const tareasFila = row.nextElementSibling;
+    
+    if (tareasFila) {
+        tareasFila.classList.toggle('hidden');
+        if (toggle) toggle.classList.toggle('collapsed');
+    }
+}
+
+// ============================================
+// RENDER TAREA FILA PARA GANTT COLAPSABLE
+// ============================================
+function renderTareaFila(t) {
+    const barraClase = getBarraClase(t.estado);
+    const prioridadClase = PRIORIDAD_COLORS[t.prioridad] || 'prioridad-media';
+    const prioridadLabel = t.prioridad || 'Media';
+    const responsable = t.responsable_texto || '-';
+    
+    let vencimiento = t.fecha_vencimiento ? new Date(t.fecha_vencimiento).toLocaleDateString() : '-';
+    
+    return `
+        <tr>
+            <td>
+                <div class="gantt-titulo">${t.titulo}</div>
+                <div class="gantt-fecha">${vencimiento}</div>
+            </td>
+            <td><div class="gantt-responsable">${responsable}</div></td>
+            <td><span class="prioridad-badge ${prioridadClase}">${prioridadLabel}</span></td>
+            <td class="gantt-check">${t.estado === 'Completado' ? '✅' : t.estado === 'Bloqueada' ? '🚫' : '○'}</td>
+            <td>
+                <div style="position:relative; width:100%; height:14px; background:#f3f4f6; border-radius:3px; overflow:hidden;">
+                    <div class="gantt-barra ${barraClase}" style="position:absolute; left:0; width:${t.estado === 'Completado' ? '100' : '30'}%;">
+                        ${t.titulo.substring(0, 15)}${t.titulo.length > 15 ? '…' : ''}
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="gantt-acciones">
+                    <select onchange="cambiarEstadoTarea(${t.id}, this.value)" class="status-select">
+                        <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pend.</option>
+                        <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>Prog.</option>
+                        <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloq.</option>
+                        <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Comp.</option>
+                    </select>
+                    <button onclick="editarTarea(${t.id})" class="edit" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button onclick="eliminarTarea(${t.id})" class="delete" title="Eliminar"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+function getBarraClase(estado) {
+    const clases = {
+        'Pendiente': 'pendiente',
+        'En Progreso': 'progreso',
+        'Completado': 'completado',
+        'Bloqueada': 'bloqueada',
+        'Hold': 'hold'
+    };
+    return clases[estado] || 'pendiente';
+}
+
+// ============================================
+// RENDER VISTA GANTT COLAPSABLE
+// ============================================
+function renderVistaGanttColapsable(tareas, proyecto) {
     const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
     
     if (tareas.length === 0) {
@@ -1032,49 +1179,6 @@ function renderVistaGantt(tareas, proyecto) {
         });
     } else {
         fasesOrdenadas.sort();
-    }
-
-    function getBarraClase(estado) {
-        const clases = {
-            'Pendiente': 'pendiente',
-            'En Progreso': 'progreso',
-            'Completado': 'completado',
-            'Bloqueada': 'bloqueada',
-            'Hold': 'hold'
-        };
-        return clases[estado] || 'pendiente';
-    }
-
-    function getEstadoIcono(estado) {
-        const iconos = {
-            'Pendiente': '⏳',
-            'En Progreso': '🔄',
-            'Completado': '✅',
-            'Bloqueada': '🚫',
-            'Hold': '⏸️'
-        };
-        return iconos[estado] || '⏳';
-    }
-
-    let todasFechas = tareas.filter(t => t.fecha_vencimiento).map(t => new Date(t.fecha_vencimiento));
-    let fechaMin = new Date();
-    let fechaMax = new Date();
-    if (todasFechas.length > 0) {
-        fechaMin = new Date(Math.min(...todasFechas));
-        fechaMax = new Date(Math.max(...todasFechas));
-        fechaMin.setDate(fechaMin.getDate() - 5);
-        fechaMax.setDate(fechaMax.getDate() + 5);
-    } else {
-        fechaMin.setDate(fechaMin.getDate() - 10);
-        fechaMax.setDate(fechaMax.getDate() + 30);
-    }
-    const totalDias = Math.ceil((fechaMax - fechaMin) / (1000 * 60 * 60 * 24)) || 30;
-
-    function getPosicionBarra(fechaVencimiento) {
-        if (!fechaVencimiento) return 0;
-        const fecha = new Date(fechaVencimiento);
-        const diff = (fecha - fechaMin) / (1000 * 60 * 60 * 24);
-        return Math.max(0, Math.min(100, (diff / totalDias) * 100));
     }
 
     let html = `
@@ -1100,57 +1204,29 @@ function renderVistaGantt(tareas, proyecto) {
         const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
 
         html += `
-            <tr class="gantt-fila-fase">
+            <tr class="gantt-fila-fase" onclick="toggleFase(this)">
                 <td colspan="6">
+                    <span class="fase-toggle collapsed">▼</span>
                     <span class="fase-icon"><i class="fas fa-flag"></i></span>
                     ${fase}
                     <span class="fase-estado ${todasCompletas ? 'fase-completa' : 'fase-incompleta'}">
                         ${todasCompletas ? '✅' : `⏳ ${completadasFase}/${totalTareasFase}`}
                     </span>
+                    <span class="fase-tareas-count">(${totalTareasFase} tareas)</span>
+                </td>
+            </tr>
+            <tr class="tarea-row hidden">
+                <td colspan="6">
+                    <div class="gantt-container">
+                        <table class="gantt-table">
+                            <tbody>
+                                ${tareasFase.map(t => renderTareaFila(t)).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 </td>
             </tr>
         `;
-
-        tareasFase.forEach(t => {
-            const barraClase = getBarraClase(t.estado);
-            const posicion = getPosicionBarra(t.fecha_vencimiento);
-            const responsable = t.responsable_texto || '-';
-            const prioridadClase = PRIORIDAD_COLORS[t.prioridad] || 'prioridad-media';
-            const prioridadLabel = t.prioridad || 'Media';
-
-            html += `
-                <tr>
-                    <td>
-                        <div class="gantt-titulo">${t.titulo}</div>
-                        <div class="gantt-fecha">${t.fecha_vencimiento ? new Date(t.fecha_vencimiento).toLocaleDateString() : '-'}</div>
-                    </td>
-                    <td><div class="gantt-responsable">${responsable}</div></td>
-                    <td><span class="prioridad-badge ${prioridadClase}">${prioridadLabel}</span></td>
-                    <td class="gantt-check">
-                        ${t.estado === 'Completado' ? '✅' : t.estado === 'Bloqueada' ? '🚫' : '○'}
-                    </td>
-                    <td>
-                        <div style="position:relative; width:100%; height:18px; background:#f3f4f6; border-radius:4px; overflow:hidden;">
-                            <div class="gantt-barra ${barraClase}" style="position:absolute; left:${posicion}%; width:${Math.max(8, 100 - posicion - 5)}%;">
-                                ${getEstadoIcono(t.estado)} ${t.titulo.substring(0, 12)}${t.titulo.length > 12 ? '…' : ''}
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="gantt-acciones">
-                            <select onchange="cambiarEstadoTarea(${t.id}, this.value)" class="status-select">
-                                <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pend.</option>
-                                <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>Prog.</option>
-                                <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloq.</option>
-                                <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Comp.</option>
-                            </select>
-                            <button onclick="editarTarea(${t.id})" class="edit" title="Editar"><i class="fas fa-edit"></i></button>
-                            <button onclick="eliminarTarea(${t.id})" class="delete" title="Eliminar"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
     });
 
     html += `
@@ -1434,7 +1510,7 @@ async function cargarProveedores() {
         
         const lista = document.getElementById('lista-proveedores');
         if (proveedores.length === 0) {
-            lista.innerHTML = '<div class="text-center py-8 text-gray-500">No hay proveedores registrados</div>';
+            lista.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No hay proveedores registrados</div>';
             return;
         }
 
@@ -1480,34 +1556,34 @@ async function cargarProveedores() {
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-2 text-left">#</th>
-                            <th class="px-4 py-2 text-left">Proveedor</th>
-                            <th class="px-4 py-2 text-left">Proyecto</th>
-                            <th class="px-4 py-2 text-left">Contacto</th>
-                            <th class="px-4 py-2 text-left">Criterios</th>
-                            <th class="px-4 py-2 text-left">Puntaje</th>
-                            <th class="px-4 py-2 text-left">Nivel</th>
-                            <th class="px-4 py-2 text-left">Acciones</th>
+                            <th class="px-3 py-1.5 text-left text-xs">#</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Proveedor</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Proyecto</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Contacto</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Criterios</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Puntaje</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Nivel</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${ranking.map((prov, index) => `
                             <tr class="border-t hover:bg-gray-50 ${index === 0 ? 'bg-green-50' : ''}">
-                                <td class="px-4 py-2 font-bold">${index === 0 ? '🏆' : index + 1}</td>
-                                <td class="px-4 py-2 font-medium">${prov.nombre}</td>
-                                <td class="px-4 py-2 text-gray-500">${prov.proyecto}</td>
-                                <td class="px-4 py-2 text-gray-500">${prov.contacto || '-'}</td>
-                                <td class="px-4 py-2 text-center">${prov.totalCriterios}</td>
-                                <td class="px-4 py-2 font-bold">${prov.puntaje}/10</td>
-                                <td class="px-4 py-2"><span class="font-semibold ${prov.color}">${prov.nivel} (${prov.porcentaje}%)</span></td>
-                                <td class="px-4 py-2">
-                                    <button onclick="verDetalleProveedor(${prov.id})" class="text-blue-500 hover:text-blue-700 text-xs" title="Ver detalle">
+                                <td class="px-3 py-1.5 text-xs font-bold">${index === 0 ? '🏆' : index + 1}</td>
+                                <td class="px-3 py-1.5 text-xs font-medium">${prov.nombre}</td>
+                                <td class="px-3 py-1.5 text-xs text-gray-500">${prov.proyecto}</td>
+                                <td class="px-3 py-1.5 text-xs text-gray-500">${prov.contacto || '-'}</td>
+                                <td class="px-3 py-1.5 text-xs text-center">${prov.totalCriterios}</td>
+                                <td class="px-3 py-1.5 text-xs font-bold">${prov.puntaje}/10</td>
+                                <td class="px-3 py-1.5 text-xs"><span class="font-semibold ${prov.color}">${prov.nivel} (${prov.porcentaje}%)</span></td>
+                                <td class="px-3 py-1.5 text-xs">
+                                    <button onclick="verDetalleProveedor(${prov.id})" class="text-blue-500 hover:text-blue-700" title="Ver detalle">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button onclick="calificarProveedor(${prov.id})" class="text-green-500 hover:text-green-700 text-xs ml-2" title="Calificar">
+                                    <button onclick="calificarProveedor(${prov.id})" class="text-green-500 hover:text-green-700 ml-1" title="Calificar">
                                         <i class="fas fa-star"></i>
                                     </button>
-                                    <button onclick="eliminarProveedor(${prov.id})" class="text-red-500 hover:text-red-700 text-xs ml-2" title="Eliminar">
+                                    <button onclick="eliminarProveedor(${prov.id})" class="text-red-500 hover:text-red-700 ml-1" title="Eliminar">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -1516,7 +1592,7 @@ async function cargarProveedores() {
                     </tbody>
                 </table>
             </div>
-            <div class="mt-3 text-xs text-gray-400">
+            <div class="mt-2 text-xs text-gray-400">
                 <i class="fas fa-info-circle mr-1"></i>
                 ${ranking.length} proveedores evaluados
             </div>
@@ -1527,7 +1603,7 @@ async function cargarProveedores() {
 
     } catch (e) {
         console.error('Error:', e);
-        document.getElementById('lista-proveedores').innerHTML = '<div class="text-red-500">Error cargando proveedores</div>';
+        document.getElementById('lista-proveedores').innerHTML = '<div class="text-red-500 text-sm">Error cargando proveedores</div>';
     }
 }
 
@@ -1589,28 +1665,28 @@ async function calificarProveedor(proveedorId) {
     }
 
     let html = `
-        <div class="modal-box" style="max-width: 500px;">
-            <div class="flex justify-between items-start mb-4">
-                <h3 class="text-xl font-bold">⭐ Calificar: ${proveedor.nombre}</h3>
+        <div class="modal-box" style="max-width: 450px;">
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="text-lg font-bold">⭐ Calificar: ${proveedor.nombre}</h3>
                 <button onclick="cerrarModal('modal-calificacion')" class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <form id="form-calificacion" onsubmit="guardarCalificacion(event, ${proveedorId})">
                 <input type="hidden" id="cal-proveedor" value="${proveedorId}">
-                <div class="space-y-3">
+                <div class="space-y-2">
     `;
 
     criterios.forEach(c => {
         html += `
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
+                <label class="block text-xs font-medium text-gray-700 mb-1">
                     ${c.nombre} (peso: ${c.peso})
                 </label>
                 <div class="flex items-center gap-2">
                     <input type="range" id="cal-${c.id}" min="1" max="10" value="5" 
                            class="w-full" oninput="document.getElementById('val-${c.id}').textContent = this.value">
-                    <span id="val-${c.id}" class="font-bold text-blue-600 w-8 text-center">5</span>
+                    <span id="val-${c.id}" class="font-bold text-blue-600 w-6 text-center text-sm">5</span>
                 </div>
                 <input type="hidden" id="cal-criterio-${c.id}" value="${c.id}">
             </div>
@@ -1619,11 +1695,11 @@ async function calificarProveedor(proveedorId) {
 
     html += `
                 </div>
-                <div class="flex gap-3 pt-4 mt-3 border-t">
-                    <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                <div class="flex gap-2 pt-3 mt-2 border-t">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
                         <i class="fas fa-save mr-1"></i> Guardar
                     </button>
-                    <button type="button" onclick="cerrarModal('modal-calificacion')" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition">
+                    <button type="button" onclick="cerrarModal('modal-calificacion')" class="flex-1 bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-300 transition">
                         Cancelar
                     </button>
                 </div>
@@ -1721,10 +1797,10 @@ async function verDetalleProveedor(proveedorId) {
         else { nivel = 'Bajo'; color = 'text-red-600'; }
 
         let detallesHTML = detalles.map(d => `
-            <div class="flex justify-between items-center p-2 border-b text-sm">
+            <div class="flex justify-between items-center p-1.5 border-b text-sm">
                 <span>${d.criterio}</span>
-                <div class="flex items-center gap-4">
-                    <span class="text-gray-400">Peso: ${d.peso}</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-gray-400">Peso: ${d.peso}</span>
                     <span class="font-bold">${d.puntaje}/10</span>
                 </div>
             </div>
@@ -1732,25 +1808,25 @@ async function verDetalleProveedor(proveedorId) {
 
         const contenido = document.getElementById('detalle-proveedor-contenido');
         contenido.innerHTML = `
-            <div class="space-y-4">
-                <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="space-y-3">
+                <div class="bg-gray-50 p-3 rounded-lg">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="text-xl font-bold">${proveedor.nombre}</h3>
-                            <p class="text-sm text-gray-500">${proveedor.proyectos?.nombre || 'Sin proyecto'}</p>
-                            <p class="text-sm text-gray-500">${proveedor.contacto || 'No especificado'}</p>
+                            <h3 class="text-lg font-bold">${proveedor.nombre}</h3>
+                            <p class="text-xs text-gray-500">${proveedor.proyectos?.nombre || 'Sin proyecto'}</p>
+                            <p class="text-xs text-gray-500">${proveedor.contacto || 'No especificado'}</p>
                         </div>
                         <div class="text-right">
-                            <div class="text-3xl font-bold ${color}">${promedio}</div>
-                            <div class="text-sm text-gray-500">de 10</div>
-                            <div class="text-sm font-semibold ${color}">${nivel} (${porcentaje}%)</div>
+                            <div class="text-2xl font-bold ${color}">${promedio}</div>
+                            <div class="text-xs text-gray-500">de 10</div>
+                            <div class="text-xs font-semibold ${color}">${nivel} (${porcentaje}%)</div>
                         </div>
                     </div>
                 </div>
-                <div class="border-t pt-3">
-                    <h4 class="font-semibold mb-2">📋 Calificaciones</h4>
+                <div class="border-t pt-2">
+                    <h4 class="font-semibold text-sm mb-2">📋 Calificaciones</h4>
                     <div class="border rounded-lg overflow-hidden">
-                        ${detallesHTML || '<div class="p-3 text-gray-400">No hay calificaciones</div>'}
+                        ${detallesHTML || '<div class="p-2 text-gray-400 text-sm">No hay calificaciones</div>'}
                     </div>
                 </div>
             </div>
@@ -1772,7 +1848,7 @@ async function cargarRecursos() {
         const usuarios = await supabaseFetch('usuarios?order=id.desc');
         const lista = document.getElementById('lista-recursos');
         if (usuarios.length === 0) {
-            lista.innerHTML = '<div class="text-center py-8 text-gray-500">No hay recursos agregados</div>';
+            lista.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No hay recursos agregados</div>';
             return;
         }
         lista.innerHTML = `
@@ -1780,11 +1856,11 @@ async function cargarRecursos() {
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-2 text-left">Nombre</th>
-                            <th class="px-4 py-2 text-left">Email</th>
-                            <th class="px-4 py-2 text-left">Rol</th>
-                            <th class="px-4 py-2 text-left">Área</th>
-                            <th class="px-4 py-2 text-left">Tareas</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Nombre</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Email</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Rol</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Área</th>
+                            <th class="px-3 py-1.5 text-left text-xs">Tareas</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1792,11 +1868,11 @@ async function cargarRecursos() {
                             const tareasAsignadas = tareasCache.filter(t => t.responsable_texto === u.nombre).length;
                             return `
                             <tr class="border-t">
-                                <td class="px-4 py-2 font-medium">${u.nombre}</td>
-                                <td class="px-4 py-2 text-gray-500">${u.email || '-'}</td>
-                                <td class="px-4 py-2"><span class="status-badge bg-blue-100 text-blue-700">${u.rol || 'Colaborador'}</span></td>
-                                <td class="px-4 py-2">${u.area ? `<span class="area-badge">${u.area}</span>` : '-'}</td>
-                                <td class="px-4 py-2">${tareasAsignadas}</td>
+                                <td class="px-3 py-1.5 text-xs font-medium">${u.nombre}</td>
+                                <td class="px-3 py-1.5 text-xs text-gray-500">${u.email || '-'}</td>
+                                <td class="px-3 py-1.5 text-xs"><span class="status-badge bg-blue-100 text-blue-700">${u.rol || 'Colaborador'}</span></td>
+                                <td class="px-3 py-1.5 text-xs">${u.area ? `<span class="area-badge">${u.area}</span>` : '-'}</td>
+                                <td class="px-3 py-1.5 text-xs">${tareasAsignadas}</td>
                             </tr>
                         `}).join('')}
                     </tbody>
@@ -1805,7 +1881,7 @@ async function cargarRecursos() {
         `;
     } catch (e) {
         console.error('Error:', e);
-        document.getElementById('lista-recursos').innerHTML = '<div class="text-red-500">Error cargando recursos</div>';
+        document.getElementById('lista-recursos').innerHTML = '<div class="text-red-500 text-sm">Error cargando recursos</div>';
     }
 }
 
@@ -1830,10 +1906,10 @@ function generarReportes() {
     }));
 
     container.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="font-semibold mb-3">📊 Resumen</h3>
-                <div class="space-y-2 text-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-50 p-3 rounded-lg">
+                <h3 class="font-semibold text-sm mb-2">📊 Resumen</h3>
+                <div class="space-y-1 text-sm">
                     <div class="flex justify-between"><span>Proyectos:</span><span class="font-semibold">${totalProyectos}</span></div>
                     <div class="flex justify-between"><span>Tareas:</span><span class="font-semibold">${totalTareas}</span></div>
                     <div class="flex justify-between"><span>Completadas:</span><span class="font-semibold text-green-600">${completadas}</span></div>
@@ -1842,9 +1918,9 @@ function generarReportes() {
                     <div class="flex justify-between"><span>Vencidas:</span><span class="font-semibold text-red-600">${vencidas}</span></div>
                 </div>
             </div>
-            <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="font-semibold mb-3">📋 Tareas por Proyecto</h3>
-                <div class="space-y-2 text-sm">
+            <div class="bg-gray-50 p-3 rounded-lg">
+                <h3 class="font-semibold text-sm mb-2">📋 Tareas por Proyecto</h3>
+                <div class="space-y-1 text-sm">
                     ${tareasPorProyecto.map(p => `
                         <div>
                             <div class="flex justify-between text-xs">
