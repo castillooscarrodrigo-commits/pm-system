@@ -1178,4 +1178,46 @@ function generarReportes() {
                         <div>
                             <div class="flex justify-between">
                                 <span>${p.nombre}</span>
-                                <span>${p.complet
+                                <span>${p.completadas}/${p.total}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill bg-blue-600" style="width:${p.total > 0 ? (p.completadas/p.total)*100 : 0}%"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================
+// INICIALIZAR
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    cargarDashboard();
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+                document.getElementById('tar-proyecto').disabled = false;
+                document.getElementById('proy-id').value = '';
+                document.getElementById('tar-id').value = '';
+                document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
+                document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
+            }
+        });
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.textContent.includes('Recursos')) cargarRecursos();
+            if (btn.textContent.includes('Reportes')) generarReportes();
+        });
+    });
+});
+</script>
+
+</body>
+</html>
