@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v2.1</title>
+    <title>PM System v2.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -55,6 +55,10 @@
         .fecha-vencimiento.proxima { background: #fef3c7; color: #d97706; }
         .fecha-vencimiento.futura { background: #d1fae5; color: #059669; }
         .area-badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; background: #e0e7ff; color: #4338ca; }
+        .responsable-tag { background: #e0e7ff; color: #4338ca; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; display: inline-block; }
+        .metodologia-desc { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #166534; margin-top: 6px; display: none; }
+        .metodologia-desc.show { display: block; }
+        .metodologia-desc i { margin-right: 6px; }
     </style>
 </head>
 <body>
@@ -67,16 +71,16 @@ const SUPABASE_URL = 'https://ryjbmqmbxeuigojztwym.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5amJtcW1ieGV1aWdvanp0d3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NTYwNzMsImV4cCI6MjEwMTQzMjA3M30.QtdcGM6GegPlHmW9MEdHlsIwXEKsTQKrpUa1Y_B2ORc';
 
 const METODOLOGIAS = {
-    'Proyectos de Inversión': 'PMI',
-    'Proyectos de Tecnología': 'PMI + Scrum',
-    'Proyectos de Automatización': 'Agile',
-    'Proyectos de Mejora Operativa': 'Lean',
-    'Proyectos de Calidad': 'Lean Six Sigma',
-    'Proyectos de Innovación': 'Design Thinking',
-    'Proyectos de Excelencia Operacional': 'Gemba + Kaizen',
-    'Proyectos de Transformación Organizacional': 'ADKAR',
-    'Proyectos de Infraestructura': 'PMI',
-    'Proyectos de Cumplimiento Normativo': 'PMI'
+    'Proyectos de Inversión': { nombre: 'PMI', desc: 'Metodología tradicional basada en fases secuenciales (Inicio, Planificación, Ejecución, Control, Cierre). Ideal para proyectos con alcance bien definido.' },
+    'Proyectos de Tecnología': { nombre: 'PMI + Scrum', desc: 'Combina la estructura de PMI con la flexibilidad de Scrum. Ideal para desarrollo de software y proyectos tecnológicos.' },
+    'Proyectos de Automatización': { nombre: 'Agile', desc: 'Metodología iterativa que permite adaptarse a cambios rápidos. Ideal para proyectos donde los requisitos pueden evolucionar.' },
+    'Proyectos de Mejora Operativa': { nombre: 'Lean', desc: 'Enfoque en eliminar desperdicios y optimizar procesos. Ideal para mejorar eficiencia operativa.' },
+    'Proyectos de Calidad': { nombre: 'Lean Six Sigma', desc: 'Combina Lean (eliminar desperdicios) con Six Sigma (reducir variabilidad). Ideal para proyectos de calidad y excelencia.' },
+    'Proyectos de Innovación': { nombre: 'Design Thinking', desc: 'Enfoque centrado en el usuario con 5 fases: Empatizar, Definir, Idear, Prototipar, Testear. Ideal para innovación y nuevos productos.' },
+    'Proyectos de Excelencia Operacional': { nombre: 'Gemba + Kaizen', desc: 'Combina observación directa (Gemba) con mejora continua (Kaizen). Ideal para proyectos de mejora operativa en campo.' },
+    'Proyectos de Transformación Organizacional': { nombre: 'ADKAR', desc: 'Modelo de cambio organizacional con 5 pasos: Conciencia, Deseo, Conocimiento, Habilidad, Refuerzo. Ideal para cambios culturales.' },
+    'Proyectos de Infraestructura': { nombre: 'PMI', desc: 'Metodología tradicional basada en fases secuenciales. Ideal para proyectos de construcción e infraestructura.' },
+    'Proyectos de Cumplimiento Normativo': { nombre: 'PMI', desc: 'Metodología tradicional basada en fases secuenciales. Ideal para proyectos que requieren cumplir regulaciones.' }
 };
 
 const FASES_POR_METODOLOGIA = {
@@ -106,7 +110,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <i class="fas fa-project-diagram text-blue-600 text-2xl"></i>
-            <span class="text-xl font-bold text-gray-800">PM System v2.1</span>
+            <span class="text-xl font-bold text-gray-800">PM System v2.3</span>
         </div>
         <div class="flex items-center gap-4">
             <span class="text-sm text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -288,10 +292,19 @@ const PRIORIDAD_COLORS = {
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Metodología</label>
                     <input id="proy-metodologia" type="text" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50">
+                    <div id="metodologia-desc" class="metodologia-desc">
+                        <i class="fas fa-info-circle"></i> <span id="metodologia-desc-texto"></span>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
-                    <input id="proy-empresa" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nombre de la empresa">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+                        <input id="proy-empresa" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nombre de la empresa">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Área</label>
+                        <input id="proy-area" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Ej: Tecnología, Operaciones, etc.">
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -339,9 +352,7 @@ const PRIORIDAD_COLORS = {
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Responsable</label>
-                        <select id="tar-responsable" class="w-full border rounded-lg px-3 py-2 text-sm">
-                            <!-- Se llena desde la base de datos, sin "Sin asignar" -->
-                        </select>
+                        <input id="tar-responsable" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Escribe el nombre del responsable">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Prioridad</label>
@@ -520,7 +531,21 @@ function showTab(tab) {
 // ============================================
 function actualizarMetodologia() {
     const categoria = document.getElementById('proy-categoria').value;
-    document.getElementById('proy-metodologia').value = METODOLOGIAS[categoria] || '';
+    const metodologiaInfo = METODOLOGIAS[categoria];
+    const metodologiaNombre = metodologiaInfo ? metodologiaInfo.nombre : '';
+    const metodologiaDesc = metodologiaInfo ? metodologiaInfo.desc : '';
+
+    document.getElementById('proy-metodologia').value = metodologiaNombre;
+
+    const descDiv = document.getElementById('metodologia-desc');
+    const descText = document.getElementById('metodologia-desc-texto');
+    if (metodologiaDesc) {
+        descText.textContent = metodologiaDesc;
+        descDiv.classList.add('show');
+    } else {
+        descDiv.classList.remove('show');
+    }
+
     calcularFechaFin();
 }
 
@@ -568,19 +593,8 @@ async function cargarDashboard() {
         document.getElementById('kpi-recursos').textContent = usuariosCache.length;
         document.getElementById('kpi-completadas').textContent = completadasTotal;
 
-        // Llenar selects de proyectos
         const selectProyecto = document.getElementById('tar-proyecto');
         selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
-
-        // Llenar select de responsables (SOLO con recursos existentes, SIN "Sin asignar")
-        const selectResponsable = document.getElementById('tar-responsable');
-        if (usuariosCache.length === 0) {
-            selectResponsable.innerHTML = `<option value="">No hay recursos disponibles</option>`;
-        } else {
-            selectResponsable.innerHTML = usuariosCache.map(u => 
-                `<option value="${u.id}">${u.nombre} ${u.area ? '· ' + u.area : ''}</option>`
-            ).join('');
-        }
 
         renderizarProyectos(proyectosConProgreso);
 
@@ -652,6 +666,7 @@ function renderizarProyectos(proyectos) {
                         ${p.metodologia ? `<span class="metodologia-badge">${p.metodologia}</span>` : ''}
                     </div>
                     <div class="proyecto-empresa text-sm text-gray-500 mt-1">Empresa: ${p.empresa || 'Sin empresa'}</div>
+                    <div class="text-sm text-gray-500">Área: ${p.area || 'Sin área'}</div>
                     <div class="flex flex-wrap items-center gap-4 mt-2 text-sm">
                         <span><i class="fas fa-calendar-plus text-gray-400"></i> Inicio: ${p.fecha_inicio || 'No definida'}</span>
                         <span><i class="fas fa-calendar text-gray-400"></i> Fin: ${p.fecha_fin || 'No definida'}</span>
@@ -771,9 +786,9 @@ async function toggleDetalle(id) {
                         </div>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2 text-sm">
                             <div><span class="text-gray-500">Empresa:</span> ${proyecto.empresa || 'Sin empresa'}</div>
+                            <div><span class="text-gray-500">Área:</span> ${proyecto.area || 'Sin área'}</div>
                             <div><span class="text-gray-500">Inicio:</span> ${proyecto.fecha_inicio || 'No definida'}</div>
                             <div><span class="text-gray-500">Fin estimado:</span> ${proyecto.fecha_fin || 'No definida'}</div>
-                            <div><span class="text-gray-500">Duración:</span> ${FASES_POR_METODOLOGIA[proyecto.metodologia]?.duracion_total || DURACION_DEFAULT} días</div>
                         </div>
                         <div class="mt-3">
                             <div class="flex justify-between text-sm">
@@ -809,7 +824,7 @@ async function toggleDetalle(id) {
 }
 
 // ============================================
-// RENDER TAREA ITEM (SIN HORAS)
+// RENDER TAREA ITEM
 // ============================================
 function renderTareaItem(t, badgeEstado) {
     const prioridadClass = PRIORIDAD_COLORS[t.prioridad] || 'prioridad-media';
@@ -826,13 +841,9 @@ function renderTareaItem(t, badgeEstado) {
         vencimientoHTML = `<span class="fecha-vencimiento ${clase}">${texto}</span>`;
     }
 
-    const responsable = usuariosCache.find(u => u.id === t.responsable_id);
     let responsableHTML = '';
-    if (responsable) {
-        responsableHTML = `<span class="text-xs text-gray-500"><i class="fas fa-user mr-1"></i>${responsable.nombre}</span>`;
-        if (responsable.area) {
-            responsableHTML += ` <span class="area-badge">${responsable.area}</span>`;
-        }
+    if (t.responsable_texto) {
+        responsableHTML = `<span class="responsable-tag"><i class="fas fa-user mr-1"></i>${t.responsable_texto}</span>`;
     }
 
     return `
@@ -880,14 +891,25 @@ function editarProyecto(id) {
     document.getElementById('proy-categoria').value = proyecto.categoria || '';
     document.getElementById('proy-metodologia').value = proyecto.metodologia || '';
     document.getElementById('proy-empresa').value = proyecto.empresa || '';
+    document.getElementById('proy-area').value = proyecto.area || '';
     document.getElementById('proy-inicio').value = proyecto.fecha_inicio || '';
     document.getElementById('proy-fecha').value = proyecto.fecha_fin || '';
+
+    // Mostrar descripción de metodología al editar
+    const categoria = proyecto.categoria || '';
+    const metodologiaInfo = METODOLOGIAS[categoria];
+    if (metodologiaInfo) {
+        document.getElementById('metodologia-desc-texto').textContent = metodologiaInfo.desc;
+        document.getElementById('metodologia-desc').classList.add('show');
+    } else {
+        document.getElementById('metodologia-desc').classList.remove('show');
+    }
 
     abrirModal('modal-proyecto');
 }
 
 // ============================================
-// EDITAR TAREA (SIN HORAS)
+// EDITAR TAREA
 // ============================================
 function editarTarea(id) {
     const tarea = tareasCache.find(t => t.id === id);
@@ -897,7 +919,7 @@ function editarTarea(id) {
     document.getElementById('tar-id').value = tarea.id;
     document.getElementById('tar-titulo').value = tarea.titulo || '';
     document.getElementById('tar-proyecto').value = tarea.proyecto_id || '';
-    document.getElementById('tar-responsable').value = tarea.responsable_id || '';
+    document.getElementById('tar-responsable').value = tarea.responsable_texto || '';
     document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
     document.getElementById('tar-fase').value = tarea.fase || '';
     document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
@@ -926,6 +948,7 @@ async function guardarProyecto(e) {
     const categoria = document.getElementById('proy-categoria').value;
     const metodologia = document.getElementById('proy-metodologia').value;
     const empresa = document.getElementById('proy-empresa').value;
+    const area = document.getElementById('proy-area').value;
     const fecha_inicio = document.getElementById('proy-inicio').value;
     const fecha_fin = document.getElementById('proy-fecha').value;
 
@@ -934,7 +957,7 @@ async function guardarProyecto(e) {
         return;
     }
 
-    const data = { nombre, categoria, metodologia, empresa: empresa || 'Sin empresa', fecha_inicio, fecha_fin, fecha_actualizacion: new Date().toISOString() };
+    const data = { nombre, categoria, metodologia, empresa: empresa || 'Sin empresa', area: area || 'Sin área', fecha_inicio, fecha_fin, fecha_actualizacion: new Date().toISOString() };
 
     try {
         if (id) {
@@ -948,6 +971,7 @@ async function guardarProyecto(e) {
         document.getElementById('form-proyecto').reset();
         document.getElementById('proy-id').value = '';
         document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
+        document.getElementById('metodologia-desc').classList.remove('show');
         cargarDashboard();
     } catch (e) {
         showToast('Error: ' + e.message, 'error');
@@ -955,14 +979,14 @@ async function guardarProyecto(e) {
 }
 
 // ============================================
-// GUARDAR TAREA (SIN HORAS)
+// GUARDAR TAREA
 // ============================================
 async function guardarTarea(e) {
     e.preventDefault();
     const id = document.getElementById('tar-id').value;
     const titulo = document.getElementById('tar-titulo').value;
     const proyecto_id = parseInt(document.getElementById('tar-proyecto').value);
-    const responsable_id = document.getElementById('tar-responsable').value ? parseInt(document.getElementById('tar-responsable').value) : null;
+    const responsable_texto = document.getElementById('tar-responsable').value.trim();
     const prioridad = document.getElementById('tar-prioridad').value;
     const fase = document.getElementById('tar-fase').value;
     const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
@@ -976,7 +1000,7 @@ async function guardarTarea(e) {
     const data = {
         titulo,
         proyecto_id,
-        responsable_id,
+        responsable_texto: responsable_texto || null,
         prioridad,
         fase: fase || null,
         fecha_vencimiento,
@@ -1003,7 +1027,7 @@ async function guardarTarea(e) {
 }
 
 // ============================================
-// GUARDAR USUARIO (CON ÁREA)
+// GUARDAR USUARIO
 // ============================================
 async function guardarUsuario(e) {
     e.preventDefault();
@@ -1123,7 +1147,7 @@ async function cargarRecursos() {
                     </thead>
                     <tbody>
                         ${usuarios.map(u => {
-                            const tareasAsignadas = tareasCache.filter(t => t.responsable_id === u.id).length;
+                            const tareasAsignadas = tareasCache.filter(t => t.responsable_texto === u.nombre).length;
                             return `
                             <tr class="border-t">
                                 <td class="px-4 py-2 font-medium">${u.nombre}</td>
@@ -1211,6 +1235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('tar-id').value = '';
                 document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
                 document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
+                document.getElementById('metodologia-desc').classList.remove('show');
             }
         });
     });
