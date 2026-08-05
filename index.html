@@ -32,9 +32,9 @@
         .badge-completado { background: #d1fae5; color: #059669; }
         .badge-bloqueada { background: #fee2e2; color: #dc2626; }
         .badge-hold { background: #e5e7eb; color: #6b7280; }
-        .detalle-panel { display: none; }
-        .detalle-panel.active { display: block; }
         .metodologia-badge { padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; background: #e0e7ff; color: #4338ca; }
+        .proyecto-detalle { display: none; margin-top: 16px; padding-top: 16px; border-top: 2px solid #e5e7eb; }
+        .proyecto-detalle.active { display: block; }
     </style>
 </head>
 <body>
@@ -46,9 +46,6 @@
 const SUPABASE_URL = 'https://ryjbmqmbxeuigojztwym.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5amJtcW1ieGV1aWdvanp0d3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NTYwNzMsImV4cCI6MjEwMTQzMjA3M30.QtdcGM6GegPlHmW9MEdHlsIwXEKsTQKrpUa1Y_B2ORc';
 
-// ============================================
-// CATEGORÍAS Y METODOLOGÍAS
-// ============================================
 const METODOLOGIAS = {
     'Proyectos de Inversión': 'PMI',
     'Proyectos de Tecnología': 'PMI + Scrum',
@@ -62,56 +59,21 @@ const METODOLOGIAS = {
     'Proyectos de Cumplimiento Normativo': 'PMI'
 };
 
-// ============================================
-// FASES POR METODOLOGÍA (con duración estimada en días)
-// ============================================
 const FASES_POR_METODOLOGIA = {
-    'PMI': {
-        fases: ['Inicio', 'Planificación', 'Ejecución', 'Monitoreo y Control', 'Cierre'],
-        duracion_total: 90
-    },
-    'PMI + Scrum': {
-        fases: ['Inicio', 'Planificación', 'Sprint 1', 'Sprint 2', 'Sprint 3', 'Sprint 4', 'Cierre'],
-        duracion_total: 120
-    },
-    'Agile': {
-        fases: ['Visión', 'Roadmap', 'Iteración 1', 'Iteración 2', 'Iteración 3', 'Iteración 4', 'Lanzamiento'],
-        duracion_total: 100
-    },
-    'Lean': {
-        fases: ['Identificar Valor', 'Mapear Flujo', 'Crear Flujo', 'Establecer Pull', 'Buscar Perfección'],
-        duracion_total: 60
-    },
-    'Lean Six Sigma': {
-        fases: ['Definir', 'Medir', 'Analizar', 'Mejorar', 'Controlar'],
-        duracion_total: 75
-    },
-    'Design Thinking': {
-        fases: ['Empatizar', 'Definir', 'Idear', 'Prototipar', 'Testear'],
-        duracion_total: 45
-    },
-    'Gemba + Kaizen': {
-        fases: ['Observación', 'Análisis', 'Propuesta', 'Implementación', 'Seguimiento', 'Estandarización'],
-        duracion_total: 50
-    },
-    'ADKAR': {
-        fases: ['Awareness', 'Desire', 'Knowledge', 'Ability', 'Reinforcement'],
-        duracion_total: 80
-    }
+    'PMI': { fases: ['Inicio', 'Planificación', 'Ejecución', 'Monitoreo y Control', 'Cierre'], duracion_total: 90 },
+    'PMI + Scrum': { fases: ['Inicio', 'Planificación', 'Sprint 1', 'Sprint 2', 'Sprint 3', 'Sprint 4', 'Cierre'], duracion_total: 120 },
+    'Agile': { fases: ['Visión', 'Roadmap', 'Iteración 1', 'Iteración 2', 'Iteración 3', 'Iteración 4', 'Lanzamiento'], duracion_total: 100 },
+    'Lean': { fases: ['Identificar Valor', 'Mapear Flujo', 'Crear Flujo', 'Establecer Pull', 'Buscar Perfección'], duracion_total: 60 },
+    'Lean Six Sigma': { fases: ['Definir', 'Medir', 'Analizar', 'Mejorar', 'Controlar'], duracion_total: 75 },
+    'Design Thinking': { fases: ['Empatizar', 'Definir', 'Idear', 'Prototipar', 'Testear'], duracion_total: 45 },
+    'Gemba + Kaizen': { fases: ['Observación', 'Análisis', 'Propuesta', 'Implementación', 'Seguimiento', 'Estandarización'], duracion_total: 50 },
+    'ADKAR': { fases: ['Awareness', 'Desire', 'Knowledge', 'Ability', 'Reinforcement'], duracion_total: 80 }
 };
-
-// Duración por defecto para metodologías no listadas
 const DURACION_DEFAULT = 60;
 </script>
 
-<!-- ============================================ -->
-<!-- TOAST -->
-<!-- ============================================ -->
 <div id="toast" class="toast toast-success"></div>
 
-<!-- ============================================ -->
-<!-- NAVBAR -->
-<!-- ============================================ -->
 <nav class="bg-white shadow-md border-b sticky top-0 z-10">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-3">
@@ -119,17 +81,13 @@ const DURACION_DEFAULT = 60;
             <span class="text-xl font-bold text-gray-800">PM System v2.0</span>
         </div>
         <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-600"><i class="fas fa-user-circle mr-1"></i> Juan Pérez (PM)</span>
+            <span class="text-sm text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
         </div>
     </div>
 </nav>
 
-<!-- ============================================ -->
-<!-- CONTENIDO PRINCIPAL -->
-<!-- ============================================ -->
 <div class="max-w-7xl mx-auto px-4 py-6">
 
-    <!-- TABS -->
     <div class="flex gap-2 mb-6 border-b pb-2 flex-wrap">
         <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn active">
             <i class="fas fa-chart-pie mr-1"></i> Dashboard
@@ -148,12 +106,8 @@ const DURACION_DEFAULT = 60;
         </button>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB: DASHBOARD -->
-    <!-- ========================================== -->
     <div id="content-dashboard" class="tab-content active">
 
-        <!-- KPIs -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="bg-white rounded-lg shadow p-4 card-hover">
                 <div class="flex justify-between items-start">
@@ -208,10 +162,9 @@ const DURACION_DEFAULT = 60;
             </div>
         </div>
 
-        <!-- Proyectos -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="px-6 py-4 border-b flex justify-between items-center">
-                <h2 class="text-lg font-semibold text-gray-800"><i class="fas fa-folder-open mr-2"></i>Mis Proyectos</h2>
+                <h2 class="text-lg font-semibold text-gray-800">Proyectos</h2>
                 <button onclick="abrirModal('modal-proyecto')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
                     <i class="fas fa-plus mr-1"></i> Nuevo Proyecto
                 </button>
@@ -220,68 +173,39 @@ const DURACION_DEFAULT = 60;
                 <div class="text-center py-8 text-gray-500">Cargando proyectos...</div>
             </div>
         </div>
-
-        <!-- Panel de Detalle (se abre abajo, no popup) -->
-        <div id="panel-detalle" class="detalle-panel mt-6">
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-                    <h2 class="text-lg font-semibold text-gray-800"><i class="fas fa-info-circle mr-2"></i>Detalle del Proyecto</h2>
-                    <button onclick="cerrarDetalle()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i> Cerrar
-                    </button>
-                </div>
-                <div class="p-6" id="detalle-contenido">
-                    <div class="text-center py-8 text-gray-500">Selecciona un proyecto para ver su detalle</div>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB: PROYECTOS -->
-    <!-- ========================================== -->
     <div id="content-proyectos" class="tab-content">
         <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4"><i class="fas fa-folder-open mr-2"></i>Todos los Proyectos</h2>
+            <h2 class="text-xl font-bold mb-4">Todos los Proyectos</h2>
             <div id="lista-proyectos-completa"></div>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB: CAMBIOS -->
-    <!-- ========================================== -->
     <div id="content-cambios" class="tab-content">
         <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4"><i class="fas fa-exchange-alt mr-2"></i>Solicitudes de Cambio</h2>
+            <h2 class="text-xl font-bold mb-4">Solicitudes de Cambio</h2>
             <div id="lista-cambios"></div>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB: RIESGOS -->
-    <!-- ========================================== -->
     <div id="content-riesgos" class="tab-content">
         <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4"><i class="fas fa-shield-alt mr-2"></i>Riesgos</h2>
+            <h2 class="text-xl font-bold mb-4">Riesgos</h2>
             <div id="lista-riesgos"></div>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB: REPORTES -->
-    <!-- ========================================== -->
     <div id="content-reportes" class="tab-content">
         <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4"><i class="fas fa-file-alt mr-2"></i>Reportes y KPIs</h2>
+            <h2 class="text-xl font-bold mb-4">Reportes y KPIs</h2>
             <div id="lista-reportes"></div>
         </div>
     </div>
 
 </div>
 
-<!-- ============================================ -->
 <!-- MODAL: NUEVO PROYECTO -->
-<!-- ============================================ -->
 <div id="modal-proyecto" class="modal">
     <div class="modal-box" style="max-width: 650px;">
         <div class="flex justify-between items-start mb-4">
@@ -347,9 +271,7 @@ const DURACION_DEFAULT = 60;
     </div>
 </div>
 
-<!-- ============================================ -->
 <!-- MODAL: NUEVA TAREA -->
-<!-- ============================================ -->
 <div id="modal-tarea" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-4">
@@ -402,7 +324,6 @@ const DURACION_DEFAULT = 60;
 // ============================================
 // FUNCIONES DE SUPABASE
 // ============================================
-
 async function supabaseFetch(query) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${query}`, {
         headers: {
@@ -519,7 +440,7 @@ function calcularFechaFin() {
 }
 
 // ============================================
-// CARGAR DASHBOARD
+// CARGAR DASHBOARD - SIN PROGRESO PLANIFICADO
 // ============================================
 let proyectosCache = [];
 let tareasCache = [];
@@ -529,15 +450,45 @@ async function cargarDashboard() {
         proyectosCache = await supabaseFetch('proyectos?order=id.desc');
         tareasCache = await supabaseFetch('tareas?select=*');
 
-        // Calcular progreso REAL basado en tareas completadas
+        // ============================================
+        // CÁLCULO DE PROGRESO REAL (SIN PLANIFICADO)
+        // ============================================
         const proyectosConProgreso = proyectosCache.map(p => {
             const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
-            const total = tareasProyecto.length;
-            const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
-            const progresoReal = total > 0 ? Math.round((completadas / total) * 100) : 0;
-            return { ...p, progreso_calculado: progresoReal };
+            
+            const totalTareas = tareasProyecto.length;
+            const tareasCompletadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+            const tareasPendientes = tareasProyecto.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
+            const tareasBloqueadas = tareasProyecto.filter(t => t.estado === 'Bloqueada').length;
+            
+            // PROGRESO REAL = (Completadas / Total) * 100
+            let progresoReal = 0;
+            if (totalTareas > 0) {
+                progresoReal = Math.round((tareasCompletadas / totalTareas) * 100);
+            }
+            
+            // Color de barra según progreso
+            let barraColor = 'bg-blue-600';
+            if (progresoReal < 30) {
+                barraColor = 'bg-red-500';
+            } else if (progresoReal < 60) {
+                barraColor = 'bg-yellow-500';
+            } else {
+                barraColor = 'bg-blue-600';
+            }
+            
+            return { 
+                ...p, 
+                progreso_calculado: progresoReal,
+                total_tareas: totalTareas,
+                completadas: tareasCompletadas,
+                pendientes: tareasPendientes,
+                bloqueadas: tareasBloqueadas,
+                barraColor: barraColor
+            };
         });
 
+        // KPIS GLOBALES
         const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
         const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
         const bloqueadas = tareasCache.filter(t => t.estado === 'Bloqueada').length;
@@ -550,6 +501,9 @@ async function cargarDashboard() {
         document.getElementById('kpi-cambios').textContent = cambios;
         document.getElementById('kpi-riesgos').textContent = riesgos;
 
+        // ============================================
+        // RENDERIZAR PROYECTOS
+        // ============================================
         const lista = document.getElementById('lista-proyectos');
         if (proyectosCache.length === 0) {
             lista.innerHTML = `
@@ -559,10 +513,9 @@ async function cargarDashboard() {
                 </div>
             `;
         } else {
-            lista.innerHTML = proyectosCache.map((p, index) => {
-                const progresoReal = proyectosConProgreso[index]?.progreso_calculado || 0;
-                const desviacion = (p.progreso_planificado || 70) - progresoReal;
+            lista.innerHTML = proyectosConProgreso.map(p => {
                 const duracion = FASES_POR_METODOLOGIA[p.metodologia]?.duracion_total || DURACION_DEFAULT;
+                
                 return `
                 <div class="border rounded-lg p-4 hover:shadow-md transition ${p.estado === 'Crítico' ? 'border-l-4 border-l-red-500' : ''}">
                     <div class="flex flex-wrap justify-between items-start gap-4">
@@ -578,20 +531,21 @@ async function cargarDashboard() {
                                 <span><i class="fas fa-calendar text-gray-400"></i> Fin: ${p.fecha_fin || 'No definida'}</span>
                                 <span><i class="fas fa-clock text-gray-400"></i> Duración: ${duracion} días</span>
                             </div>
+                            <div class="text-xs text-gray-400 mt-1">
+                                <i class="fas fa-tasks mr-1"></i> 
+                                ${p.total_tareas} total • ${p.completadas} completadas • ${p.pendientes} pendientes • ${p.bloqueadas} bloqueadas
+                            </div>
                         </div>
                         <div class="w-full md:w-64">
                             <div class="flex justify-between text-sm mb-1">
-                                <span>Progreso Real</span>
-                                <span class="font-semibold">${progresoReal}%</span>
+                                <span>Progreso</span>
+                                <span class="font-semibold">${p.progreso_calculado}%</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill ${progresoReal < 40 ? 'bg-red-500' : progresoReal < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progresoReal}%"></div>
+                                <div class="progress-fill ${p.barraColor}" style="width:${p.progreso_calculado}%"></div>
                             </div>
-                            <div class="flex justify-between text-xs text-gray-400 mt-1">
-                                <span>Planificado: ${p.progreso_planificado || 70}%</span>
-                                <span class="${desviacion > 0 ? 'text-red-600' : 'text-green-600'}">
-                                    ${desviacion > 0 ? `-${desviacion}% desviación` : '✅ Alineado'}
-                                </span>
+                            <div class="text-xs text-gray-400 mt-1 text-center">
+                                ${p.total_tareas > 0 ? `${p.completadas} de ${p.total_tareas} tareas completadas` : 'Sin tareas aún'}
                             </div>
                         </div>
                     </div>
@@ -599,14 +553,17 @@ async function cargarDashboard() {
                         ${p.cambios_pendientes > 0 ? `<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded flex items-center gap-1"><i class="fas fa-exchange-alt"></i> ${p.cambios_pendientes} cambio pendiente</span>` : ''}
                         ${p.riesgos_criticos > 0 ? `<span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded flex items-center gap-1"><i class="fas fa-exclamation-circle"></i> ${p.riesgos_criticos} riesgo crítico</span>` : ''}
                         <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded flex items-center gap-1">
-                            <i class="fas fa-tasks"></i> ${tareasCache.filter(t => t.proyecto_id === p.id).length} tareas
+                            <i class="fas fa-tasks"></i> ${p.total_tareas} tareas
                         </span>
-                        <button onclick="verDetalleProyecto(${p.id})" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 ml-auto">
-                            <i class="fas fa-chevron-right"></i> Ver detalle
+                        <button onclick="toggleDetalle(${p.id})" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 ml-auto" id="btn-detalle-${p.id}">
+                            <i class="fas fa-chevron-down"></i> Ver detalle
                         </button>
                         <button onclick="eliminarProyecto(${p.id})" class="text-xs bg-red-50 text-red-600 px-3 py-1 rounded hover:bg-red-100">
                             <i class="fas fa-trash"></i>
                         </button>
+                    </div>
+                    <div id="detalle-${p.id}" class="proyecto-detalle">
+                        <div class="text-center py-4 text-gray-400">Cargando detalle...</div>
                     </div>
                 </div>
             `}).join('');
@@ -627,117 +584,30 @@ async function cargarDashboard() {
 }
 
 // ============================================
-// GUARDAR PROYECTO
+// TOGGLE DETALLE
 // ============================================
-async function guardarProyecto(e) {
-    e.preventDefault();
-    const nombre = document.getElementById('proy-nombre').value;
-    const categoria = document.getElementById('proy-categoria').value;
-    const metodologia = document.getElementById('proy-metodologia').value;
-    const empresa = document.getElementById('proy-empresa').value;
-    const fecha_inicio = document.getElementById('proy-inicio').value;
-    const fecha_fin = document.getElementById('proy-fecha').value;
+let detallesAbiertos = {};
 
-    if (!nombre || !categoria) {
-        showToast('Nombre y categoría son obligatorios', 'error');
+async function toggleDetalle(id) {
+    const detalleDiv = document.getElementById(`detalle-${id}`);
+    const btn = document.getElementById(`btn-detalle-${id}`);
+    
+    if (detallesAbiertos[id]) {
+        detalleDiv.classList.remove('active');
+        detallesAbiertos[id] = false;
+        btn.innerHTML = '<i class="fas fa-chevron-down"></i> Ver detalle';
         return;
     }
-
-    if (!fecha_inicio) {
-        showToast('La fecha de inicio es obligatoria', 'error');
-        return;
-    }
-
+    
+    detallesAbiertos[id] = true;
+    btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar detalle';
+    detalleDiv.classList.add('active');
+    
     try {
-        await supabaseInsert('proyectos', {
-            nombre,
-            categoria,
-            metodologia,
-            empresa: empresa || 'Sin empresa',
-            fecha_inicio: fecha_inicio || null,
-            fecha_fin: fecha_fin || null,
-            estado: 'Activo',
-            progreso: 0,
-            progreso_planificado: 70
-        });
-        showToast('✅ Proyecto creado exitosamente');
-        cerrarModal('modal-proyecto');
-        document.getElementById('form-proyecto').reset();
-        document.getElementById('proy-metodologia').value = '';
-        document.getElementById('proy-fecha').value = '';
-        cargarDashboard();
-    } catch (e) {
-        showToast('Error al crear proyecto: ' + e.message, 'error');
-    }
-}
-
-// ============================================
-// GUARDAR TAREA
-// ============================================
-async function guardarTarea(e) {
-    e.preventDefault();
-    const titulo = document.getElementById('tar-titulo').value;
-    const proyecto_id = parseInt(document.getElementById('tar-proyecto').value);
-    const fase = document.getElementById('tar-fase').value;
-    const horas = parseFloat(document.getElementById('tar-horas').value) || 0;
-    const descripcion = document.getElementById('tar-descripcion').value;
-
-    if (!titulo || !proyecto_id) {
-        showToast('Título y proyecto son obligatorios', 'error');
-        return;
-    }
-
-    try {
-        await supabaseInsert('tareas', {
-            titulo,
-            descripcion,
-            proyecto_id,
-            fase: fase || null,
-            horas_estimadas: horas,
-            estado: 'Pendiente'
-        });
-        showToast('✅ Tarea creada exitosamente');
-        cerrarModal('modal-tarea');
-        document.getElementById('form-tarea').reset();
-        document.getElementById('tar-proyecto').disabled = false;
-        cargarDashboard();
-        if (document.getElementById('panel-detalle').classList.contains('active') && proyectoIdEnDetalle) {
-            verDetalleProyecto(proyectoIdEnDetalle);
-        }
-    } catch (e) {
-        showToast('Error al crear tarea: ' + e.message, 'error');
-    }
-}
-
-// ============================================
-// ELIMINAR PROYECTO
-// ============================================
-async function eliminarProyecto(id) {
-    if (!confirm('¿Eliminar este proyecto y todas sus tareas?')) return;
-    try {
-        await supabaseDelete('proyectos', id);
-        showToast('Proyecto eliminado');
-        if (document.getElementById('panel-detalle').classList.contains('active')) {
-            cerrarDetalle();
-        }
-        cargarDashboard();
-    } catch (e) {
-        showToast('Error al eliminar', 'error');
-    }
-}
-
-// ============================================
-// VER DETALLE PROYECTO
-// ============================================
-let proyectoIdEnDetalle = null;
-
-async function verDetalleProyecto(id) {
-    try {
-        proyectoIdEnDetalle = id;
         const proyectos = await supabaseFetch(`proyectos?id=eq.${id}&select=*`);
         const proyecto = proyectos[0];
         if (!proyecto) {
-            showToast('Proyecto no encontrado', 'error');
+            detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Proyecto no encontrado</div>';
             return;
         }
 
@@ -822,52 +692,41 @@ async function verDetalleProyecto(id) {
             }
         }
 
-        const contenido = document.getElementById('detalle-contenido');
-        contenido.innerHTML = `
-            <div class="space-y-4">
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-800">${proyecto.nombre}</h3>
-                            <div class="flex items-center gap-2 mt-1 flex-wrap">
-                                <span class="status-badge ${proyecto.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : proyecto.estado === 'Crítico' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${proyecto.estado || 'Activo'}</span>
-                                ${proyecto.metodologia ? `<span class="metodologia-badge">${proyecto.metodologia}</span>` : ''}
-                                ${proyecto.categoria ? `<span class="metodologia-badge" style="background:#e0f2fe;color:#0369a1;">${proyecto.categoria}</span>` : ''}
+        detalleDiv.innerHTML = `
+            <div class="bg-gray-50 p-4 rounded-lg mt-2">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="status-badge ${proyecto.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : proyecto.estado === 'Crítico' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${proyecto.estado || 'Activo'}</span>
+                            ${proyecto.metodologia ? `<span class="metodologia-badge">${proyecto.metodologia}</span>` : ''}
+                            ${proyecto.categoria ? `<span class="metodologia-badge" style="background:#e0f2fe;color:#0369a1;">${proyecto.categoria}</span>` : ''}
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2 text-sm">
+                            <div><span class="text-gray-500">Empresa:</span> ${proyecto.empresa || 'Sin empresa'}</div>
+                            <div><span class="text-gray-500">Inicio:</span> ${proyecto.fecha_inicio || 'No definida'}</div>
+                            <div><span class="text-gray-500">Fin estimado:</span> ${proyecto.fecha_fin || 'No definida'}</div>
+                            <div><span class="text-gray-500">Duración:</span> ${FASES_POR_METODOLOGIA[proyecto.metodologia]?.duracion_total || DURACION_DEFAULT} días</div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="flex justify-between text-sm">
+                                <span>Progreso</span>
+                                <span class="font-semibold">${progresoReal}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill ${progresoReal < 40 ? 'bg-red-500' : progresoReal < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progresoReal}%"></div>
+                            </div>
+                            <div class="text-xs text-gray-400 mt-1 text-center">
+                                ${total > 0 ? `${completadas} de ${total} tareas completadas` : 'Sin tareas aún'}
                             </div>
                         </div>
-                        <button onclick="abrirModalTarea(${proyecto.id})" class="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition">
-                            <i class="fas fa-plus mr-1"></i> Agregar Tarea
-                        </button>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-sm">
-                        <div><span class="text-gray-500">Empresa:</span> ${proyecto.empresa || 'Sin empresa'}</div>
-                        <div><span class="text-gray-500">Metodología:</span> ${proyecto.metodologia || 'No definida'}</div>
-                        <div><span class="text-gray-500">Inicio:</span> ${proyecto.fecha_inicio || 'No definida'}</div>
-                        <div><span class="text-gray-500">Fin estimado:</span> ${proyecto.fecha_fin || 'No definida'}</div>
-                    </div>
-                    <div class="mt-3">
-                        <div class="flex justify-between text-sm">
-                            <span>Progreso Real</span>
-                            <span class="font-semibold">${progresoReal}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill ${progresoReal < 40 ? 'bg-red-500' : progresoReal < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progresoReal}%"></div>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-400 mt-1">
-                            <span>Planificado: ${proyecto.progreso_planificado || 70}%</span>
-                            <span class="${(progresoReal) < (proyecto.progreso_planificado || 70) ? 'text-red-600' : 'text-green-600'}">
-                                ${(progresoReal) < (proyecto.progreso_planificado || 70) ? `-${(proyecto.progreso_planificado || 70) - progresoReal}% desviación` : '✅ Alineado'}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="mt-3 text-xs text-gray-400">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Total: ${tareas.length} tareas • ${completadas} completadas • ${tareas.filter(t => t.estado === 'Pendiente').length} pendientes
-                    </div>
+                    <button onclick="abrirModalTareaDesdeDetalle(${proyecto.id})" class="bg-blue-600 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-700 transition ml-4">
+                        <i class="fas fa-plus mr-1"></i> Agregar Tarea
+                    </button>
                 </div>
 
-                <div class="border-t pt-3">
-                    <h4 class="font-semibold text-gray-700 mb-3"><i class="fas fa-tasks mr-2"></i>Cronograma de Actividades (${tareas.length} tareas)</h4>
+                <div class="border-t pt-3 mt-3">
+                    <h4 class="font-semibold text-gray-700 mb-3 text-sm"><i class="fas fa-tasks mr-2"></i>Cronograma (${tareas.length} tareas)</h4>
                     <div class="border rounded-lg overflow-hidden">
                         ${tareasHTML}
                     </div>
@@ -875,28 +734,16 @@ async function verDetalleProyecto(id) {
             </div>
         `;
 
-        const panel = document.getElementById('panel-detalle');
-        panel.classList.add('active');
-        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
     } catch (e) {
         console.error('Error:', e);
-        showToast('Error cargando detalle', 'error');
+        detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Error cargando detalle</div>';
     }
-}
-
-// ============================================
-// CERRAR DETALLE
-// ============================================
-function cerrarDetalle() {
-    document.getElementById('panel-detalle').classList.remove('active');
-    proyectoIdEnDetalle = null;
 }
 
 // ============================================
 // ABRIR MODAL TAREA DESDE DETALLE
 // ============================================
-function abrirModalTarea(proyectoId) {
+function abrirModalTareaDesdeDetalle(proyectoId) {
     const select = document.getElementById('tar-proyecto');
     select.value = proyectoId;
     select.disabled = true;
@@ -918,13 +765,104 @@ function abrirModalTarea(proyectoId) {
 }
 
 // ============================================
+// GUARDAR PROYECTO
+// ============================================
+async function guardarProyecto(e) {
+    e.preventDefault();
+    const nombre = document.getElementById('proy-nombre').value;
+    const categoria = document.getElementById('proy-categoria').value;
+    const metodologia = document.getElementById('proy-metodologia').value;
+    const empresa = document.getElementById('proy-empresa').value;
+    const fecha_inicio = document.getElementById('proy-inicio').value;
+    const fecha_fin = document.getElementById('proy-fecha').value;
+
+    if (!nombre || !categoria) {
+        showToast('Nombre y categoría son obligatorios', 'error');
+        return;
+    }
+
+    if (!fecha_inicio) {
+        showToast('La fecha de inicio es obligatoria', 'error');
+        return;
+    }
+
+    try {
+        await supabaseInsert('proyectos', {
+            nombre,
+            categoria,
+            metodologia,
+            empresa: empresa || 'Sin empresa',
+            fecha_inicio: fecha_inicio || null,
+            fecha_fin: fecha_fin || null,
+            estado: 'Activo'
+        });
+        showToast('✅ Proyecto creado exitosamente');
+        cerrarModal('modal-proyecto');
+        document.getElementById('form-proyecto').reset();
+        document.getElementById('proy-metodologia').value = '';
+        document.getElementById('proy-fecha').value = '';
+        cargarDashboard();
+    } catch (e) {
+        showToast('Error al crear proyecto: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// GUARDAR TAREA
+// ============================================
+async function guardarTarea(e) {
+    e.preventDefault();
+    const titulo = document.getElementById('tar-titulo').value;
+    const proyecto_id = parseInt(document.getElementById('tar-proyecto').value);
+    const fase = document.getElementById('tar-fase').value;
+    const horas = parseFloat(document.getElementById('tar-horas').value) || 0;
+    const descripcion = document.getElementById('tar-descripcion').value;
+
+    if (!titulo || !proyecto_id) {
+        showToast('Título y proyecto son obligatorios', 'error');
+        return;
+    }
+
+    try {
+        await supabaseInsert('tareas', {
+            titulo,
+            descripcion,
+            proyecto_id,
+            fase: fase || null,
+            horas_estimadas: horas,
+            estado: 'Pendiente'
+        });
+        showToast('✅ Tarea creada exitosamente');
+        cerrarModal('modal-tarea');
+        document.getElementById('form-tarea').reset();
+        document.getElementById('tar-proyecto').disabled = false;
+        cargarDashboard();
+    } catch (e) {
+        showToast('Error al crear tarea: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// ELIMINAR PROYECTO
+// ============================================
+async function eliminarProyecto(id) {
+    if (!confirm('¿Eliminar este proyecto y todas sus tareas?')) return;
+    try {
+        await supabaseDelete('proyectos', id);
+        showToast('Proyecto eliminado');
+        cargarDashboard();
+    } catch (e) {
+        showToast('Error al eliminar', 'error');
+    }
+}
+
+// ============================================
 // CAMBIAR ESTADO DE TAREA
 // ============================================
 async function cambiarEstadoTarea(id, nuevoEstado) {
     try {
         await supabaseUpdate('tareas', id, { estado: nuevoEstado });
         showToast('Estado actualizado');
-        if (proyectoIdEnDetalle) verDetalleProyecto(proyectoIdEnDetalle);
         cargarDashboard();
     } catch (e) {
         showToast('Error al actualizar estado', 'error');
@@ -939,7 +877,6 @@ async function eliminarTarea(id) {
     try {
         await supabaseDelete('tareas', id);
         showToast('Tarea eliminada');
-        if (proyectoIdEnDetalle) verDetalleProyecto(proyectoIdEnDetalle);
         cargarDashboard();
     } catch (e) {
         showToast('Error al eliminar tarea', 'error');
