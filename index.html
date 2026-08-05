@@ -19,7 +19,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
         .modal.show { display: flex; }
-        .modal-box { background: white; border-radius: 16px; max-width: 600px; width: 100%; padding: 24px; max-height: 90vh; overflow-y: auto; }
+        .modal-box { background: white; border-radius: 16px; max-width: 650px; width: 100%; padding: 24px; max-height: 90vh; overflow-y: auto; }
         .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; border-radius: 12px; color: white; z-index: 200; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
         .toast-success { background: #22c55e; }
         .toast-error { background: #ef4444; }
@@ -32,9 +32,31 @@
         .badge-completado { background: #d1fae5; color: #059669; }
         .badge-bloqueada { background: #fee2e2; color: #dc2626; }
         .badge-hold { background: #e5e7eb; color: #6b7280; }
+        .badge-baja { background: #e5e7eb; color: #6b7280; }
+        .badge-media { background: #fef3c7; color: #d97706; }
+        .badge-alta { background: #fee2e2; color: #dc2626; }
+        .badge-critica { background: #7f1d1d; color: #fecaca; }
         .metodologia-badge { padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; background: #e0e7ff; color: #4338ca; }
         .proyecto-detalle { display: none; margin-top: 16px; padding-top: 16px; border-top: 2px solid #e5e7eb; }
         .proyecto-detalle.active { display: block; }
+        .filtro-btn { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; background: #f3f4f6; color: #6b7280; cursor: pointer; border: 1px solid transparent; }
+        .filtro-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+        .filtro-btn:hover { background: #e5e7eb; }
+        .filtro-btn.active:hover { background: #2563eb; }
+        .buscar-input { padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 20px; font-size: 13px; outline: none; width: 200px; }
+        .buscar-input:focus { border-color: #3b82f6; ring: 2px solid #93c5fd; }
+        .prioridad-badge { font-size: 9px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        .prioridad-baja { background: #e5e7eb; color: #6b7280; }
+        .prioridad-media { background: #fef3c7; color: #d97706; }
+        .prioridad-alta { background: #fee2e2; color: #dc2626; }
+        .prioridad-critica { background: #7f1d1d; color: #fecaca; }
+        .comentario-item { border-left: 3px solid #93c5fd; padding-left: 12px; margin-bottom: 8px; }
+        .comentario-item .texto { font-size: 13px; }
+        .comentario-item .meta { font-size: 10px; color: #9ca3af; }
+        .fecha-vencimiento { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+        .fecha-vencimiento.vencida { background: #fee2e2; color: #dc2626; }
+        .fecha-vencimiento.proxima { background: #fef3c7; color: #d97706; }
+        .fecha-vencimiento.futura { background: #d1fae5; color: #059669; }
     </style>
 </head>
 <body>
@@ -70,6 +92,14 @@ const FASES_POR_METODOLOGIA = {
     'ADKAR': { fases: ['Awareness', 'Desire', 'Knowledge', 'Ability', 'Reinforcement'], duracion_total: 80 }
 };
 const DURACION_DEFAULT = 60;
+
+const PRIORIDADES = ['Baja', 'Media', 'Alta', 'Crítica'];
+const PRIORIDAD_COLORS = {
+    'Baja': 'prioridad-baja',
+    'Media': 'prioridad-media',
+    'Alta': 'prioridad-alta',
+    'Crítica': 'prioridad-critica'
+};
 </script>
 
 <div id="toast" class="toast toast-success"></div>
@@ -95,20 +125,17 @@ const DURACION_DEFAULT = 60;
         <button onclick="showTab('proyectos')" id="tab-proyectos" class="tab-btn">
             <i class="fas fa-folder-open mr-1"></i> Proyectos
         </button>
-        <button onclick="showTab('cambios')" id="tab-cambios" class="tab-btn">
-            <i class="fas fa-exchange-alt mr-1"></i> Cambios
-        </button>
-        <button onclick="showTab('riesgos')" id="tab-riesgos" class="tab-btn">
-            <i class="fas fa-shield-alt mr-1"></i> Riesgos
+        <button onclick="showTab('recursos')" id="tab-recursos" class="tab-btn">
+            <i class="fas fa-users mr-1"></i> Recursos
         </button>
         <button onclick="showTab('reportes')" id="tab-reportes" class="tab-btn">
-            <i class="fas fa-file-alt mr-1"></i> Reportes
+            <i class="fas fa-chart-bar mr-1"></i> Reportes
         </button>
     </div>
 
     <div id="content-dashboard" class="tab-content active">
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
             <div class="bg-white rounded-lg shadow p-4 card-hover">
                 <div class="flex justify-between items-start">
                     <div>
@@ -119,7 +146,6 @@ const DURACION_DEFAULT = 60;
                         <i class="fas fa-folder-open text-blue-600"></i>
                     </div>
                 </div>
-                <div class="text-xs text-green-600 mt-2" id="kpi-proyectos-mes"><i class="fas fa-arrow-up"></i> +0 este mes</div>
             </div>
 
             <div class="bg-white rounded-lg shadow p-4 card-hover">
@@ -138,36 +164,59 @@ const DURACION_DEFAULT = 60;
             <div class="bg-white rounded-lg shadow p-4 card-hover">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="text-sm text-gray-500">Cambios Pendientes</div>
-                        <div class="text-2xl font-bold text-purple-600" id="kpi-cambios">0</div>
+                        <div class="text-sm text-gray-500">Vencidas</div>
+                        <div class="text-2xl font-bold text-red-600" id="kpi-vencidas">0</div>
                     </div>
-                    <div class="bg-purple-100 p-3 rounded-full">
-                        <i class="fas fa-exchange-alt text-purple-600"></i>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-clock text-red-600"></i>
                     </div>
                 </div>
-                <div class="text-xs text-gray-500 mt-2">Requieren aprobación</div>
+                <div class="text-xs text-gray-500 mt-2">Requieren atención</div>
             </div>
 
             <div class="bg-white rounded-lg shadow p-4 card-hover">
                 <div class="flex justify-between items-start">
                     <div>
-                        <div class="text-sm text-gray-500">Riesgos Críticos</div>
-                        <div class="text-2xl font-bold text-red-600" id="kpi-riesgos">0</div>
+                        <div class="text-sm text-gray-500">Recursos</div>
+                        <div class="text-2xl font-bold text-purple-600" id="kpi-recursos">0</div>
                     </div>
-                    <div class="bg-red-100 p-3 rounded-full">
-                        <i class="fas fa-exclamation-circle text-red-600"></i>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-users text-purple-600"></i>
                     </div>
                 </div>
-                <div class="text-xs text-orange-600 mt-2"><i class="fas fa-shield"></i> Requieren mitigación</div>
+                <div class="text-xs text-gray-500 mt-2">En el equipo</div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4 card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="text-sm text-gray-500">Tareas Completadas</div>
+                        <div class="text-2xl font-bold text-green-600" id="kpi-completadas">0</div>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-check-circle text-green-600"></i>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <!-- Proyectos -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-6 py-4 border-b flex justify-between items-center">
+            <div class="px-6 py-4 border-b flex flex-wrap justify-between items-center gap-3">
                 <h2 class="text-lg font-semibold text-gray-800">Proyectos</h2>
-                <button onclick="abrirModal('modal-proyecto')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
-                    <i class="fas fa-plus mr-1"></i> Nuevo Proyecto
-                </button>
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex gap-1">
+                        <button onclick="filtrarProyectos('todos')" class="filtro-btn active" id="filtro-todos">Todos</button>
+                        <button onclick="filtrarProyectos('Activo')" class="filtro-btn" id="filtro-Activo">Activos</button>
+                        <button onclick="filtrarProyectos('Ejecutando')" class="filtro-btn" id="filtro-Ejecutando">Ejecutando</button>
+                        <button onclick="filtrarProyectos('Crítico')" class="filtro-btn" id="filtro-Crítico">Críticos</button>
+                        <button onclick="filtrarProyectos('Cerrado')" class="filtro-btn" id="filtro-Cerrado">Cerrados</button>
+                    </div>
+                    <input id="buscar-proyectos" onkeyup="buscarProyectos()" class="buscar-input" placeholder="🔍 Buscar...">
+                    <button onclick="abrirModal('modal-proyecto')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                        <i class="fas fa-plus mr-1"></i> Nuevo Proyecto
+                    </button>
+                </div>
             </div>
             <div class="p-6 space-y-4" id="lista-proyectos">
                 <div class="text-center py-8 text-gray-500">Cargando proyectos...</div>
@@ -182,39 +231,42 @@ const DURACION_DEFAULT = 60;
         </div>
     </div>
 
-    <div id="content-cambios" class="tab-content">
+    <div id="content-recursos" class="tab-content">
         <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Solicitudes de Cambio</h2>
-            <div id="lista-cambios"></div>
-        </div>
-    </div>
-
-    <div id="content-riesgos" class="tab-content">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Riesgos</h2>
-            <div id="lista-riesgos"></div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold"><i class="fas fa-users mr-2"></i>Recursos del Equipo</h2>
+                <button onclick="abrirModal('modal-usuario')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                    <i class="fas fa-plus mr-1"></i> Agregar Recurso
+                </button>
+            </div>
+            <div id="lista-recursos"></div>
         </div>
     </div>
 
     <div id="content-reportes" class="tab-content">
         <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Reportes y KPIs</h2>
-            <div id="lista-reportes"></div>
+            <h2 class="text-xl font-bold mb-4"><i class="fas fa-chart-bar mr-2"></i>Reportes</h2>
+            <div id="contenido-reportes"></div>
         </div>
     </div>
 
 </div>
 
+<!-- ============================================ -->
+<!-- MODALES -->
+<!-- ============================================ -->
+
 <!-- MODAL: NUEVO PROYECTO -->
 <div id="modal-proyecto" class="modal">
-    <div class="modal-box" style="max-width: 650px;">
+    <div class="modal-box">
         <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-bold">🚀 Nuevo Proyecto</h3>
+            <h3 class="text-xl font-bold" id="modal-proyecto-titulo">🚀 Nuevo Proyecto</h3>
             <button onclick="cerrarModal('modal-proyecto')" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <form id="form-proyecto" onsubmit="guardarProyecto(event)">
+            <input type="hidden" id="proy-id" value="">
             <div class="space-y-3">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Proyecto *</label>
@@ -237,8 +289,8 @@ const DURACION_DEFAULT = 60;
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Metodología Recomendada</label>
-                    <input id="proy-metodologia" type="text" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50" placeholder="Selecciona una categoría para ver la metodología">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Metodología</label>
+                    <input id="proy-metodologia" type="text" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
@@ -251,17 +303,13 @@ const DURACION_DEFAULT = 60;
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin (estimada)</label>
-                        <input id="proy-fecha" type="date" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50" placeholder="Se calcula automáticamente">
+                        <input id="proy-fecha" type="date" readonly class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50">
                     </div>
-                </div>
-                <div class="text-xs text-gray-400">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    La fecha de fin se calcula automáticamente según la metodología seleccionada.
                 </div>
             </div>
             <div class="flex gap-3 pt-4 mt-3 border-t">
                 <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
-                    <i class="fas fa-save mr-1"></i> Crear Proyecto
+                    <i class="fas fa-save mr-1"></i> Guardar
                 </button>
                 <button type="button" onclick="cerrarModal('modal-proyecto')" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition">
                     Cancelar
@@ -275,30 +323,58 @@ const DURACION_DEFAULT = 60;
 <div id="modal-tarea" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-bold">📋 Nueva Tarea</h3>
+            <h3 class="text-xl font-bold" id="modal-tarea-titulo">📋 Nueva Tarea</h3>
             <button onclick="cerrarModal('modal-tarea')" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <form id="form-tarea" onsubmit="guardarTarea(event)">
+            <input type="hidden" id="tar-id" value="">
             <div class="space-y-3">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Título *</label>
                     <input id="tar-titulo" type="text" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Ej: Diseñar base de datos">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fase</label>
-                    <select id="tar-fase" class="w-full border rounded-lg px-3 py-2 text-sm">
-                        <option value="">Sin fase</option>
-                    </select>
-                </div>
-                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Proyecto</label>
                     <select id="tar-proyecto" class="w-full border rounded-lg px-3 py-2 text-sm"></select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Horas estimadas</label>
-                    <input id="tar-horas" type="number" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="8">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Responsable</label>
+                        <select id="tar-responsable" class="w-full border rounded-lg px-3 py-2 text-sm"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prioridad</label>
+                        <select id="tar-prioridad" class="w-full border rounded-lg px-3 py-2 text-sm">
+                            <option value="Baja">Baja</option>
+                            <option value="Media" selected>Media</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Crítica">Crítica</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fase</label>
+                        <select id="tar-fase" class="w-full border rounded-lg px-3 py-2 text-sm">
+                            <option value="">Sin fase</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
+                        <input id="tar-fecha-vencimiento" type="date" class="w-full border rounded-lg px-3 py-2 text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Horas estimadas</label>
+                        <input id="tar-horas" type="number" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="8">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Horas reales</label>
+                        <input id="tar-horas-reales" type="number" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="0" step="0.5">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
@@ -307,9 +383,52 @@ const DURACION_DEFAULT = 60;
             </div>
             <div class="flex gap-3 pt-4 mt-3 border-t">
                 <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
-                    <i class="fas fa-save mr-1"></i> Crear Tarea
+                    <i class="fas fa-save mr-1"></i> Guardar
                 </button>
                 <button type="button" onclick="cerrarModal('modal-tarea')" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: NUEVO USUARIO -->
+<div id="modal-usuario" class="modal">
+    <div class="modal-box">
+        <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-bold">👤 Agregar Recurso</h3>
+            <button onclick="cerrarModal('modal-usuario')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="form-usuario" onsubmit="guardarUsuario(event)">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                    <input id="usr-nombre" type="text" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Nombre completo">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input id="usr-email" type="email" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="correo@ejemplo.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                    <select id="usr-rol" class="w-full border rounded-lg px-3 py-2 text-sm">
+                        <option value="Project Manager">Project Manager</option>
+                        <option value="Desarrollador">Desarrollador</option>
+                        <option value="Diseñador">Diseñador</option>
+                        <option value="QA">QA</option>
+                        <option value="Analista">Analista</option>
+                        <option value="Colaborador">Colaborador</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-4 mt-3 border-t">
+                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                    <i class="fas fa-save mr-1"></i> Agregar
+                </button>
+                <button type="button" onclick="cerrarModal('modal-usuario')" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition">
                     Cancelar
                 </button>
             </div>
@@ -326,10 +445,7 @@ const DURACION_DEFAULT = 60;
 // ============================================
 async function supabaseFetch(query) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${query}`, {
-        headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`
-        }
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     });
     if (!res.ok) throw new Error('Error fetching data');
     return res.json();
@@ -350,18 +466,6 @@ async function supabaseInsert(table, data) {
     return res.json();
 }
 
-async function supabaseDelete(table, id) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
-        method: 'DELETE',
-        headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`
-        }
-    });
-    if (!res.ok) throw new Error('Error deleting data');
-    return res;
-}
-
 async function supabaseUpdate(table, id, data) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
         method: 'PATCH',
@@ -375,6 +479,15 @@ async function supabaseUpdate(table, id, data) {
     });
     if (!res.ok) throw new Error('Error updating data');
     return res.json();
+}
+
+async function supabaseDelete(table, id) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    if (!res.ok) throw new Error('Error deleting data');
+    return res;
 }
 
 // ============================================
@@ -392,13 +505,8 @@ function showToast(message, type = 'success') {
 // ============================================
 // MODALES
 // ============================================
-function abrirModal(id) {
-    document.getElementById(id).classList.add('show');
-}
-
-function cerrarModal(id) {
-    document.getElementById(id).classList.remove('show');
-}
+function abrirModal(id) { document.getElementById(id).classList.add('show'); }
+function cerrarModal(id) { document.getElementById(id).classList.remove('show'); }
 
 // ============================================
 // TABS
@@ -408,6 +516,8 @@ function showTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById('content-' + tab).classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
+    if (tab === 'recursos') cargarRecursos();
+    if (tab === 'reportes') generarReportes();
 }
 
 // ============================================
@@ -415,162 +525,63 @@ function showTab(tab) {
 // ============================================
 function actualizarMetodologia() {
     const categoria = document.getElementById('proy-categoria').value;
-    const metodologia = METODOLOGIAS[categoria] || '';
-    document.getElementById('proy-metodologia').value = metodologia;
+    document.getElementById('proy-metodologia').value = METODOLOGIAS[categoria] || '';
     calcularFechaFin();
 }
 
 function calcularFechaFin() {
     const fechaInicio = document.getElementById('proy-inicio').value;
     const metodologia = document.getElementById('proy-metodologia').value;
-
-    if (!fechaInicio || !metodologia) {
-        document.getElementById('proy-fecha').value = '';
-        return;
-    }
-
+    if (!fechaInicio || !metodologia) { document.getElementById('proy-fecha').value = ''; return; }
     const duracion = FASES_POR_METODOLOGIA[metodologia]?.duracion_total || DURACION_DEFAULT;
     const fecha = new Date(fechaInicio);
     fecha.setDate(fecha.getDate() + duracion);
-
-    const year = fecha.getFullYear();
-    const month = String(fecha.getMonth() + 1).padStart(2, '0');
-    const day = String(fecha.getDate()).padStart(2, '0');
-    document.getElementById('proy-fecha').value = `${year}-${month}-${day}`;
+    document.getElementById('proy-fecha').value = fecha.toISOString().split('T')[0];
 }
 
 // ============================================
-// CARGAR DASHBOARD - SIN PROGRESO PLANIFICADO
+// CARGAR DASHBOARD
 // ============================================
 let proyectosCache = [];
 let tareasCache = [];
+let usuariosCache = [];
 
 async function cargarDashboard() {
     try {
         proyectosCache = await supabaseFetch('proyectos?order=id.desc');
         tareasCache = await supabaseFetch('tareas?select=*');
+        usuariosCache = await supabaseFetch('usuarios?select=*');
 
-        // ============================================
-        // CÁLCULO DE PROGRESO REAL (SIN PLANIFICADO)
-        // ============================================
         const proyectosConProgreso = proyectosCache.map(p => {
             const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
-            
-            const totalTareas = tareasProyecto.length;
-            const tareasCompletadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
-            const tareasPendientes = tareasProyecto.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
-            const tareasBloqueadas = tareasProyecto.filter(t => t.estado === 'Bloqueada').length;
-            
-            // PROGRESO REAL = (Completadas / Total) * 100
-            let progresoReal = 0;
-            if (totalTareas > 0) {
-                progresoReal = Math.round((tareasCompletadas / totalTareas) * 100);
-            }
-            
-            // Color de barra según progreso
-            let barraColor = 'bg-blue-600';
-            if (progresoReal < 30) {
-                barraColor = 'bg-red-500';
-            } else if (progresoReal < 60) {
-                barraColor = 'bg-yellow-500';
-            } else {
-                barraColor = 'bg-blue-600';
-            }
-            
-            return { 
-                ...p, 
-                progreso_calculado: progresoReal,
-                total_tareas: totalTareas,
-                completadas: tareasCompletadas,
-                pendientes: tareasPendientes,
-                bloqueadas: tareasBloqueadas,
-                barraColor: barraColor
-            };
+            const total = tareasProyecto.length;
+            const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+            const progreso = total > 0 ? Math.round((completadas / total) * 100) : 0;
+            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
         });
 
-        // KPIS GLOBALES
         const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
         const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
         const bloqueadas = tareasCache.filter(t => t.estado === 'Bloqueada').length;
-        const cambios = proyectosCache.reduce((sum, p) => sum + (p.cambios_pendientes || 0), 0);
-        const riesgos = proyectosCache.reduce((sum, p) => sum + (p.riesgos_criticos || 0), 0);
+        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
 
         document.getElementById('kpi-proyectos').textContent = activos;
         document.getElementById('kpi-tareas').textContent = pendientes;
         document.getElementById('kpi-bloqueadas').textContent = bloqueadas;
-        document.getElementById('kpi-cambios').textContent = cambios;
-        document.getElementById('kpi-riesgos').textContent = riesgos;
+        document.getElementById('kpi-vencidas').textContent = vencidas;
+        document.getElementById('kpi-recursos').textContent = usuariosCache.length;
+        document.getElementById('kpi-completadas').textContent = completadasTotal;
 
-        // ============================================
-        // RENDERIZAR PROYECTOS
-        // ============================================
-        const lista = document.getElementById('lista-proyectos');
-        if (proyectosCache.length === 0) {
-            lista.innerHTML = `
-                <div class="text-center py-8 text-gray-500">
-                    <i class="fas fa-folder-open text-4xl text-gray-300 mb-2 block"></i>
-                    No hay proyectos aún. Crea uno nuevo.
-                </div>
-            `;
-        } else {
-            lista.innerHTML = proyectosConProgreso.map(p => {
-                const duracion = FASES_POR_METODOLOGIA[p.metodologia]?.duracion_total || DURACION_DEFAULT;
-                
-                return `
-                <div class="border rounded-lg p-4 hover:shadow-md transition ${p.estado === 'Crítico' ? 'border-l-4 border-l-red-500' : ''}">
-                    <div class="flex flex-wrap justify-between items-start gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 flex-wrap">
-                                <h3 class="font-semibold text-gray-800">${p.nombre}</h3>
-                                <span class="status-badge ${p.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : p.estado === 'Crítico' ? 'bg-red-100 text-red-700' : p.estado === 'Monitoreo' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">${p.estado || 'Activo'}</span>
-                                ${p.metodologia ? `<span class="metodologia-badge">${p.metodologia}</span>` : ''}
-                            </div>
-                            <div class="text-sm text-gray-500 mt-1">Empresa: ${p.empresa || 'Sin empresa'}</div>
-                            <div class="flex flex-wrap items-center gap-4 mt-2 text-sm">
-                                <span><i class="fas fa-calendar-plus text-gray-400"></i> Inicio: ${p.fecha_inicio || 'No definida'}</span>
-                                <span><i class="fas fa-calendar text-gray-400"></i> Fin: ${p.fecha_fin || 'No definida'}</span>
-                                <span><i class="fas fa-clock text-gray-400"></i> Duración: ${duracion} días</span>
-                            </div>
-                            <div class="text-xs text-gray-400 mt-1">
-                                <i class="fas fa-tasks mr-1"></i> 
-                                ${p.total_tareas} total • ${p.completadas} completadas • ${p.pendientes} pendientes • ${p.bloqueadas} bloqueadas
-                            </div>
-                        </div>
-                        <div class="w-full md:w-64">
-                            <div class="flex justify-between text-sm mb-1">
-                                <span>Progreso</span>
-                                <span class="font-semibold">${p.progreso_calculado}%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill ${p.barraColor}" style="width:${p.progreso_calculado}%"></div>
-                            </div>
-                            <div class="text-xs text-gray-400 mt-1 text-center">
-                                ${p.total_tareas > 0 ? `${p.completadas} de ${p.total_tareas} tareas completadas` : 'Sin tareas aún'}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t">
-                        ${p.cambios_pendientes > 0 ? `<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded flex items-center gap-1"><i class="fas fa-exchange-alt"></i> ${p.cambios_pendientes} cambio pendiente</span>` : ''}
-                        ${p.riesgos_criticos > 0 ? `<span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded flex items-center gap-1"><i class="fas fa-exclamation-circle"></i> ${p.riesgos_criticos} riesgo crítico</span>` : ''}
-                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded flex items-center gap-1">
-                            <i class="fas fa-tasks"></i> ${p.total_tareas} tareas
-                        </span>
-                        <button onclick="toggleDetalle(${p.id})" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 ml-auto" id="btn-detalle-${p.id}">
-                            <i class="fas fa-chevron-down"></i> Ver detalle
-                        </button>
-                        <button onclick="eliminarProyecto(${p.id})" class="text-xs bg-red-50 text-red-600 px-3 py-1 rounded hover:bg-red-100">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                    <div id="detalle-${p.id}" class="proyecto-detalle">
-                        <div class="text-center py-4 text-gray-400">Cargando detalle...</div>
-                    </div>
-                </div>
-            `}).join('');
-        }
+        // Llenar selects de proyectos y responsables
+        const selectProyecto = document.getElementById('tar-proyecto');
+        selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
-        const select = document.getElementById('tar-proyecto');
-        select.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+        const selectResponsable = document.getElementById('tar-responsable');
+        selectResponsable.innerHTML = '<option value="">Sin asignar</option>' +
+            usuariosCache.map(u => `<option value="${u.id}">${u.nombre}</option>`).join('');
+
+        renderizarProyectos(proyectosConProgreso);
 
     } catch (e) {
         console.error('Error:', e);
@@ -584,6 +595,104 @@ async function cargarDashboard() {
 }
 
 // ============================================
+// FILTRAR Y BUSCAR PROYECTOS
+// ============================================
+let filtroActual = 'todos';
+
+function filtrarProyectos(filtro) {
+    filtroActual = filtro;
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('filtro-' + filtro)?.classList.add('active');
+    cargarDashboard();
+}
+
+function buscarProyectos() {
+    const termino = document.getElementById('buscar-proyectos').value.toLowerCase();
+    const proyectos = document.querySelectorAll('.proyecto-card');
+    proyectos.forEach(p => {
+        const nombre = p.querySelector('.proyecto-nombre')?.textContent?.toLowerCase() || '';
+        const empresa = p.querySelector('.proyecto-empresa')?.textContent?.toLowerCase() || '';
+        p.style.display = (nombre.includes(termino) || empresa.includes(termino)) ? '' : 'none';
+    });
+}
+
+// ============================================
+// RENDERIZAR PROYECTOS
+// ============================================
+function renderizarProyectos(proyectos) {
+    const lista = document.getElementById('lista-proyectos');
+    if (proyectos.length === 0) {
+        lista.innerHTML = `<div class="text-center py-8 text-gray-500">No hay proyectos aún. Crea uno nuevo.</div>`;
+        return;
+    }
+
+    let filtrados = proyectos;
+    if (filtroActual !== 'todos') {
+        filtrados = proyectos.filter(p => p.estado === filtroActual);
+    }
+
+    if (filtrados.length === 0) {
+        lista.innerHTML = `<div class="text-center py-8 text-gray-500">No hay proyectos con el filtro "${filtroActual}"</div>`;
+        return;
+    }
+
+    lista.innerHTML = filtrados.map(p => {
+        const duracion = FASES_POR_METODOLOGIA[p.metodologia]?.duracion_total || DURACION_DEFAULT;
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
+        const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+
+        return `
+        <div class="proyecto-card border rounded-lg p-4 hover:shadow-md transition ${p.estado === 'Crítico' ? 'border-l-4 border-l-red-500' : ''}">
+            <div class="flex flex-wrap justify-between items-start gap-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <h3 class="proyecto-nombre font-semibold text-gray-800">${p.nombre}</h3>
+                        <span class="status-badge ${p.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : p.estado === 'Crítico' ? 'bg-red-100 text-red-700' : p.estado === 'Monitoreo' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">${p.estado || 'Activo'}</span>
+                        ${p.metodologia ? `<span class="metodologia-badge">${p.metodologia}</span>` : ''}
+                    </div>
+                    <div class="proyecto-empresa text-sm text-gray-500 mt-1">Empresa: ${p.empresa || 'Sin empresa'}</div>
+                    <div class="flex flex-wrap items-center gap-4 mt-2 text-sm">
+                        <span><i class="fas fa-calendar-plus text-gray-400"></i> Inicio: ${p.fecha_inicio || 'No definida'}</span>
+                        <span><i class="fas fa-calendar text-gray-400"></i> Fin: ${p.fecha_fin || 'No definida'}</span>
+                        <span><i class="fas fa-clock text-gray-400"></i> Duración: ${duracion} días</span>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">
+                        <i class="fas fa-tasks mr-1"></i>
+                        ${tareasProyecto.length} tareas • ${completadas} completadas • ${tareasProyecto.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length} pendientes
+                    </div>
+                </div>
+                <div class="w-full md:w-56">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Progreso</span>
+                        <span class="font-semibold">${p.progreso_calculado}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${p.progreso_calculado < 30 ? 'bg-red-500' : p.progreso_calculado < 60 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${p.progreso_calculado}%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t">
+                <button onclick="toggleDetalle(${p.id})" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100" id="btn-detalle-${p.id}">
+                    <i class="fas fa-chevron-down"></i> Ver detalle
+                </button>
+                <button onclick="editarProyecto(${p.id})" class="text-xs bg-yellow-50 text-yellow-600 px-3 py-1 rounded hover:bg-yellow-100">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="eliminarProyecto(${p.id})" class="text-xs bg-red-50 text-red-600 px-3 py-1 rounded hover:bg-red-100">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-auto">
+                    <i class="fas fa-tasks"></i> ${tareasProyecto.length} tareas
+                </span>
+            </div>
+            <div id="detalle-${p.id}" class="proyecto-detalle">
+                <div class="text-center py-4 text-gray-400">Cargando detalle...</div>
+            </div>
+        </div>
+    `}).join('');
+}
+
+// ============================================
 // TOGGLE DETALLE
 // ============================================
 let detallesAbiertos = {};
@@ -591,27 +700,23 @@ let detallesAbiertos = {};
 async function toggleDetalle(id) {
     const detalleDiv = document.getElementById(`detalle-${id}`);
     const btn = document.getElementById(`btn-detalle-${id}`);
-    
+
     if (detallesAbiertos[id]) {
         detalleDiv.classList.remove('active');
         detallesAbiertos[id] = false;
         btn.innerHTML = '<i class="fas fa-chevron-down"></i> Ver detalle';
         return;
     }
-    
+
     detallesAbiertos[id] = true;
     btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar detalle';
     detalleDiv.classList.add('active');
-    
-    try {
-        const proyectos = await supabaseFetch(`proyectos?id=eq.${id}&select=*`);
-        const proyecto = proyectos[0];
-        if (!proyecto) {
-            detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Proyecto no encontrado</div>';
-            return;
-        }
 
-        const tareas = await supabaseFetch(`tareas?proyecto_id=eq.${id}&select=*`);
+    try {
+        const proyecto = proyectosCache.find(p => p.id === id);
+        if (!proyecto) { detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Proyecto no encontrado</div>'; return; }
+
+        const tareas = tareasCache.filter(t => t.proyecto_id === id);
 
         const badgeEstado = {
             'Pendiente': 'badge-pendiente',
@@ -623,8 +728,9 @@ async function toggleDetalle(id) {
 
         const total = tareas.length;
         const completadas = tareas.filter(t => t.estado === 'Completado').length;
-        const progresoReal = total > 0 ? Math.round((completadas / total) * 100) : 0;
+        const progreso = total > 0 ? Math.round((completadas / total) * 100) : 0;
 
+        // Agrupar tareas por fase
         const fases = {};
         tareas.forEach(t => {
             const fase = t.fase || 'Sin fase';
@@ -638,26 +744,7 @@ async function toggleDetalle(id) {
         } else {
             const fasesKeys = Object.keys(fases);
             if (fasesKeys.length === 0 || (fasesKeys.length === 1 && fasesKeys[0] === 'Sin fase')) {
-                tareasHTML = tareas.map(t => `
-                    <div class="tarea-item flex justify-between items-center p-3 border-b hover:bg-gray-50 rounded">
-                        <div class="flex-1">
-                            <div class="font-medium text-sm">${t.titulo}</div>
-                            <div class="text-xs text-gray-400">${t.descripcion || 'Sin descripción'} • ${t.horas_estimadas || 0}h</div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="badge-estado ${badgeEstado[t.estado] || 'badge-pendiente'}">${t.estado || 'Pendiente'}</span>
-                            <select onchange="cambiarEstadoTarea(${t.id}, this.value)" class="text-xs border rounded px-2 py-1 bg-white">
-                                <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                                <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>En Progreso</option>
-                                <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloqueada</option>
-                                <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Completado</option>
-                            </select>
-                            <button onclick="eliminarTarea(${t.id})" class="text-red-400 hover:text-red-600 text-xs" title="Eliminar tarea">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
+                tareasHTML = tareas.map(t => renderTareaItem(t, badgeEstado)).join('');
             } else {
                 tareasHTML = fasesKeys.map(fase => `
                     <div class="mb-3">
@@ -666,30 +753,22 @@ async function toggleDetalle(id) {
                             <span class="text-xs text-gray-400 ml-auto">${fases[fase].length} tareas</span>
                         </div>
                         <div class="border border-t-0 rounded-b-lg">
-                            ${fases[fase].map(t => `
-                                <div class="tarea-item flex justify-between items-center p-3 border-b last:border-b-0 hover:bg-gray-50">
-                                    <div class="flex-1">
-                                        <div class="font-medium text-sm">${t.titulo}</div>
-                                        <div class="text-xs text-gray-400">${t.descripcion || 'Sin descripción'} • ${t.horas_estimadas || 0}h</div>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <span class="badge-estado ${badgeEstado[t.estado] || 'badge-pendiente'}">${t.estado || 'Pendiente'}</span>
-                                        <select onchange="cambiarEstadoTarea(${t.id}, this.value)" class="text-xs border rounded px-2 py-1 bg-white">
-                                            <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                                            <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>En Progreso</option>
-                                            <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloqueada</option>
-                                            <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Completado</option>
-                                        </select>
-                                        <button onclick="eliminarTarea(${t.id})" class="text-red-400 hover:text-red-600 text-xs" title="Eliminar tarea">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            `).join('')}
+                            ${fases[fase].map(t => renderTareaItem(t, badgeEstado)).join('')}
                         </div>
                     </div>
                 `).join('');
             }
+        }
+
+        // Comentarios (simplificado)
+        let comentariosHTML = '';
+        if (tareas.length > 0) {
+            comentariosHTML = `
+                <div class="mt-3 pt-3 border-t">
+                    <h5 class="font-semibold text-sm text-gray-700 mb-2"><i class="fas fa-comment mr-1"></i>Comentarios recientes</h5>
+                    <div class="text-xs text-gray-400">Funcionalidad en desarrollo</div>
+                </div>
+            `;
         }
 
         detalleDiv.innerHTML = `
@@ -710,10 +789,10 @@ async function toggleDetalle(id) {
                         <div class="mt-3">
                             <div class="flex justify-between text-sm">
                                 <span>Progreso</span>
-                                <span class="font-semibold">${progresoReal}%</span>
+                                <span class="font-semibold">${progreso}%</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill ${progresoReal < 40 ? 'bg-red-500' : progresoReal < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progresoReal}%"></div>
+                                <div class="progress-fill ${progreso < 40 ? 'bg-red-500' : progreso < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progreso}%"></div>
                             </div>
                             <div class="text-xs text-gray-400 mt-1 text-center">
                                 ${total > 0 ? `${completadas} de ${total} tareas completadas` : 'Sin tareas aún'}
@@ -731,6 +810,7 @@ async function toggleDetalle(id) {
                         ${tareasHTML}
                     </div>
                 </div>
+                ${comentariosHTML}
             </div>
         `;
 
@@ -741,26 +821,108 @@ async function toggleDetalle(id) {
 }
 
 // ============================================
-// ABRIR MODAL TAREA DESDE DETALLE
+// RENDER TAREA ITEM
 // ============================================
-function abrirModalTareaDesdeDetalle(proyectoId) {
-    const select = document.getElementById('tar-proyecto');
-    select.value = proyectoId;
-    select.disabled = true;
+function renderTareaItem(t, badgeEstado) {
+    const prioridadClass = PRIORIDAD_COLORS[t.prioridad] || 'prioridad-media';
 
-    const proyecto = proyectosCache.find(p => p.id === proyectoId);
+    // Calcular estado de vencimiento
+    let vencimientoHTML = '';
+    if (t.fecha_vencimiento) {
+        const hoy = new Date();
+        const venc = new Date(t.fecha_vencimiento);
+        const diff = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+        let clase = 'futura';
+        let texto = `Vence en ${diff} días`;
+        if (diff < 0) { clase = 'vencida'; texto = `Vencida hace ${Math.abs(diff)} días`; }
+        else if (diff <= 3) { clase = 'proxima'; texto = `Vence en ${diff} días`; }
+        vencimientoHTML = `<span class="fecha-vencimiento ${clase}">${texto}</span>`;
+    }
+
+    const responsable = usuariosCache.find(u => u.id === t.responsable_id);
+    const responsableHTML = responsable ? `<span class="text-xs text-gray-500"><i class="fas fa-user mr-1"></i>${responsable.nombre}</span>` : '';
+
+    return `
+        <div class="tarea-item flex flex-wrap justify-between items-center p-3 border-b last:border-b-0 hover:bg-gray-50 rounded">
+            <div class="flex-1 min-w-[150px]">
+                <div class="font-medium text-sm">${t.titulo}</div>
+                <div class="text-xs text-gray-400 flex flex-wrap items-center gap-2">
+                    ${t.descripcion || 'Sin descripción'} • ${t.horas_estimadas || 0}h estimadas • ${t.horas_reales || 0}h reales
+                </div>
+                <div class="flex flex-wrap items-center gap-2 mt-1">
+                    ${responsableHTML}
+                    ${vencimientoHTML}
+                    <span class="prioridad-badge ${prioridadClass}">${t.prioridad || 'Media'}</span>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
+                <span class="badge-estado ${badgeEstado[t.estado] || 'badge-pendiente'}">${t.estado || 'Pendiente'}</span>
+                <select onchange="cambiarEstadoTarea(${t.id}, this.value)" class="text-xs border rounded px-2 py-1 bg-white">
+                    <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                    <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>En Progreso</option>
+                    <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloqueada</option>
+                    <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Completado</option>
+                </select>
+                <button onclick="editarTarea(${t.id})" class="text-yellow-500 hover:text-yellow-700 text-xs" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="eliminarTarea(${t.id})" class="text-red-400 hover:text-red-600 text-xs" title="Eliminar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================
+// EDITAR PROYECTO
+// ============================================
+function editarProyecto(id) {
+    const proyecto = proyectosCache.find(p => p.id === id);
+    if (!proyecto) return;
+
+    document.getElementById('modal-proyecto-titulo').textContent = '✏️ Editar Proyecto';
+    document.getElementById('proy-id').value = proyecto.id;
+    document.getElementById('proy-nombre').value = proyecto.nombre || '';
+    document.getElementById('proy-categoria').value = proyecto.categoria || '';
+    document.getElementById('proy-metodologia').value = proyecto.metodologia || '';
+    document.getElementById('proy-empresa').value = proyecto.empresa || '';
+    document.getElementById('proy-inicio').value = proyecto.fecha_inicio || '';
+    document.getElementById('proy-fecha').value = proyecto.fecha_fin || '';
+
+    abrirModal('modal-proyecto');
+}
+
+// ============================================
+// EDITAR TAREA
+// ============================================
+function editarTarea(id) {
+    const tarea = tareasCache.find(t => t.id === id);
+    if (!tarea) return;
+
+    document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
+    document.getElementById('tar-id').value = tarea.id;
+    document.getElementById('tar-titulo').value = tarea.titulo || '';
+    document.getElementById('tar-proyecto').value = tarea.proyecto_id || '';
+    document.getElementById('tar-responsable').value = tarea.responsable_id || '';
+    document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
+    document.getElementById('tar-fase').value = tarea.fase || '';
+    document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
+    document.getElementById('tar-horas').value = tarea.horas_estimadas || '';
+    document.getElementById('tar-horas-reales').value = tarea.horas_reales || '';
+    document.getElementById('tar-descripcion').value = tarea.descripcion || '';
+
+    // Cargar fases según metodología del proyecto
+    const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
     const fasesSelect = document.getElementById('tar-fase');
     if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
         const fases = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
-        fasesSelect.innerHTML = '<option value="">Selecciona una fase...</option>' +
-            fases.map(f => `<option value="${f}">${f}</option>`).join('');
+        fasesSelect.innerHTML = '<option value="">Sin fase</option>' +
+            fases.map(f => `<option value="${f}" ${f === tarea.fase ? 'selected' : ''}>${f}</option>`).join('');
     } else {
         fasesSelect.innerHTML = '<option value="">Sin fase</option>';
     }
 
-    document.getElementById('tar-titulo').value = '';
-    document.getElementById('tar-horas').value = '';
-    document.getElementById('tar-descripcion').value = '';
     abrirModal('modal-tarea');
 }
 
@@ -769,6 +931,7 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
 // ============================================
 async function guardarProyecto(e) {
     e.preventDefault();
+    const id = document.getElementById('proy-id').value;
     const nombre = document.getElementById('proy-nombre').value;
     const categoria = document.getElementById('proy-categoria').value;
     const metodologia = document.getElementById('proy-metodologia').value;
@@ -781,29 +944,23 @@ async function guardarProyecto(e) {
         return;
     }
 
-    if (!fecha_inicio) {
-        showToast('La fecha de inicio es obligatoria', 'error');
-        return;
-    }
+    const data = { nombre, categoria, metodologia, empresa: empresa || 'Sin empresa', fecha_inicio, fecha_fin, fecha_actualizacion: new Date().toISOString() };
 
     try {
-        await supabaseInsert('proyectos', {
-            nombre,
-            categoria,
-            metodologia,
-            empresa: empresa || 'Sin empresa',
-            fecha_inicio: fecha_inicio || null,
-            fecha_fin: fecha_fin || null,
-            estado: 'Activo'
-        });
-        showToast('✅ Proyecto creado exitosamente');
+        if (id) {
+            await supabaseUpdate('proyectos', id, data);
+            showToast('✅ Proyecto actualizado');
+        } else {
+            await supabaseInsert('proyectos', { ...data, estado: 'Activo' });
+            showToast('✅ Proyecto creado');
+        }
         cerrarModal('modal-proyecto');
         document.getElementById('form-proyecto').reset();
-        document.getElementById('proy-metodologia').value = '';
-        document.getElementById('proy-fecha').value = '';
+        document.getElementById('proy-id').value = '';
+        document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
         cargarDashboard();
     } catch (e) {
-        showToast('Error al crear proyecto: ' + e.message, 'error');
+        showToast('Error: ' + e.message, 'error');
     }
 }
 
@@ -812,10 +969,15 @@ async function guardarProyecto(e) {
 // ============================================
 async function guardarTarea(e) {
     e.preventDefault();
+    const id = document.getElementById('tar-id').value;
     const titulo = document.getElementById('tar-titulo').value;
     const proyecto_id = parseInt(document.getElementById('tar-proyecto').value);
+    const responsable_id = document.getElementById('tar-responsable').value ? parseInt(document.getElementById('tar-responsable').value) : null;
+    const prioridad = document.getElementById('tar-prioridad').value;
     const fase = document.getElementById('tar-fase').value;
-    const horas = parseFloat(document.getElementById('tar-horas').value) || 0;
+    const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
+    const horas_estimadas = parseFloat(document.getElementById('tar-horas').value) || 0;
+    const horas_reales = parseFloat(document.getElementById('tar-horas-reales').value) || 0;
     const descripcion = document.getElementById('tar-descripcion').value;
 
     if (!titulo || !proyecto_id) {
@@ -823,22 +985,60 @@ async function guardarTarea(e) {
         return;
     }
 
+    const data = {
+        titulo,
+        proyecto_id,
+        responsable_id,
+        prioridad,
+        fase: fase || null,
+        fecha_vencimiento,
+        horas_estimadas,
+        horas_reales,
+        descripcion,
+        fecha_actualizacion: new Date().toISOString()
+    };
+
     try {
-        await supabaseInsert('tareas', {
-            titulo,
-            descripcion,
-            proyecto_id,
-            fase: fase || null,
-            horas_estimadas: horas,
-            estado: 'Pendiente'
-        });
-        showToast('✅ Tarea creada exitosamente');
+        if (id) {
+            await supabaseUpdate('tareas', id, data);
+            showToast('✅ Tarea actualizada');
+        } else {
+            await supabaseInsert('tareas', { ...data, estado: 'Pendiente' });
+            showToast('✅ Tarea creada');
+        }
         cerrarModal('modal-tarea');
         document.getElementById('form-tarea').reset();
-        document.getElementById('tar-proyecto').disabled = false;
+        document.getElementById('tar-id').value = '';
+        document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
         cargarDashboard();
     } catch (e) {
-        showToast('Error al crear tarea: ' + e.message, 'error');
+        showToast('Error: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// GUARDAR USUARIO
+// ============================================
+async function guardarUsuario(e) {
+    e.preventDefault();
+    const nombre = document.getElementById('usr-nombre').value;
+    const email = document.getElementById('usr-email').value;
+    const rol = document.getElementById('usr-rol').value;
+
+    if (!nombre) {
+        showToast('El nombre es obligatorio', 'error');
+        return;
+    }
+
+    try {
+        await supabaseInsert('usuarios', { nombre, email: email || null, rol });
+        showToast('✅ Recurso agregado');
+        cerrarModal('modal-usuario');
+        document.getElementById('form-usuario').reset();
+        cargarDashboard();
+        cargarRecursos();
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
     }
 }
 
@@ -857,19 +1057,6 @@ async function eliminarProyecto(id) {
 }
 
 // ============================================
-// CAMBIAR ESTADO DE TAREA
-// ============================================
-async function cambiarEstadoTarea(id, nuevoEstado) {
-    try {
-        await supabaseUpdate('tareas', id, { estado: nuevoEstado });
-        showToast('Estado actualizado');
-        cargarDashboard();
-    } catch (e) {
-        showToast('Error al actualizar estado', 'error');
-    }
-}
-
-// ============================================
 // ELIMINAR TAREA
 // ============================================
 async function eliminarTarea(id) {
@@ -884,17 +1071,169 @@ async function eliminarTarea(id) {
 }
 
 // ============================================
+// CAMBIAR ESTADO DE TAREA
+// ============================================
+async function cambiarEstadoTarea(id, nuevoEstado) {
+    try {
+        await supabaseUpdate('tareas', id, { estado: nuevoEstado });
+        showToast('Estado actualizado');
+        cargarDashboard();
+    } catch (e) {
+        showToast('Error al actualizar estado', 'error');
+    }
+}
+
+// ============================================
+// ABRIR MODAL TAREA DESDE DETALLE
+// ============================================
+function abrirModalTareaDesdeDetalle(proyectoId) {
+    const select = document.getElementById('tar-proyecto');
+    select.value = proyectoId;
+    select.disabled = true;
+    document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
+    document.getElementById('tar-id').value = '';
+    document.getElementById('tar-titulo').value = '';
+    document.getElementById('tar-responsable').value = '';
+    document.getElementById('tar-prioridad').value = 'Media';
+    document.getElementById('tar-fecha-vencimiento').value = '';
+    document.getElementById('tar-horas').value = '';
+    document.getElementById('tar-horas-reales').value = '';
+    document.getElementById('tar-descripcion').value = '';
+
+    const proyecto = proyectosCache.find(p => p.id === proyectoId);
+    const fasesSelect = document.getElementById('tar-fase');
+    if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
+        const fases = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
+        fasesSelect.innerHTML = '<option value="">Selecciona una fase...</option>' +
+            fases.map(f => `<option value="${f}">${f}</option>`).join('');
+    } else {
+        fasesSelect.innerHTML = '<option value="">Sin fase</option>';
+    }
+
+    abrirModal('modal-tarea');
+}
+
+// ============================================
+// RECURSOS
+// ============================================
+async function cargarRecursos() {
+    try {
+        const usuarios = await supabaseFetch('usuarios?order=id.desc');
+        const lista = document.getElementById('lista-recursos');
+        if (usuarios.length === 0) {
+            lista.innerHTML = '<div class="text-center py-8 text-gray-500">No hay recursos agregados</div>';
+            return;
+        }
+        lista.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Nombre</th>
+                            <th class="px-4 py-2 text-left">Email</th>
+                            <th class="px-4 py-2 text-left">Rol</th>
+                            <th class="px-4 py-2 text-left">Tareas asignadas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${usuarios.map(u => {
+                            const tareasAsignadas = tareasCache.filter(t => t.responsable_id === u.id).length;
+                            return `
+                            <tr class="border-t">
+                                <td class="px-4 py-2 font-medium">${u.nombre}</td>
+                                <td class="px-4 py-2 text-gray-500">${u.email || '-'}</td>
+                                <td class="px-4 py-2"><span class="status-badge bg-blue-100 text-blue-700">${u.rol || 'Colaborador'}</span></td>
+                                <td class="px-4 py-2">${tareasAsignadas} tareas</td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (e) {
+        console.error('Error:', e);
+        document.getElementById('lista-recursos').innerHTML = '<div class="text-red-500">Error cargando recursos</div>';
+    }
+}
+
+// ============================================
+// REPORTES
+// ============================================
+function generarReportes() {
+    const container = document.getElementById('contenido-reportes');
+
+    const totalProyectos = proyectosCache.length;
+    const totalTareas = tareasCache.length;
+    const completadas = tareasCache.filter(t => t.estado === 'Completado').length;
+    const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
+    const bloqueadas = tareasCache.filter(t => t.estado === 'Bloqueada').length;
+    const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+
+    const tareasPorProyecto = proyectosCache.map(p => ({
+        nombre: p.nombre,
+        total: tareasCache.filter(t => t.proyecto_id === p.id).length,
+        completadas: tareasCache.filter(t => t.proyecto_id === p.id && t.estado === 'Completado').length
+    }));
+
+    container.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-semibold mb-3">📊 Resumen General</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between"><span>Total Proyectos:</span><span class="font-semibold">${totalProyectos}</span></div>
+                    <div class="flex justify-between"><span>Total Tareas:</span><span class="font-semibold">${totalTareas}</span></div>
+                    <div class="flex justify-between"><span>Completadas:</span><span class="font-semibold text-green-600">${completadas}</span></div>
+                    <div class="flex justify-between"><span>Pendientes:</span><span class="font-semibold text-yellow-600">${pendientes}</span></div>
+                    <div class="flex justify-between"><span>Bloqueadas:</span><span class="font-semibold text-red-600">${bloqueadas}</span></div>
+                    <div class="flex justify-between"><span>Vencidas:</span><span class="font-semibold text-red-600">${vencidas}</span></div>
+                    <div class="flex justify-between"><span>Efectividad:</span><span class="font-semibold">${totalTareas > 0 ? Math.round((completadas/totalTareas)*100) : 0}%</span></div>
+                </div>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-semibold mb-3">📋 Tareas por Proyecto</h3>
+                <div class="space-y-2 text-sm">
+                    ${tareasPorProyecto.map(p => `
+                        <div>
+                            <div class="flex justify-between">
+                                <span>${p.nombre}</span>
+                                <span>${p.completadas}/${p.total}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill bg-blue-600" style="width:${p.total > 0 ? (p.completadas/p.total)*100 : 0}%"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================
 // INICIALIZAR
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
     cargarDashboard();
 
+    // Cerrar modales al hacer clic fuera
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.remove('show');
                 document.getElementById('tar-proyecto').disabled = false;
+                document.getElementById('proy-id').value = '';
+                document.getElementById('tar-id').value = '';
+                document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
+                document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
             }
+        });
+    });
+
+    // Recargar al cambiar de tab
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.textContent.includes('Recursos')) cargarRecursos();
+            if (btn.textContent.includes('Reportes')) generarReportes();
         });
     });
 });
