@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v3.3</title>
+    <title>PM System v3.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -206,7 +206,7 @@ const PRIORIDAD_COLORS = {
                     </div>
                     <div class="kpi-icon bg-yellow-100 text-yellow-600"><i class="fas fa-tasks"></i></div>
                 </div>
-                <div class="text-xs text-gray-400 mt-1">Tareas pendientes</div>
+                <div class="text-xs text-gray-400 mt-1">&nbsp;</div>
             </div>
             <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
                 <div class="flex justify-between items-start">
@@ -1145,17 +1145,18 @@ async function subirEvidencia() {
             estado: 'Completado'
         });
         
-        showToast('✅ Evidencia subida y tarea completada');
+        // POPUP DE ÉXITO
+        alert('✅ Evidencia subida correctamente\n\n📎 Archivo: ' + archivo.name + '\n📋 Tarea: ' + tareaEnEvidencia.titulo);
+        
         cerrarModal('modal-evidencia');
         cargarDashboard();
         
     } catch (e) {
         console.error('Error:', e);
-        showToast('Error al subir evidencia: ' + e.message, 'error');
+        alert('❌ Error al subir evidencia: ' + e.message);
     }
 }
-
-// ============================================
+    // ============================================
 // GENERAR REPORTE DEL PROYECTO
 // ============================================
 async function generarReporteProyecto(proyectoId) {
