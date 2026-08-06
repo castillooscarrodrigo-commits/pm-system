@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v3.2</title>
+    <title>PM System v3.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -54,6 +54,8 @@
         .fecha-vencimiento.futura { background: #d1fae5; color: #059669; }
         .area-badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; background: #e0e7ff; color: #4338ca; }
         .responsable-tag { background: #e0e7ff; color: #4338ca; padding: 1px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; display: inline-block; }
+        .evidencia-tag { background: #dbeafe; color: #2563eb; padding: 1px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; display: inline-block; cursor: pointer; }
+        .evidencia-tag:hover { background: #bfdbfe; }
         .metodologia-desc { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #166534; margin-top: 4px; display: none; }
         .metodologia-desc.show { display: block; }
         .gantt-container { overflow-x: auto; }
@@ -103,6 +105,9 @@
         .fase-item.sin-tareas { background: #e5e7eb; color: #6b7280; }
         .fase-item .fase-check { font-size: 9px; }
         .fase-item .fase-detalle { font-size: 7px; opacity: 0.7; }
+        .evidencia-preview { max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 8px; }
+        .evidencia-link { color: #3b82f6; text-decoration: underline; cursor: pointer; }
+        .evidencia-link:hover { color: #2563eb; }
     </style>
 </head>
 <body>
@@ -153,7 +158,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v3.2</span>
+            <span class="text-lg font-bold text-gray-800">PM System v3.3</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -430,6 +435,56 @@ const PRIORIDAD_COLORS = {
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- MODAL: SUBIR EVIDENCIA -->
+<div id="modal-evidencia" class="modal">
+    <div class="modal-box" style="max-width: 450px;">
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold">📎 Subir Evidencia</h3>
+            <button onclick="cerrarModal('modal-evidencia')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="space-y-3">
+            <div class="text-sm text-gray-600">
+                Tarea: <span id="evidencia-tarea-titulo" class="font-semibold"></span>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Archivo de evidencia</label>
+                <input id="evidencia-archivo" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.zip" 
+                       class="w-full border rounded-lg px-3 py-2 text-sm">
+                <div class="text-xs text-gray-400 mt-1">Formatos: PDF, Word, Excel, Imagen, ZIP</div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Comentario adicional</label>
+                <textarea id="evidencia-comentario" class="w-full border rounded-lg px-3 py-2 text-sm" rows="2" placeholder="Comentario sobre la evidencia..."></textarea>
+            </div>
+        </div>
+        <div class="flex gap-2 pt-3 mt-2 border-t">
+            <button onclick="subirEvidencia()" class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
+                <i class="fas fa-upload mr-1"></i> Subir
+            </button>
+            <button onclick="cerrarModal('modal-evidencia')" class="flex-1 bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-300 transition">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: VER EVIDENCIA -->
+<div id="modal-ver-evidencia" class="modal">
+    <div class="modal-box" style="max-width: 500px;">
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold">📎 Evidencia</h3>
+            <button onclick="cerrarModal('modal-ver-evidencia')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="ver-evidencia-contenido">
+            <div class="text-center py-4 text-gray-500 text-sm">Cargando...</div>
+        </div>
     </div>
 </div>
 
@@ -846,10 +901,9 @@ function renderizarProyectos(proyectos) {
 }
 
 // ============================================
-// FUNCIONES AUXILIARES (definidas ANTES de usarlas)
+// FUNCIONES AUXILIARES
 // ============================================
 
-// Obtener clase de barra según estado
 function getBarraClase(estado) {
     const clases = {
         'Pendiente': 'pendiente',
@@ -861,7 +915,6 @@ function getBarraClase(estado) {
     return clases[estado] || 'pendiente';
 }
 
-// Render tarea fila para Gantt
 function renderTareaFilaGantt(t) {
     const barraClase = getBarraClase(t.estado);
     const prioridadClase = PRIORIDAD_COLORS[t.prioridad] || 'prioridad-media';
@@ -875,10 +928,15 @@ function renderTareaFilaGantt(t) {
     else if (t.estado === 'En Progreso') anchoBarra = '60%';
     else if (t.estado === 'Bloqueada') anchoBarra = '40%';
     
+    let evidenciaHTML = '';
+    if (t.evidencia_url) {
+        evidenciaHTML = `<span class="evidencia-tag" onclick="verEvidencia('${t.evidencia_url}', '${t.evidencia_nombre || 'Evidencia'}')" title="Ver evidencia">📎</span>`;
+    }
+    
     return `
         <tr>
             <td>
-                <div class="gantt-titulo">${t.titulo}</div>
+                <div class="gantt-titulo">${t.titulo} ${evidenciaHTML}</div>
                 <div class="gantt-fecha">${vencimiento}</div>
             </td>
             <td><div class="gantt-responsable">${responsable}</div></td>
@@ -899,6 +957,7 @@ function renderTareaFilaGantt(t) {
                         <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloq.</option>
                         <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Comp.</option>
                     </select>
+                    ${t.evidencia_url ? `<button onclick="verEvidencia('${t.evidencia_url}', '${t.evidencia_nombre || 'Evidencia'}')" class="text-blue-500 hover:text-blue-700" title="Ver evidencia"><i class="fas fa-eye"></i></button>` : ''}
                     <button onclick="editarTarea(${t.id})" class="edit" title="Editar"><i class="fas fa-edit"></i></button>
                     <button onclick="eliminarTarea(${t.id})" class="delete" title="Eliminar"><i class="fas fa-trash"></i></button>
                 </div>
@@ -907,7 +966,6 @@ function renderTareaFilaGantt(t) {
     `;
 }
 
-// Toggle fase (colapsar/expandir)
 function toggleFase(row) {
     const toggle = row.querySelector('.fase-toggle');
     const tareasFila = row.nextElementSibling;
@@ -918,7 +976,6 @@ function toggleFase(row) {
     }
 }
 
-// Render vista Gantt colapsable
 function renderVistaGanttColapsable(tareas, proyecto) {
     const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
     
@@ -1001,7 +1058,294 @@ function renderVistaGanttColapsable(tareas, proyecto) {
 }
 
 // ============================================
-// TOGGLE DETALLE CON FASES COLAPSABLES Y BOTÓN ORDENAR
+// VER EVIDENCIA
+// ============================================
+function verEvidencia(url, nombre) {
+    const contenido = document.getElementById('ver-evidencia-contenido');
+    
+    // Determinar si es imagen
+    const extensionesImagen = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+    const ext = url.split('.').pop().toLowerCase();
+    const esImagen = extensionesImagen.includes(ext);
+    
+    if (esImagen) {
+        contenido.innerHTML = `
+            <div class="text-center">
+                <img src="${url}" alt="${nombre}" class="evidencia-preview">
+                <div class="text-xs text-gray-500 mt-2">${nombre}</div>
+                <a href="${url}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-block">📥 Descargar</a>
+            </div>
+        `;
+    } else {
+        contenido.innerHTML = `
+            <div class="text-center py-4">
+                <div class="text-4xl mb-3">📄</div>
+                <div class="font-medium text-sm">${nombre}</div>
+                <div class="text-xs text-gray-500 mt-1">Archivo no visualizable directamente</div>
+                <a href="${url}" target="_blank" class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                    📥 Descargar archivo
+                </a>
+            </div>
+        `;
+    }
+    
+    abrirModal('modal-ver-evidencia');
+}
+
+// ============================================
+// SUBIR EVIDENCIA
+// ============================================
+let tareaEnEvidencia = null;
+
+function abrirModalEvidencia(tareaId) {
+    const tarea = tareasCache.find(t => t.id === tareaId);
+    if (!tarea) {
+        showToast('Tarea no encontrada', 'error');
+        return;
+    }
+    tareaEnEvidencia = tarea;
+    document.getElementById('evidencia-tarea-titulo').textContent = tarea.titulo;
+    document.getElementById('evidencia-archivo').value = '';
+    document.getElementById('evidencia-comentario').value = '';
+    abrirModal('modal-evidencia');
+}
+
+async function subirEvidencia() {
+    const archivoInput = document.getElementById('evidencia-archivo');
+    const comentario = document.getElementById('evidencia-comentario').value;
+    
+    if (!archivoInput.files || archivoInput.files.length === 0) {
+        showToast('Selecciona un archivo', 'error');
+        return;
+    }
+    
+    const archivo = archivoInput.files[0];
+    const tareaId = tareaEnEvidencia.id;
+    const extension = archivo.name.split('.').pop();
+    const nombreArchivo = `tarea_${tareaId}_${Date.now()}.${extension}`;
+    
+    try {
+        // Subir a Supabase Storage
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/evidencias/${nombreArchivo}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'apikey': SUPABASE_KEY
+            },
+            body: archivo
+        });
+        
+        if (!uploadRes.ok) {
+            const errorText = await uploadRes.text();
+            throw new Error('Error al subir archivo: ' + errorText);
+        }
+        
+        // Obtener URL pública
+        const urlPublica = `${SUPABASE_URL}/storage/v1/object/public/evidencias/${nombreArchivo}`;
+        
+        // Guardar en la base de datos
+        await supabaseUpdate('tareas', tareaId, {
+            evidencia_url: urlPublica,
+            evidencia_nombre: archivo.name,
+            evidencia_tipo: archivo.type,
+            estado: 'Completado'
+        });
+        
+        showToast('✅ Evidencia subida y tarea completada');
+        cerrarModal('modal-evidencia');
+        cargarDashboard();
+        
+    } catch (e) {
+        console.error('Error:', e);
+        showToast('Error al subir evidencia: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// GENERAR REPORTE DEL PROYECTO
+// ============================================
+async function generarReporteProyecto(proyectoId) {
+    try {
+        const proyecto = proyectosCache.find(p => p.id === proyectoId);
+        if (!proyecto) {
+            showToast('Proyecto no encontrado', 'error');
+            return;
+        }
+        
+        const tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
+        const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
+        const proveedores = await supabaseFetch(`proveedores?select=*,proyectos(nombre)&proyecto_id=eq.${proyectoId}`);
+        
+        // Calcular estadísticas
+        const totalTareas = tareas.length;
+        const completadas = tareas.filter(t => t.estado === 'Completado').length;
+        const pendientes = tareas.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
+        const bloqueadas = tareas.filter(t => t.estado === 'Bloqueada').length;
+        const progreso = totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0;
+        
+        // Calcular fases completas
+        let fasesCompletas = 0;
+        let totalFases = fasesMetodologia.length;
+        fasesMetodologia.forEach(fase => {
+            const tareasFase = tareas.filter(t => t.fase === fase);
+            if (tareasFase.length > 0 && tareasFase.every(t => t.estado === 'Completado')) {
+                fasesCompletas++;
+            }
+        });
+        
+        // Tareas con evidencia
+        const tareasConEvidencia = tareas.filter(t => t.evidencia_url);
+        
+        // Construir HTML del reporte
+        let tareasHTML = '';
+        if (tareas.length === 0) {
+            tareasHTML = '<p class="text-sm text-gray-500">No hay tareas registradas.</p>';
+        } else {
+            const fasesTareas = {};
+            tareas.forEach(t => {
+                const fase = t.fase || 'Sin fase';
+                if (!fasesTareas[fase]) fasesTareas[fase] = [];
+                fasesTareas[fase].push(t);
+            });
+            
+            let fasesOrdenadas = Object.keys(fasesTareas);
+            if (fasesMetodologia.length > 0) {
+                fasesOrdenadas = fasesMetodologia.filter(f => fasesTareas[f]);
+            }
+            
+            fasesOrdenadas.forEach(fase => {
+                const tareasFase = fasesTareas[fase] || [];
+                tareasHTML += `
+                    <div style="margin-bottom: 12px; border-left: 3px solid #3b82f6; padding-left: 12px;">
+                        <h4 style="font-weight: 600; font-size: 14px; color: #1f2937;">${fase}</h4>
+                        ${tareasFase.map(t => `
+                            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">
+                                <span>${t.titulo}</span>
+                                <span style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="color: ${t.estado === 'Completado' ? '#22c55e' : t.estado === 'Bloqueada' ? '#ef4444' : '#f59e0b'}; font-weight: 500;">
+                                        ${t.estado || 'Pendiente'}
+                                    </span>
+                                    ${t.evidencia_url ? `<span style="color: #3b82f6;">📎</span>` : ''}
+                                    ${t.responsable_texto ? `<span style="color: #6b7280; font-size: 11px;">👤 ${t.responsable_texto}</span>` : ''}
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `);
+            });
+        }
+        
+        // Proveedores
+        let proveedoresHTML = '';
+        if (proveedores.length > 0) {
+            proveedoresHTML = `
+                <div style="margin-top: 16px; border-top: 2px solid #e5e7eb; padding-top: 12px;">
+                    <h3 style="font-weight: 600; font-size: 15px; color: #1f2937;">🏢 Proveedores Evaluados</h3>
+                    ${proveedores.map(p => `
+                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">
+                            <span>${p.nombre}</span>
+                            <span style="color: #6b7280;">${p.contacto || 'Sin contacto'}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        // Evidencia
+        let evidenciaHTML = '';
+        if (tareasConEvidencia.length > 0) {
+            evidenciaHTML = `
+                <div style="margin-top: 16px; border-top: 2px solid #e5e7eb; padding-top: 12px;">
+                    <h3 style="font-weight: 600; font-size: 15px; color: #1f2937;">📎 Evidencia Adjunta</h3>
+                    ${tareasConEvidencia.map(t => `
+                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">
+                            <span>${t.titulo}</span>
+                            <span style="color: #3b82f6;">${t.evidencia_nombre || 'Archivo'}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        const reporteHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Reporte - ${proyecto.nombre}</title>
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 900px; margin: 0 auto; color: #1f2937; }
+                    .header { border-bottom: 3px solid #3b82f6; padding-bottom: 12px; margin-bottom: 20px; }
+                    .header h1 { font-size: 24px; font-weight: 700; color: #1f2937; margin: 0; }
+                    .header .sub { font-size: 14px; color: #6b7280; }
+                    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
+                    .info-grid .label { color: #6b7280; }
+                    .info-grid .value { font-weight: 500; }
+                    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+                    .stat-card { background: #f9fafb; padding: 12px; border-radius: 8px; text-align: center; }
+                    .stat-card .num { font-size: 22px; font-weight: 700; }
+                    .stat-card .num.blue { color: #3b82f6; }
+                    .stat-card .num.green { color: #22c55e; }
+                    .stat-card .num.yellow { color: #f59e0b; }
+                    .stat-card .num.red { color: #ef4444; }
+                    .stat-card .label { font-size: 11px; color: #6b7280; }
+                    .section { margin: 16px 0; }
+                    .section h3 { font-weight: 600; font-size: 15px; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
+                    .footer { margin-top: 24px; padding-top: 12px; border-top: 2px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>📊 Reporte de Proyecto</h1>
+                    <div class="sub">${proyecto.nombre}</div>
+                </div>
+                
+                <div class="info-grid">
+                    <div><span class="label">Cliente/Empresa:</span> <span class="value">${proyecto.empresa || 'No especificada'}</span></div>
+                    <div><span class="label">Área:</span> <span class="value">${proyecto.area || 'No especificada'}</span></div>
+                    <div><span class="label">Metodología:</span> <span class="value">${proyecto.metodologia || 'No definida'}</span></div>
+                    <div><span class="label">Estado:</span> <span class="value">${proyecto.estado || 'Activo'}</span></div>
+                    <div><span class="label">Fecha Inicio:</span> <span class="value">${proyecto.fecha_inicio || 'No definida'}</span></div>
+                    <div><span class="label">Fecha Fin:</span> <span class="value">${proyecto.fecha_fin || 'No definida'}</span></div>
+                    <div><span class="label">Fases:</span> <span class="value">${fasesCompletas}/${totalFases} completas</span></div>
+                    <div><span class="label">Progreso:</span> <span class="value">${progreso}%</span></div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card"><div class="num blue">${totalTareas}</div><div class="label">Total Tareas</div></div>
+                    <div class="stat-card"><div class="num green">${completadas}</div><div class="label">Completadas</div></div>
+                    <div class="stat-card"><div class="num yellow">${pendientes}</div><div class="label">Pendientes</div></div>
+                    <div class="stat-card"><div class="num red">${bloqueadas}</div><div class="label">Bloqueadas</div></div>
+                </div>
+                
+                <div class="section">
+                    <h3>📋 Tareas por Fase</h3>
+                    ${tareasHTML}
+                </div>
+                
+                ${proveedoresHTML}
+                ${evidenciaHTML}
+                
+                <div class="footer">
+                    Reporte generado el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}
+                </div>
+            </body>
+            </html>
+        `;
+        
+        const ventana = window.open('', '_blank', 'width=900,height=800');
+        ventana.document.write(reporteHTML);
+        ventana.document.close();
+        ventana.print();
+        
+    } catch (e) {
+        console.error('Error:', e);
+        showToast('Error al generar reporte: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// TOGGLE DETALLE
 // ============================================
 let detallesAbiertos = {};
 let ordenFechaActivo = {};
@@ -1074,7 +1418,7 @@ async function toggleDetalle(id) {
             `;
         }
 
-        // GANTT CON FASES COLAPSABLES
+        // GANTT
         let ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
 
         detalleDiv.innerHTML = `
@@ -1105,6 +1449,9 @@ async function toggleDetalle(id) {
                         <button onclick="ordenarPorFecha(${proyecto.id})" class="orden-btn" id="orden-btn-${proyecto.id}" title="Ordenar por fecha">
                             <i class="fas fa-sort-amount-down-alt mr-1"></i> Fecha
                         </button>
+                        <button onclick="generarReporteProyecto(${proyecto.id})" class="bg-green-600 text-white text-xs px-2 py-1 rounded hover:bg-green-700 transition" title="Generar reporte">
+                            <i class="fas fa-file-pdf mr-1"></i> Reporte
+                        </button>
                         <button onclick="abrirModalTareaDesdeDetalle(${proyecto.id})" class="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 transition">
                             <i class="fas fa-plus mr-1"></i> Tarea
                         </button>
@@ -1123,7 +1470,7 @@ async function toggleDetalle(id) {
             </div>
         `;
 
-        // Inicializar estado de colapso (todas cerradas excepto la primera)
+        // Inicializar colapso
         const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
         if (fasesRows.length > 0) {
             fasesRows.forEach((row, index) => {
@@ -1154,26 +1501,21 @@ function ordenarPorFecha(proyectoId) {
     
     if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
     
-    // Obtener las tareas del proyecto
     let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
     
-    // Alternar orden
     ordenFechaActivo[proyectoId] = !ordenFechaActivo[proyectoId];
     const ascendente = ordenFechaActivo[proyectoId];
     btn.innerHTML = ascendente ? '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
     
-    // Ordenar tareas por fecha
     tareas.sort((a, b) => {
         const fechaA = a.fecha_vencimiento ? new Date(a.fecha_vencimiento) : new Date('2099-12-31');
         const fechaB = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : new Date('2099-12-31');
         return ascendente ? fechaA - fechaB : fechaB - fechaA;
     });
     
-    // Reordenar en el DOM
     const fasesContainer = detalleDiv.querySelector('.gantt-container table tbody');
     if (!fasesContainer) return;
     
-    // Agrupar por fase
     const fases = {};
     tareas.forEach(t => {
         const fase = t.fase || 'Sin fase';
@@ -1181,7 +1523,6 @@ function ordenarPorFecha(proyectoId) {
         fases[fase].push(t);
     });
     
-    // Reconstruir el HTML de las fases
     const proyecto = proyectosCache.find(p => p.id === proyectoId);
     const nuevasFases = FASES_POR_METODOLOGIA[proyecto?.metodologia]?.fases || [];
     let fasesOrdenadas = Object.keys(fases);
@@ -1229,13 +1570,46 @@ function ordenarPorFecha(proyectoId) {
     
     fasesContainer.innerHTML = html;
     
-    // Abrir la primera fase
     const primerasFilas = fasesContainer.querySelectorAll('.gantt-fila-fase');
     if (primerasFilas.length > 0) {
         const toggle = primerasFilas[0].querySelector('.fase-toggle');
         const tareasFila = primerasFilas[0].nextElementSibling;
         if (toggle) toggle.classList.remove('collapsed');
         if (tareasFila) tareasFila.classList.remove('hidden');
+    }
+}
+
+// ============================================
+// CAMBIAR ESTADO DE TAREA (con evidencia)
+// ============================================
+async function cambiarEstadoTarea(id, nuevoEstado) {
+    try {
+        if (nuevoEstado === 'Completado') {
+            const tarea = tareasCache.find(t => t.id === id);
+            if (tarea.evidencia_url) {
+                await supabaseUpdate('tareas', id, { estado: nuevoEstado });
+                showToast('✅ Tarea completada');
+                cargarDashboard();
+                return;
+            }
+            
+            const confirmar = confirm('📎 ¿Quieres subir evidencia para esta tarea?');
+            if (confirmar) {
+                abrirModalEvidencia(id);
+                return;
+            } else {
+                await supabaseUpdate('tareas', id, { estado: nuevoEstado });
+                showToast('✅ Tarea completada');
+                cargarDashboard();
+                return;
+            }
+        }
+        
+        await supabaseUpdate('tareas', id, { estado: nuevoEstado });
+        showToast('Estado actualizado');
+        cargarDashboard();
+    } catch (e) {
+        showToast('Error al actualizar estado', 'error');
     }
 }
 
@@ -1456,19 +1830,6 @@ async function eliminarTarea(id) {
         cargarDashboard();
     } catch (e) {
         showToast('Error al eliminar tarea', 'error');
-    }
-}
-
-// ============================================
-// CAMBIAR ESTADO DE TAREA
-// ============================================
-async function cambiarEstadoTarea(id, nuevoEstado) {
-    try {
-        await supabaseUpdate('tareas', id, { estado: nuevoEstado });
-        showToast('Estado actualizado');
-        cargarDashboard();
-    } catch (e) {
-        showToast('Error al actualizar estado', 'error');
     }
 }
 
