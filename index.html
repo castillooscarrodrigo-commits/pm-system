@@ -84,7 +84,6 @@
         .gantt-fila-fase .fase-estado { font-size: 8px; font-weight: 400; }
         .gantt-fila-fase .fase-completa { color: #059669; }
         .gantt-fila-fase .fase-incompleta { color: #dc2626; }
-        .gantt-fila-vacia { color: #9ca3af; text-align: center; padding: 12px; font-size: 11px; }
         .gantt-fila-fase .fase-toggle { font-size: 10px; margin-right: 4px; transition: transform 0.2s; display: inline-block; }
         .gantt-fila-fase .fase-toggle.collapsed { transform: rotate(-90deg); }
         .gantt-fila-fase .fase-tareas-count { font-size: 8px; font-weight: 400; color: #6b7280; }
@@ -139,6 +138,13 @@ const FASES_POR_METODOLOGIA = {
     'ADKAR': { fases: ['Awareness', 'Desire', 'Knowledge', 'Ability', 'Reinforcement'], duracion_total: 80 }
 };
 const DURACION_DEFAULT = 60;
+
+const PRIORIDAD_COLORS = {
+    'Baja': 'prioridad-baja',
+    'Media': 'prioridad-media',
+    'Alta': 'prioridad-alta',
+    'Crítica': 'prioridad-critica'
+};
 </script>
 
 <div id="toast" class="toast toast-success"></div>
@@ -669,15 +675,9 @@ function calcularProgresoPorFases(tareas, metodologia) {
     
     fasesMetodologia.forEach(fase => {
         const tareasFase = tareas.filter(t => t.fase === fase);
-        
-        if (tareasFase.length === 0) {
-            return;
-        }
-        
+        if (tareasFase.length === 0) return;
         const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
-        if (todasCompletas) {
-            fasesCompletas++;
-        }
+        if (todasCompletas) fasesCompletas++;
     });
 
     return Math.round((fasesCompletas / totalFases) * 100);
@@ -846,6 +846,161 @@ function renderizarProyectos(proyectos) {
 }
 
 // ============================================
+// FUNCIONES AUXILIARES (definidas ANTES de usarlas)
+// ============================================
+
+// Obtener clase de barra según estado
+function getBarraClase(estado) {
+    const clases = {
+        'Pendiente': 'pendiente',
+        'En Progreso': 'progreso',
+        'Completado': 'completado',
+        'Bloqueada': 'bloqueada',
+        'Hold': 'hold'
+    };
+    return clases[estado] || 'pendiente';
+}
+
+// Render tarea fila para Gantt
+function renderTareaFilaGantt(t) {
+    const barraClase = getBarraClase(t.estado);
+    const prioridadClase = PRIORIDAD_COLORS[t.prioridad] || 'prioridad-media';
+    const prioridadLabel = t.prioridad || 'Media';
+    const responsable = t.responsable_texto || '-';
+    
+    let vencimiento = t.fecha_vencimiento ? new Date(t.fecha_vencimiento).toLocaleDateString() : '-';
+    
+    let anchoBarra = '30%';
+    if (t.estado === 'Completado') anchoBarra = '100%';
+    else if (t.estado === 'En Progreso') anchoBarra = '60%';
+    else if (t.estado === 'Bloqueada') anchoBarra = '40%';
+    
+    return `
+        <tr>
+            <td>
+                <div class="gantt-titulo">${t.titulo}</div>
+                <div class="gantt-fecha">${vencimiento}</div>
+            </td>
+            <td><div class="gantt-responsable">${responsable}</div></td>
+            <td><span class="prioridad-badge ${prioridadClase}">${prioridadLabel}</span></td>
+            <td class="gantt-check">${t.estado === 'Completado' ? '✅' : t.estado === 'Bloqueada' ? '🚫' : '○'}</td>
+            <td>
+                <div style="position:relative; width:100%; height:14px; background:#f3f4f6; border-radius:3px; overflow:hidden;">
+                    <div class="gantt-barra ${barraClase}" style="position:absolute; left:0; width:${anchoBarra};">
+                        ${t.titulo.substring(0, 15)}${t.titulo.length > 15 ? '…' : ''}
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="gantt-acciones">
+                    <select onchange="cambiarEstadoTarea(${t.id}, this.value)" class="status-select">
+                        <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pend.</option>
+                        <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>Prog.</option>
+                        <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloq.</option>
+                        <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Comp.</option>
+                    </select>
+                    <button onclick="editarTarea(${t.id})" class="edit" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button onclick="eliminarTarea(${t.id})" class="delete" title="Eliminar"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+// Toggle fase (colapsar/expandir)
+function toggleFase(row) {
+    const toggle = row.querySelector('.fase-toggle');
+    const tareasFila = row.nextElementSibling;
+    
+    if (tareasFila) {
+        tareasFila.classList.toggle('hidden');
+        if (toggle) toggle.classList.toggle('collapsed');
+    }
+}
+
+// Render vista Gantt colapsable
+function renderVistaGanttColapsable(tareas, proyecto) {
+    const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
+    
+    if (tareas.length === 0) {
+        return `<div class="text-gray-400 text-xs text-center py-2">Sin tareas</div>`;
+    }
+
+    const tareasPorFase = {};
+    tareas.forEach(t => {
+        const fase = t.fase || 'Sin fase';
+        if (!tareasPorFase[fase]) tareasPorFase[fase] = [];
+        tareasPorFase[fase].push(t);
+    });
+
+    let fasesOrdenadas = Object.keys(tareasPorFase);
+    if (fasesMetodologia.length > 0) {
+        fasesOrdenadas = fasesMetodologia.filter(f => tareasPorFase[f]);
+        Object.keys(tareasPorFase).forEach(f => {
+            if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
+        });
+    } else {
+        fasesOrdenadas.sort();
+    }
+
+    let html = `
+        <div class="gantt-container">
+            <table class="gantt-table">
+                <thead>
+                    <tr>
+                        <th style="width:22%;">Tarea</th>
+                        <th style="width:10%;">Resp.</th>
+                        <th style="width:8%;">Prioridad</th>
+                        <th style="width:4%;">Estado</th>
+                        <th style="width:46%;">Cronograma</th>
+                        <th style="width:10%;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    fasesOrdenadas.forEach(fase => {
+        const tareasFase = tareasPorFase[fase] || [];
+        const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
+        const totalTareasFase = tareasFase.length;
+        const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
+
+        html += `
+            <tr class="gantt-fila-fase" onclick="toggleFase(this)">
+                <td colspan="6">
+                    <span class="fase-toggle collapsed">▼</span>
+                    <span class="fase-icon"><i class="fas fa-flag"></i></span>
+                    ${fase}
+                    <span class="fase-estado ${todasCompletas ? 'fase-completa' : 'fase-incompleta'}">
+                        ${todasCompletas ? '✅' : `⏳ ${completadasFase}/${totalTareasFase}`}
+                    </span>
+                    <span class="fase-tareas-count">(${totalTareasFase} tareas)</span>
+                </td>
+            </tr>
+            <tr class="tarea-row hidden">
+                <td colspan="6">
+                    <div class="gantt-container">
+                        <table class="gantt-table">
+                            <tbody>
+                                ${tareasFase.map(t => renderTareaFilaGantt(t)).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    return html;
+}
+
+// ============================================
 // TOGGLE DETALLE CON FASES COLAPSABLES Y BOTÓN ORDENAR
 // ============================================
 let detallesAbiertos = {};
@@ -868,7 +1023,10 @@ async function toggleDetalle(id) {
 
     try {
         const proyecto = proyectosCache.find(p => p.id === id);
-        if (!proyecto) { detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Proyecto no encontrado</div>'; return; }
+        if (!proyecto) { 
+            detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Proyecto no encontrado</div>'; 
+            return; 
+        }
 
         let tareas = tareasCache.filter(t => t.proyecto_id === id);
         const progreso = calcularProgresoPorFases(tareas, proyecto.metodologia);
@@ -916,7 +1074,7 @@ async function toggleDetalle(id) {
             `;
         }
 
-        // --- GANTT CON FASES COLAPSABLES ---
+        // GANTT CON FASES COLAPSABLES
         let ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
 
         detalleDiv.innerHTML = `
@@ -972,11 +1130,9 @@ async function toggleDetalle(id) {
                 const toggle = row.querySelector('.fase-toggle');
                 const tareasFila = row.nextElementSibling;
                 if (index === 0) {
-                    // Primera fase abierta por defecto
                     if (toggle) toggle.classList.remove('collapsed');
                     if (tareasFila) tareasFila.classList.remove('hidden');
                 } else {
-                    // Las demás cerradas
                     if (toggle) toggle.classList.add('collapsed');
                     if (tareasFila) tareasFila.classList.add('hidden');
                 }
@@ -997,10 +1153,6 @@ function ordenarPorFecha(proyectoId) {
     const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
     
     if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
-    
-    // Obtener todas las filas de tareas
-    const tareaRows = detalleDiv.querySelectorAll('.tarea-row');
-    const tareasArray = Array.from(tareaRows);
     
     // Obtener las tareas del proyecto
     let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
@@ -1066,7 +1218,7 @@ function ordenarPorFecha(proyectoId) {
                     <div class="gantt-container">
                         <table class="gantt-table">
                             <tbody>
-                                ${tareasFase.map(t => renderTareaFila(t)).join('')}
+                                ${tareasFase.map(t => renderTareaFilaGantt(t)).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -1085,157 +1237,6 @@ function ordenarPorFecha(proyectoId) {
         if (toggle) toggle.classList.remove('collapsed');
         if (tareasFila) tareasFila.classList.remove('hidden');
     }
-}
-
-// ============================================
-// TOGGLE FASE (colapsar/expandir)
-// ============================================
-function toggleFase(row) {
-    const toggle = row.querySelector('.fase-toggle');
-    const tareasFila = row.nextElementSibling;
-    
-    if (tareasFila) {
-        tareasFila.classList.toggle('hidden');
-        if (toggle) toggle.classList.toggle('collapsed');
-    }
-}
-
-// ============================================
-// RENDER TAREA FILA PARA GANTT COLAPSABLE
-// ============================================
-function renderTareaFila(t) {
-    const barraClase = getBarraClase(t.estado);
-    const prioridadClase = PRIORIDAD_COLORS[t.prioridad] || 'prioridad-media';
-    const prioridadLabel = t.prioridad || 'Media';
-    const responsable = t.responsable_texto || '-';
-    
-    let vencimiento = t.fecha_vencimiento ? new Date(t.fecha_vencimiento).toLocaleDateString() : '-';
-    
-    return `
-        <tr>
-            <td>
-                <div class="gantt-titulo">${t.titulo}</div>
-                <div class="gantt-fecha">${vencimiento}</div>
-            </td>
-            <td><div class="gantt-responsable">${responsable}</div></td>
-            <td><span class="prioridad-badge ${prioridadClase}">${prioridadLabel}</span></td>
-            <td class="gantt-check">${t.estado === 'Completado' ? '✅' : t.estado === 'Bloqueada' ? '🚫' : '○'}</td>
-            <td>
-                <div style="position:relative; width:100%; height:14px; background:#f3f4f6; border-radius:3px; overflow:hidden;">
-                    <div class="gantt-barra ${barraClase}" style="position:absolute; left:0; width:${t.estado === 'Completado' ? '100' : '30'}%;">
-                        ${t.titulo.substring(0, 15)}${t.titulo.length > 15 ? '…' : ''}
-                    </div>
-                </div>
-            </td>
-            <td>
-                <div class="gantt-acciones">
-                    <select onchange="cambiarEstadoTarea(${t.id}, this.value)" class="status-select">
-                        <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pend.</option>
-                        <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>Prog.</option>
-                        <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloq.</option>
-                        <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Comp.</option>
-                    </select>
-                    <button onclick="editarTarea(${t.id})" class="edit" title="Editar"><i class="fas fa-edit"></i></button>
-                    <button onclick="eliminarTarea(${t.id})" class="delete" title="Eliminar"><i class="fas fa-trash"></i></button>
-                </div>
-            </td>
-        </tr>
-    `;
-}
-
-function getBarraClase(estado) {
-    const clases = {
-        'Pendiente': 'pendiente',
-        'En Progreso': 'progreso',
-        'Completado': 'completado',
-        'Bloqueada': 'bloqueada',
-        'Hold': 'hold'
-    };
-    return clases[estado] || 'pendiente';
-}
-
-// ============================================
-// RENDER VISTA GANTT COLAPSABLE
-// ============================================
-function renderVistaGanttColapsable(tareas, proyecto) {
-    const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
-    
-    if (tareas.length === 0) {
-        return `<div class="text-gray-400 text-xs text-center py-2">Sin tareas</div>`;
-    }
-
-    const tareasPorFase = {};
-    tareas.forEach(t => {
-        const fase = t.fase || 'Sin fase';
-        if (!tareasPorFase[fase]) tareasPorFase[fase] = [];
-        tareasPorFase[fase].push(t);
-    });
-
-    let fasesOrdenadas = Object.keys(tareasPorFase);
-    if (fasesMetodologia.length > 0) {
-        fasesOrdenadas = fasesMetodologia.filter(f => tareasPorFase[f]);
-        Object.keys(tareasPorFase).forEach(f => {
-            if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
-        });
-    } else {
-        fasesOrdenadas.sort();
-    }
-
-    let html = `
-        <div class="gantt-container">
-            <table class="gantt-table">
-                <thead>
-                    <tr>
-                        <th style="width:22%;">Tarea</th>
-                        <th style="width:10%;">Resp.</th>
-                        <th style="width:8%;">Prioridad</th>
-                        <th style="width:4%;">Estado</th>
-                        <th style="width:46%;">Cronograma</th>
-                        <th style="width:10%;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-
-    fasesOrdenadas.forEach(fase => {
-        const tareasFase = tareasPorFase[fase] || [];
-        const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
-        const totalTareasFase = tareasFase.length;
-        const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
-
-        html += `
-            <tr class="gantt-fila-fase" onclick="toggleFase(this)">
-                <td colspan="6">
-                    <span class="fase-toggle collapsed">▼</span>
-                    <span class="fase-icon"><i class="fas fa-flag"></i></span>
-                    ${fase}
-                    <span class="fase-estado ${todasCompletas ? 'fase-completa' : 'fase-incompleta'}">
-                        ${todasCompletas ? '✅' : `⏳ ${completadasFase}/${totalTareasFase}`}
-                    </span>
-                    <span class="fase-tareas-count">(${totalTareasFase} tareas)</span>
-                </td>
-            </tr>
-            <tr class="tarea-row hidden">
-                <td colspan="6">
-                    <div class="gantt-container">
-                        <table class="gantt-table">
-                            <tbody>
-                                ${tareasFase.map(t => renderTareaFila(t)).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </td>
-            </tr>
-        `;
-    });
-
-    html += `
-                </tbody>
-            </table>
-        </div>
-    `;
-
-    return html;
 }
 
 // ============================================
