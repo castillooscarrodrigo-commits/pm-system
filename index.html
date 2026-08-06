@@ -158,7 +158,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v3.3</span>
+            <span class="text-lg font-bold text-gray-800">PM System v3.4</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -1145,7 +1145,6 @@ async function subirEvidencia() {
             estado: 'Completado'
         });
         
-        // POPUP DE ÉXITO
         alert('✅ Evidencia subida correctamente\n\n📎 Archivo: ' + archivo.name + '\n📋 Tarea: ' + tareaEnEvidencia.titulo);
         
         cerrarModal('modal-evidencia');
@@ -1156,7 +1155,8 @@ async function subirEvidencia() {
         alert('❌ Error al subir evidencia: ' + e.message);
     }
 }
-    // ============================================
+
+// ============================================
 // GENERAR REPORTE DEL PROYECTO
 // ============================================
 async function generarReporteProyecto(proyectoId) {
@@ -1334,11 +1334,46 @@ async function generarReporteProyecto(proyectoId) {
 }
 
 // ============================================
+// EDITAR PROYECTO
+// ============================================
+function editarProyecto(id) {
+    const proyecto = proyectosCache.find(p => p.id === id);
+    if (!proyecto) {
+        showToast('Proyecto no encontrado', 'error');
+        return;
+    }
+
+    document.getElementById('modal-proyecto-titulo').textContent = '✏️ Editar Proyecto';
+    document.getElementById('proy-id').value = proyecto.id;
+    document.getElementById('proy-nombre').value = proyecto.nombre || '';
+    document.getElementById('proy-categoria').value = proyecto.categoria || '';
+    document.getElementById('proy-metodologia').value = proyecto.metodologia || '';
+    document.getElementById('proy-empresa').value = proyecto.empresa || '';
+    document.getElementById('proy-area').value = proyecto.area || '';
+    document.getElementById('proy-inicio').value = proyecto.fecha_inicio || '';
+    document.getElementById('proy-fecha').value = proyecto.fecha_fin || '';
+
+    const categoria = proyecto.categoria || '';
+    const metodologiaInfo = METODOLOGIAS[categoria];
+    if (metodologiaInfo) {
+        document.getElementById('metodologia-desc-texto').textContent = metodologiaInfo.desc;
+        document.getElementById('metodologia-desc').classList.add('show');
+    } else {
+        document.getElementById('metodologia-desc').classList.remove('show');
+    }
+
+    abrirModal('modal-proyecto');
+}
+
+// ============================================
 // EDITAR TAREA (con cambio de fase)
 // ============================================
 function editarTarea(id) {
     const tarea = tareasCache.find(t => t.id === id);
-    if (!tarea) return;
+    if (!tarea) {
+        showToast('Tarea no encontrada', 'error');
+        return;
+    }
 
     document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
     document.getElementById('tar-id').value = tarea.id;
@@ -1350,22 +1385,52 @@ function editarTarea(id) {
     document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
     document.getElementById('tar-descripcion').value = tarea.descripcion || '';
 
+    // ============================================
+    // CARGAR FASES DISPONIBLES
+    // ============================================
     const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
     const fasesSelect = document.getElementById('tar-fase');
     
+    // Limpiar el select
+    fasesSelect.innerHTML = '';
+    
+    // Obtener fases según la metodología
     let fasesDisponibles = [];
     if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
         fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
-    } else {
-        fasesDisponibles = ['Sin fase'];
     }
     
-    fasesSelect.innerHTML = fasesDisponibles.map(f => 
-        `<option value="${f}" ${f === tarea.fase ? 'selected' : ''}>${f}</option>`
-    ).join('');
+    // Si no hay metodología, usar las fases que ya tiene el proyecto
+    if (fasesDisponibles.length === 0) {
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === tarea.proyecto_id);
+        const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
+        if (fasesExistentes.length > 0) {
+            fasesDisponibles = fasesExistentes;
+        } else {
+            fasesDisponibles = ['Sin fase'];
+        }
+    }
     
+    // Agregar las fases al selector
+    fasesDisponibles.forEach(f => {
+        const option = document.createElement('option');
+        option.value = f;
+        option.textContent = f;
+        if (f === tarea.fase) {
+            option.selected = true;
+        }
+        fasesSelect.appendChild(option);
+    });
+    
+    // Agregar opción "Sin fase" si no existe y la tarea actual no tiene fase
     if (!fasesDisponibles.includes('Sin fase')) {
-        fasesSelect.innerHTML += `<option value="">Sin fase</option>`;
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Sin fase';
+        if (tarea.fase === '' || tarea.fase === null) {
+            option.selected = true;
+        }
+        fasesSelect.appendChild(option);
     }
 
     abrirModal('modal-tarea');
@@ -1386,8 +1451,11 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
     document.getElementById('tar-fecha-vencimiento').value = '';
     document.getElementById('tar-descripcion').value = '';
 
+    // Cargar fases disponibles
     const proyecto = proyectosCache.find(p => p.id === proyectoId);
     const fasesSelect = document.getElementById('tar-fase');
+    
+    fasesSelect.innerHTML = '';
     
     let fasesDisponibles = [];
     if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
@@ -1396,12 +1464,18 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
         fasesDisponibles = ['Sin fase'];
     }
     
-    fasesSelect.innerHTML = fasesDisponibles.map(f => 
-        `<option value="${f}">${f}</option>`
-    ).join('');
+    fasesDisponibles.forEach(f => {
+        const option = document.createElement('option');
+        option.value = f;
+        option.textContent = f;
+        fasesSelect.appendChild(option);
+    });
     
     if (!fasesDisponibles.includes('Sin fase')) {
-        fasesSelect.innerHTML += `<option value="">Sin fase</option>`;
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Sin fase';
+        fasesSelect.appendChild(option);
     }
 
     abrirModal('modal-tarea');
