@@ -206,7 +206,7 @@ const PRIORIDAD_COLORS = {
                     </div>
                     <div class="kpi-icon bg-yellow-100 text-yellow-600"><i class="fas fa-tasks"></i></div>
                 </div>
-                <div class="text-xs text-red-600 mt-1"><i class="fas fa-exclamation-triangle"></i> <span id="kpi-bloqueadas">0</span> bloqueadas</div>
+                <div class="text-xs text-gray-400 mt-1">Tareas pendientes</div>
             </div>
             <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
                 <div class="flex justify-between items-start">
@@ -1641,10 +1641,6 @@ function editarProyecto(id) {
 
     abrirModal('modal-proyecto');
 }
-
-// ============================================
-// EDITAR TAREA
-// ============================================
 function editarTarea(id) {
     const tarea = tareasCache.find(t => t.id === id);
     if (!tarea) return;
@@ -1653,20 +1649,33 @@ function editarTarea(id) {
     document.getElementById('tar-id').value = tarea.id;
     document.getElementById('tar-titulo').value = tarea.titulo || '';
     document.getElementById('tar-proyecto').value = tarea.proyecto_id || '';
+    document.getElementById('tar-proyecto').disabled = true; // No permitir cambiar proyecto
     document.getElementById('tar-responsable').value = tarea.responsable_texto || '';
     document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
-    document.getElementById('tar-fase').value = tarea.fase || '';
     document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
     document.getElementById('tar-descripcion').value = tarea.descripcion || '';
 
+    // Cargar las fases disponibles según la metodología del proyecto
     const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
     const fasesSelect = document.getElementById('tar-fase');
+    
+    // Obtener fases de la metodología
+    let fasesDisponibles = [];
     if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
-        const fases = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
-        fasesSelect.innerHTML = '<option value="">Sin fase</option>' +
-            fases.map(f => `<option value="${f}" ${f === tarea.fase ? 'selected' : ''}>${f}</option>`).join('');
+        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
     } else {
-        fasesSelect.innerHTML = '<option value="">Sin fase</option>';
+        // Fases por defecto si no hay metodología
+        fasesDisponibles = ['Sin fase'];
+    }
+    
+    // Construir el select con las fases disponibles
+    fasesSelect.innerHTML = fasesDisponibles.map(f => 
+        `<option value="${f}" ${f === tarea.fase ? 'selected' : ''}>${f}</option>`
+    ).join('');
+    
+    // Agregar opción "Sin fase" si no está en la lista
+    if (!fasesDisponibles.includes('Sin fase')) {
+        fasesSelect.innerHTML += `<option value="">Sin fase</option>`;
     }
 
     abrirModal('modal-tarea');
@@ -1850,17 +1859,24 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
 
     const proyecto = proyectosCache.find(p => p.id === proyectoId);
     const fasesSelect = document.getElementById('tar-fase');
+    
+    let fasesDisponibles = [];
     if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
-        const fases = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
-        fasesSelect.innerHTML = '<option value="">Selecciona una fase...</option>' +
-            fases.map(f => `<option value="${f}">${f}</option>`).join('');
+        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
     } else {
-        fasesSelect.innerHTML = '<option value="">Sin fase</option>';
+        fasesDisponibles = ['Sin fase'];
+    }
+    
+    fasesSelect.innerHTML = fasesDisponibles.map(f => 
+        `<option value="${f}">${f}</option>`
+    ).join('');
+    
+    if (!fasesDisponibles.includes('Sin fase')) {
+        fasesSelect.innerHTML += `<option value="">Sin fase</option>`;
     }
 
     abrirModal('modal-tarea');
 }
-
 // ============================================
 // PROVEEDORES
 // ============================================
