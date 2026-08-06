@@ -761,13 +761,11 @@ async function cargarDashboard() {
 
         const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
         const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
-        const bloqueadas = tareasCache.filter(t => t.estado === 'Bloqueada').length;
         const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
         const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
 
         document.getElementById('kpi-proyectos').textContent = activos;
         document.getElementById('kpi-tareas').textContent = pendientes;
-        document.getElementById('kpi-bloqueadas').textContent = bloqueadas;
         document.getElementById('kpi-vencidas').textContent = vencidas;
         document.getElementById('kpi-recursos').textContent = usuariosCache.length;
         document.getElementById('kpi-completadas').textContent = completadasTotal;
@@ -1063,7 +1061,6 @@ function renderVistaGanttColapsable(tareas, proyecto) {
 function verEvidencia(url, nombre) {
     const contenido = document.getElementById('ver-evidencia-contenido');
     
-    // Determinar si es imagen
     const extensionesImagen = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
     const ext = url.split('.').pop().toLowerCase();
     const esImagen = extensionesImagen.includes(ext);
@@ -1125,7 +1122,6 @@ async function subirEvidencia() {
     const nombreArchivo = `tarea_${tareaId}_${Date.now()}.${extension}`;
     
     try {
-        // Subir a Supabase Storage
         const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/evidencias/${nombreArchivo}`, {
             method: 'POST',
             headers: {
@@ -1140,10 +1136,8 @@ async function subirEvidencia() {
             throw new Error('Error al subir archivo: ' + errorText);
         }
         
-        // Obtener URL pública
         const urlPublica = `${SUPABASE_URL}/storage/v1/object/public/evidencias/${nombreArchivo}`;
         
-        // Guardar en la base de datos
         await supabaseUpdate('tareas', tareaId, {
             evidencia_url: urlPublica,
             evidencia_nombre: archivo.name,
@@ -1176,14 +1170,12 @@ async function generarReporteProyecto(proyectoId) {
         const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
         const proveedores = await supabaseFetch(`proveedores?select=*,proyectos(nombre)&proyecto_id=eq.${proyectoId}`);
         
-        // Calcular estadísticas
         const totalTareas = tareas.length;
         const completadas = tareas.filter(t => t.estado === 'Completado').length;
         const pendientes = tareas.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
         const bloqueadas = tareas.filter(t => t.estado === 'Bloqueada').length;
         const progreso = totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0;
         
-        // Calcular fases completas
         let fasesCompletas = 0;
         let totalFases = fasesMetodologia.length;
         fasesMetodologia.forEach(fase => {
@@ -1193,10 +1185,8 @@ async function generarReporteProyecto(proyectoId) {
             }
         });
         
-        // Tareas con evidencia
         const tareasConEvidencia = tareas.filter(t => t.evidencia_url);
         
-        // Construir HTML del reporte
         let tareasHTML = '';
         if (tareas.length === 0) {
             tareasHTML = '<p class="text-sm text-gray-500">No hay tareas registradas.</p>';
@@ -1231,11 +1221,10 @@ async function generarReporteProyecto(proyectoId) {
                             </div>
                         `).join('')}
                     </div>
-                `);
+                `;
             });
         }
         
-        // Proveedores
         let proveedoresHTML = '';
         if (proveedores.length > 0) {
             proveedoresHTML = `
@@ -1251,7 +1240,6 @@ async function generarReporteProyecto(proyectoId) {
             `;
         }
         
-        // Evidencia
         let evidenciaHTML = '';
         if (tareasConEvidencia.length > 0) {
             evidenciaHTML = `
@@ -1345,6 +1333,80 @@ async function generarReporteProyecto(proyectoId) {
 }
 
 // ============================================
+// EDITAR TAREA (con cambio de fase)
+// ============================================
+function editarTarea(id) {
+    const tarea = tareasCache.find(t => t.id === id);
+    if (!tarea) return;
+
+    document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
+    document.getElementById('tar-id').value = tarea.id;
+    document.getElementById('tar-titulo').value = tarea.titulo || '';
+    document.getElementById('tar-proyecto').value = tarea.proyecto_id || '';
+    document.getElementById('tar-proyecto').disabled = true;
+    document.getElementById('tar-responsable').value = tarea.responsable_texto || '';
+    document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
+    document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
+    document.getElementById('tar-descripcion').value = tarea.descripcion || '';
+
+    const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
+    const fasesSelect = document.getElementById('tar-fase');
+    
+    let fasesDisponibles = [];
+    if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
+        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
+    } else {
+        fasesDisponibles = ['Sin fase'];
+    }
+    
+    fasesSelect.innerHTML = fasesDisponibles.map(f => 
+        `<option value="${f}" ${f === tarea.fase ? 'selected' : ''}>${f}</option>`
+    ).join('');
+    
+    if (!fasesDisponibles.includes('Sin fase')) {
+        fasesSelect.innerHTML += `<option value="">Sin fase</option>`;
+    }
+
+    abrirModal('modal-tarea');
+}
+
+// ============================================
+// ABRIR MODAL TAREA DESDE DETALLE
+// ============================================
+function abrirModalTareaDesdeDetalle(proyectoId) {
+    const select = document.getElementById('tar-proyecto');
+    select.value = proyectoId;
+    select.disabled = true;
+    document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
+    document.getElementById('tar-id').value = '';
+    document.getElementById('tar-titulo').value = '';
+    document.getElementById('tar-responsable').value = '';
+    document.getElementById('tar-prioridad').value = 'Media';
+    document.getElementById('tar-fecha-vencimiento').value = '';
+    document.getElementById('tar-descripcion').value = '';
+
+    const proyecto = proyectosCache.find(p => p.id === proyectoId);
+    const fasesSelect = document.getElementById('tar-fase');
+    
+    let fasesDisponibles = [];
+    if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
+        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
+    } else {
+        fasesDisponibles = ['Sin fase'];
+    }
+    
+    fasesSelect.innerHTML = fasesDisponibles.map(f => 
+        `<option value="${f}">${f}</option>`
+    ).join('');
+    
+    if (!fasesDisponibles.includes('Sin fase')) {
+        fasesSelect.innerHTML += `<option value="">Sin fase</option>`;
+    }
+
+    abrirModal('modal-tarea');
+}
+
+// ============================================
 // TOGGLE DETALLE
 // ============================================
 let detallesAbiertos = {};
@@ -1396,7 +1458,6 @@ async function toggleDetalle(id) {
             });
         }
 
-        // FASES COMPACTAS
         let fasesCompactasHTML = '';
         if (fasesStatus.length > 0) {
             fasesCompactasHTML = `
@@ -1418,7 +1479,6 @@ async function toggleDetalle(id) {
             `;
         }
 
-        // GANTT
         let ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
 
         detalleDiv.innerHTML = `
@@ -1470,7 +1530,6 @@ async function toggleDetalle(id) {
             </div>
         `;
 
-        // Inicializar colapso
         const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
         if (fasesRows.length > 0) {
             fasesRows.forEach((row, index) => {
@@ -1611,74 +1670,6 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
     } catch (e) {
         showToast('Error al actualizar estado', 'error');
     }
-}
-
-// ============================================
-// EDITAR PROYECTO
-// ============================================
-function editarProyecto(id) {
-    const proyecto = proyectosCache.find(p => p.id === id);
-    if (!proyecto) return;
-
-    document.getElementById('modal-proyecto-titulo').textContent = '✏️ Editar Proyecto';
-    document.getElementById('proy-id').value = proyecto.id;
-    document.getElementById('proy-nombre').value = proyecto.nombre || '';
-    document.getElementById('proy-categoria').value = proyecto.categoria || '';
-    document.getElementById('proy-metodologia').value = proyecto.metodologia || '';
-    document.getElementById('proy-empresa').value = proyecto.empresa || '';
-    document.getElementById('proy-area').value = proyecto.area || '';
-    document.getElementById('proy-inicio').value = proyecto.fecha_inicio || '';
-    document.getElementById('proy-fecha').value = proyecto.fecha_fin || '';
-
-    const categoria = proyecto.categoria || '';
-    const metodologiaInfo = METODOLOGIAS[categoria];
-    if (metodologiaInfo) {
-        document.getElementById('metodologia-desc-texto').textContent = metodologiaInfo.desc;
-        document.getElementById('metodologia-desc').classList.add('show');
-    } else {
-        document.getElementById('metodologia-desc').classList.remove('show');
-    }
-
-    abrirModal('modal-proyecto');
-}
-function editarTarea(id) {
-    const tarea = tareasCache.find(t => t.id === id);
-    if (!tarea) return;
-
-    document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
-    document.getElementById('tar-id').value = tarea.id;
-    document.getElementById('tar-titulo').value = tarea.titulo || '';
-    document.getElementById('tar-proyecto').value = tarea.proyecto_id || '';
-    document.getElementById('tar-proyecto').disabled = true; // No permitir cambiar proyecto
-    document.getElementById('tar-responsable').value = tarea.responsable_texto || '';
-    document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
-    document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
-    document.getElementById('tar-descripcion').value = tarea.descripcion || '';
-
-    // Cargar las fases disponibles según la metodología del proyecto
-    const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
-    const fasesSelect = document.getElementById('tar-fase');
-    
-    // Obtener fases de la metodología
-    let fasesDisponibles = [];
-    if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
-        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
-    } else {
-        // Fases por defecto si no hay metodología
-        fasesDisponibles = ['Sin fase'];
-    }
-    
-    // Construir el select con las fases disponibles
-    fasesSelect.innerHTML = fasesDisponibles.map(f => 
-        `<option value="${f}" ${f === tarea.fase ? 'selected' : ''}>${f}</option>`
-    ).join('');
-    
-    // Agregar opción "Sin fase" si no está en la lista
-    if (!fasesDisponibles.includes('Sin fase')) {
-        fasesSelect.innerHTML += `<option value="">Sin fase</option>`;
-    }
-
-    abrirModal('modal-tarea');
 }
 
 // ============================================
@@ -1877,6 +1868,7 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
 
     abrirModal('modal-tarea');
 }
+
 // ============================================
 // PROVEEDORES
 // ============================================
@@ -2273,7 +2265,6 @@ function generarReportes() {
     const totalTareas = tareasCache.length;
     const completadas = tareasCache.filter(t => t.estado === 'Completado').length;
     const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
-    const bloqueadas = tareasCache.filter(t => t.estado === 'Bloqueada').length;
     const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
 
     const tareasPorProyecto = proyectosCache.map(p => ({
@@ -2292,7 +2283,6 @@ function generarReportes() {
                     <div class="flex justify-between"><span>Tareas:</span><span class="font-semibold">${totalTareas}</span></div>
                     <div class="flex justify-between"><span>Completadas:</span><span class="font-semibold text-green-600">${completadas}</span></div>
                     <div class="flex justify-between"><span>Pendientes:</span><span class="font-semibold text-yellow-600">${pendientes}</span></div>
-                    <div class="flex justify-between"><span>Bloqueadas:</span><span class="font-semibold text-red-600">${bloqueadas}</span></div>
                     <div class="flex justify-between"><span>Vencidas:</span><span class="font-semibold text-red-600">${vencidas}</span></div>
                 </div>
             </div>
