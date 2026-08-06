@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v3.4</title>
+    <title>PM System v3.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -158,7 +158,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v3.4</span>
+            <span class="text-lg font-bold text-gray-800">PM System v3.5</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -1366,7 +1366,7 @@ function editarProyecto(id) {
 }
 
 // ============================================
-// EDITAR TAREA (con cambio de fase)
+// EDITAR TAREA - CON CAMBIO DE FASE
 // ============================================
 function editarTarea(id) {
     const tarea = tareasCache.find(t => t.id === id);
@@ -1394,14 +1394,12 @@ function editarTarea(id) {
     // Limpiar el select
     fasesSelect.innerHTML = '';
     
-    // Obtener fases según la metodología
+    // Obtener fases según la metodología del proyecto
     let fasesDisponibles = [];
     if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
         fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
-    }
-    
-    // Si no hay metodología, usar las fases que ya tiene el proyecto
-    if (fasesDisponibles.length === 0) {
+    } else {
+        // Si no hay metodología, usar las fases que ya tienen las tareas del proyecto
         const tareasProyecto = tareasCache.filter(t => t.proyecto_id === tarea.proyecto_id);
         const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
         if (fasesExistentes.length > 0) {
@@ -1411,7 +1409,7 @@ function editarTarea(id) {
         }
     }
     
-    // Agregar las fases al selector
+    // Agregar las fases al selector (como opciones)
     fasesDisponibles.forEach(f => {
         const option = document.createElement('option');
         option.value = f;
@@ -1422,17 +1420,16 @@ function editarTarea(id) {
         fasesSelect.appendChild(option);
     });
     
-    // Agregar opción "Sin fase" si no existe y la tarea actual no tiene fase
-    if (!fasesDisponibles.includes('Sin fase')) {
+    // Si la tarea tiene una fase que no está en la lista, agregarla
+    if (tarea.fase && !fasesDisponibles.includes(tarea.fase)) {
         const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Sin fase';
-        if (tarea.fase === '' || tarea.fase === null) {
-            option.selected = true;
-        }
+        option.value = tarea.fase;
+        option.textContent = tarea.fase + ' (actual)';
+        option.selected = true;
         fasesSelect.appendChild(option);
     }
 
+    // Abrir el modal
     abrirModal('modal-tarea');
 }
 
