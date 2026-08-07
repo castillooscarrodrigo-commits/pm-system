@@ -1176,7 +1176,6 @@ async function subirEvidencia() {
         document.getElementById('exito-tarea').textContent = tareaEnEvidencia.titulo;
         abrirModal('modal-evidencia-exito');
         
-        // Recargar datos sin cerrar detalle
         await recargarDatos(tareaEnEvidencia.proyecto_id);
         
     } catch (e) {
@@ -1220,10 +1219,14 @@ async function recargarDatos(proyectoId) {
         renderizarProyectos(proyectosConProgreso);
         
         const selectProyecto = document.getElementById('tar-proyecto');
-        selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+        if (selectProyecto) {
+            selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+        }
         
         if (proyectoId && detallesAbiertos[proyectoId]) {
-            await renderizarDetalle(proyectoId);
+            setTimeout(async () => {
+                await renderizarDetalle(proyectoId);
+            }, 150);
         }
         
     } catch (e) {
@@ -1260,6 +1263,9 @@ async function toggleDetalle(id) {
 // ============================================
 async function renderizarDetalle(id) {
     const detalleDiv = document.getElementById(`detalle-${id}`);
+    if (!detalleDiv) {
+        return;
+    }
     
     try {
         const proyecto = proyectosCache.find(p => p.id === id);
@@ -1654,8 +1660,13 @@ function ordenarPorFecha(proyectoId) {
 // ============================================
 async function cambiarEstadoTarea(id, nuevoEstado) {
     try {
+        const tarea = tareasCache.find(t => t.id === id);
+        if (!tarea) {
+            showToast('Tarea no encontrada', 'error');
+            return;
+        }
+        
         if (nuevoEstado === 'Completado') {
-            const tarea = tareasCache.find(t => t.id === id);
             if (tarea.evidencia_url) {
                 await supabaseUpdate('tareas', id, { estado: nuevoEstado });
                 showToast('✅ Tarea completada');
@@ -1678,8 +1689,10 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
         await supabaseUpdate('tareas', id, { estado: nuevoEstado });
         showToast('Estado actualizado');
         await recargarDatos(tarea.proyecto_id);
+        
     } catch (e) {
-        showToast('Error al actualizar estado', 'error');
+        console.error('Error:', e);
+        showToast('Error al actualizar estado: ' + e.message, 'error');
     }
 }
 
