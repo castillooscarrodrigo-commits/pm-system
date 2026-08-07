@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>PM System v4.5 - KPIs Mejorados</title>
+    <title>PM System v4.7 - Gantt con Días</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
@@ -49,14 +49,10 @@
             margin-bottom: 12px;
         }
         @media (max-width: 768px) {
-            .kpi-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            .kpi-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 480px) {
-            .kpi-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
         }
         
         .kpi-card {
@@ -93,17 +89,7 @@
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
-        .kpi-card .kpi-change {
-            font-size: 9px;
-            font-weight: 600;
-            padding: 1px 6px;
-            border-radius: 10px;
-        }
-        .kpi-card .kpi-change.up { background: #d1fae5; color: #065f46; }
-        .kpi-card .kpi-change.down { background: #fee2e2; color: #991b1b; }
-        .kpi-card .kpi-change.neutral { background: #e5e7eb; color: #6b7280; }
 
-        /* Colores específicos para cada KPI */
         .kpi-total { border-left: 3px solid #3b82f6; }
         .kpi-total .kpi-icon { background: #dbeafe; color: #2563eb; }
         .kpi-total .kpi-number { color: #2563eb; }
@@ -129,7 +115,7 @@
         .kpi-proyectos .kpi-number { color: #0891b2; }
 
         /* ============================================ */
-        /* GANTT BASADO EN TIEMPO (v4.4)               */
+        /* GANTT - CON DÍAS EN LAS BARRAS              */
         /* ============================================ */
         .gantt-container {
             overflow-x: auto;
@@ -172,83 +158,103 @@
             background: #f8fafc;
         }
 
+        /* === CONTENEDOR DE LA BARRA === */
         .gantt-barra-wrapper {
             position: relative;
             width: 100%;
             min-width: 200px;
-            height: 40px;
+            height: 36px;
             background: #e2e8f0;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
         }
 
+        /* === LA BARRA - CON DÍAS === */
         .gantt-barra {
             position: absolute;
             left: 0;
-            top: 4px;
-            height: 32px;
+            top: 3px;
+            height: 30px;
             border-radius: 6px;
             display: flex;
             align-items: center;
-            padding: 0 14px;
-            font-size: 13px;
+            justify-content: center;
+            padding: 0 6px;
+            font-size: 11px;
             font-weight: 700;
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis;
             transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            min-width: 60px;
-            letter-spacing: 0.5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            min-width: 30px;
             cursor: pointer;
             border: 2px solid rgba(0,0,0,0.08);
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
         .gantt-barra:hover {
-            transform: scaleY(1.05);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+            transform: scaleY(1.04);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             z-index: 2;
         }
 
+        /* === ESTADOS === */
         .gantt-barra.pendiente {
             background: linear-gradient(135deg, #f97316, #ea580c);
-            color: #ffffff;
             border-color: #c2410c;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
-        .gantt-barra.pendiente::before { content: "⏳ "; font-size: 15px; }
+        .gantt-barra.pendiente .barra-dias {
+            color: #fff;
+        }
 
         .gantt-barra.progreso {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: #fff;
             border-color: #1e40af;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        .gantt-barra.progreso::before { content: "🔄 "; font-size: 15px; }
+        .gantt-barra.progreso .barra-dias {
+            color: #fff;
+        }
 
         .gantt-barra.completado {
             background: linear-gradient(135deg, #34d399, #059669);
-            color: #064e3b;
             border-color: #047857;
         }
-        .gantt-barra.completado::before { content: "✅ "; font-size: 15px; }
+        .gantt-barra.completado .barra-dias {
+            color: #064e3b;
+            text-shadow: none;
+        }
 
         .gantt-barra.bloqueada {
             background: linear-gradient(135deg, #f87171, #dc2626);
-            color: #fff;
             border-color: #b91c1c;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        .gantt-barra.bloqueada::before { content: "🚫 "; font-size: 15px; }
+        .gantt-barra.bloqueada .barra-dias {
+            color: #fff;
+        }
 
         .gantt-barra.hold {
             background: linear-gradient(135deg, #9ca3af, #4b5563);
-            color: #fff;
             border-color: #374151;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        .gantt-barra.hold::before { content: "⏸️ "; font-size: 15px; }
+        .gantt-barra.hold .barra-dias {
+            color: #fff;
+        }
 
+        /* === TEXTO DE DÍAS DENTRO DE LA BARRA === */
+        .barra-dias {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .barra-dias .icono {
+            font-size: 14px;
+        }
+
+        /* === FILAS DE FASE === */
         .gantt-fila-fase {
             background: #f0fdf4;
             font-weight: 700;
@@ -564,8 +570,8 @@ let tareaEnEvidencia = null;
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v4.5</span>
-            <span class="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full font-semibold">KPIs+</span>
+            <span class="text-lg font-bold text-gray-800">PM System v4.7</span>
+            <span class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-semibold">Días Gantt</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -601,9 +607,8 @@ let tareaEnEvidencia = null;
     <!-- DASHBOARD -->
     <div id="content-dashboard" class="tab-content active">
         
-        <!-- ===== KPIS MEJORADOS CON 6 CARDS ===== -->
+        <!-- KPIS -->
         <div class="kpi-grid">
-            <!-- 1. Total Proyectos -->
             <div class="kpi-card kpi-proyectos">
                 <div class="flex items-center gap-3">
                     <div class="kpi-icon"><i class="fas fa-folder-open"></i></div>
@@ -613,8 +618,6 @@ let tareaEnEvidencia = null;
                     </div>
                 </div>
             </div>
-            
-            <!-- 2. Total Tareas -->
             <div class="kpi-card kpi-total">
                 <div class="flex items-center gap-3">
                     <div class="kpi-icon"><i class="fas fa-list"></i></div>
@@ -624,8 +627,6 @@ let tareaEnEvidencia = null;
                     </div>
                 </div>
             </div>
-            
-            <!-- 3. En Progreso (NUEVO) -->
             <div class="kpi-card kpi-progreso">
                 <div class="flex items-center gap-3">
                     <div class="kpi-icon"><i class="fas fa-spinner"></i></div>
@@ -635,8 +636,6 @@ let tareaEnEvidencia = null;
                     </div>
                 </div>
             </div>
-            
-            <!-- 4. Pendientes -->
             <div class="kpi-card kpi-pendientes">
                 <div class="flex items-center gap-3">
                     <div class="kpi-icon"><i class="fas fa-tasks"></i></div>
@@ -646,8 +645,6 @@ let tareaEnEvidencia = null;
                     </div>
                 </div>
             </div>
-            
-            <!-- 5. Completadas -->
             <div class="kpi-card kpi-completadas">
                 <div class="flex items-center gap-3">
                     <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
@@ -657,8 +654,6 @@ let tareaEnEvidencia = null;
                     </div>
                 </div>
             </div>
-            
-            <!-- 6. Vencidas -->
             <div class="kpi-card kpi-vencidas">
                 <div class="flex items-center gap-3">
                     <div class="kpi-icon"><i class="fas fa-clock"></i></div>
@@ -697,7 +692,7 @@ let tareaEnEvidencia = null;
         </div>
     </div>
 
-    <!-- OTRAS PESTAÑAS -->
+    <!-- OTRAS PESTAÑAS (simplificadas) -->
     <div id="content-proyectos" class="tab-content">
         <div class="bg-white rounded-lg shadow p-4">
             <h2 class="text-lg font-bold mb-3">Todos los Proyectos</h2>
@@ -746,7 +741,7 @@ let tareaEnEvidencia = null;
 </div>
 
 <!-- ============================================ -->
-<!-- MODALES (simplificados)                     -->
+<!-- MODALES                                      -->
 <!-- ============================================ -->
 
 <div id="modal-proyecto" class="modal">
@@ -1064,7 +1059,7 @@ let tareaEnEvidencia = null;
 </div>
 
 <!-- ============================================ -->
-<!-- SCRIPT PRINCIPAL - v4.5                      -->
+<!-- SCRIPT PRINCIPAL - v4.7                      -->
 <!-- ============================================ -->
 <script>
 // ============================================
@@ -1283,7 +1278,7 @@ function formatDate(dateString) {
 }
 
 // ============================================
-// RENDER TAREA FILA GANTT - v4.4 (Time-based)
+// RENDER TAREA FILA GANTT - CON DÍAS
 // ============================================
 function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const barraClase = getBarraClase(t.estado);
@@ -1292,21 +1287,34 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const responsable = t.responsable_texto || '-';
     const fechaStr = formatDate(t.fecha_vencimiento);
     
+    // ===== CALCULAR DÍAS =====
+    let dias = 0;
     let anchoPx = 60;
+    
     if (t.fecha_vencimiento) {
         const fechaVenc = new Date(t.fecha_vencimiento);
         const fechaInicio = fechaInicioProyecto ? new Date(fechaInicioProyecto) : new Date();
         const fechaFin = fechaFinProyecto ? new Date(fechaFinProyecto) : new Date();
         fechaFin.setDate(fechaFin.getDate() + 1);
+        
         const diffDias = Math.ceil((fechaVenc - fechaInicio) / (1000 * 60 * 60 * 24));
         const totalDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24));
+        
+        dias = Math.max(0, diffDias);
+        
         if (totalDias > 0) {
             const escala = Math.max(8, Math.min(15, 800 / totalDias));
             anchoPx = Math.max(60, diffDias * escala);
         }
     }
-    if (t.estado === 'Completado') anchoPx = Math.max(anchoPx, 80);
+    
+    if (t.estado === 'Completado') {
+        anchoPx = Math.max(anchoPx, 80);
+    }
     anchoPx = Math.min(anchoPx, 600);
+    
+    // ===== TEXTO DE DÍAS =====
+    let textoDias = dias > 0 ? `${dias}d` : '0d';
     
     let estadoCheck = '';
     if (t.estado === 'Completado') estadoCheck = '✅';
@@ -1330,8 +1338,8 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
             <td class="gantt-check">${estadoCheck}</td>
             <td>
                 <div class="gantt-barra-wrapper">
-                    <div class="gantt-barra ${barraClase}" style="width:${anchoPx}px;" title="${t.titulo} - ${t.estado} (${anchoPx}px)">
-                        ${t.titulo}
+                    <div class="gantt-barra ${barraClase}" style="width:${anchoPx}px;" title="${t.titulo} - ${dias} días">
+                        <span class="barra-dias">${textoDias}</span>
                     </div>
                 </div>
             </td>
@@ -1393,7 +1401,7 @@ function renderVistaGanttColapsable(tareas, proyecto) {
                             <th style="width:14%;">Responsable</th>
                             <th style="width:8%;">Prioridad</th>
                             <th style="width:6%;">Estado</th>
-                            <th style="width:40%;">Cronograma (días)</th>
+                            <th style="width:40%;">Días</th>
                             <th style="width:10%;">Acciones</th>
                         </tr>
                     </thead>
@@ -1413,7 +1421,7 @@ function renderVistaGanttColapsable(tareas, proyecto) {
                         <th style="width:14%;">Responsable</th>
                         <th style="width:8%;">Prioridad</th>
                         <th style="width:6%;">Estado</th>
-                        <th style="width:40%;">Cronograma (días)</th>
+                        <th style="width:40%;">Días</th>
                         <th style="width:10%;">Acciones</th>
                     </tr>
                 </thead>
@@ -1455,7 +1463,7 @@ function renderVistaGanttColapsable(tareas, proyecto) {
 }
 
 // ============================================
-// CARGAR DASHBOARD - CON NUEVO KPI "EN PROGRESO"
+// CARGAR DASHBOARD
 // ============================================
 async function cargarDashboard() {
     try {
@@ -1476,7 +1484,6 @@ async function cargarDashboard() {
             return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
         });
 
-        // ===== CÁLCULO DE KPIS =====
         const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
         const totalTareas = tareasCache.length;
         const enProgreso = tareasCache.filter(t => t.estado === 'En Progreso').length;
@@ -1484,7 +1491,6 @@ async function cargarDashboard() {
         const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
         const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
 
-        // ===== ACTUALIZAR KPIS =====
         document.getElementById('kpi-proyectos').textContent = activos;
         document.getElementById('kpi-tareas-totales').textContent = totalTareas;
         document.getElementById('kpi-en-progreso').textContent = enProgreso;
@@ -1737,7 +1743,7 @@ async function renderizarDetalle(id) {
                 <div class="mt-2 pt-2 border-t">
                     <div class="flex justify-between items-center mb-1">
                         <span class="text-xs font-semibold text-gray-600"><i class="fas fa-tasks mr-1"></i>${tareas.length} tareas</span>
-                        <span class="text-xs text-gray-400">Gantt v4.4</span>
+                        <span class="text-xs text-gray-400">Gantt v4.7</span>
                     </div>
                     ${ganttHTML}
                 </div>
@@ -2941,8 +2947,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-console.log('✅ PM System v4.5 - KPIs mejorados cargado correctamente');
-console.log('📊 Nuevo KPI: "En Progreso" añadido al dashboard');
+console.log('✅ PM System v4.7 - Gantt con días cargado correctamente');
+console.log('📊 Las barras muestran los días de duración de cada tarea');
 </script>
 
 </body>
