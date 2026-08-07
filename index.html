@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>PM System v4.3 - Gantt Completo</title>
+    <title>PM System v4.4 - Gantt Basado en Tiempo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
@@ -42,7 +42,7 @@
         }
 
         /* ============================================ */
-        /* GANTT – DISEÑO COMPLETO                      */
+        /* GANTT BASADO EN TIEMPO (v4.4)               */
         /* ============================================ */
         .gantt-container {
             overflow-x: auto;
@@ -50,13 +50,16 @@
             border-radius: 12px;
             border: 1px solid #e5e7eb;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 0;
         }
+        
         .gantt-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
-            min-width: 750px;
+            min-width: 900px;
         }
+        
         .gantt-table th {
             text-align: left;
             padding: 10px 14px;
@@ -71,19 +74,22 @@
             top: 0;
             z-index: 5;
         }
+        
         .gantt-table td {
             padding: 10px 14px;
             border-bottom: 1px solid #e2e8f0;
             vertical-align: middle;
         }
+        
         .gantt-table tr:hover td {
             background: #f8fafc;
         }
 
-        /* === CONTENEDOR DE LA BARRA === */
+        /* === CONTENEDOR DE LA BARRA (ancho fijo en píxeles) === */
         .gantt-barra-wrapper {
             position: relative;
             width: 100%;
+            min-width: 200px;
             height: 40px;
             background: #e2e8f0;
             border-radius: 8px;
@@ -91,7 +97,7 @@
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
         }
 
-        /* === LA BARRA EN SÍ === */
+        /* === LA BARRA CON ANCHO FIJO EN PÍXELES === */
         .gantt-barra {
             position: absolute;
             left: 0;
@@ -113,6 +119,7 @@
             cursor: pointer;
             border: 2px solid rgba(0,0,0,0.08);
         }
+        
         .gantt-barra:hover {
             transform: scaleY(1.05);
             box-shadow: 0 6px 16px rgba(0,0,0,0.25);
@@ -625,8 +632,8 @@ let tareaEnEvidencia = null;
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v4.3</span>
-            <span class="text-xs bg-orange-500 text-white px-2 py-0.5 rounded-full font-semibold">Gantt Full</span>
+            <span class="text-lg font-bold text-gray-800">PM System v4.4</span>
+            <span class="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full font-semibold">Time Gantt</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -1104,7 +1111,7 @@ let tareaEnEvidencia = null;
 </div>
 
 <!-- ============================================ -->
-<!-- SCRIPT PRINCIPAL                             -->
+<!-- SCRIPT PRINCIPAL - v4.4 (Time Gantt)        -->
 <!-- ============================================ -->
 <script>
 // ============================================
@@ -1323,36 +1330,43 @@ function formatDate(dateString) {
 }
 
 // ============================================
-// RENDER TAREA FILA GANTT v4.3 - ANCHO MEJORADO
+// RENDER TAREA FILA GANTT v4.4 - ANCHO BASADO EN TIEMPO
 // ============================================
-function renderTareaFilaGantt(t) {
+function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const barraClase = getBarraClase(t.estado);
     const prioridadClase = getPrioridadClase(t.prioridad);
     const prioridadLabel = t.prioridad || 'Media';
     const responsable = t.responsable_texto || '-';
     const fechaStr = formatDate(t.fecha_vencimiento);
     
-    // ===== NUEVO CÁLCULO DE ANCHO INTELIGENTE =====
-    let anchoBarra = '80%';
+    // ===== CALCULAR ANCHO BASADO EN TIEMPO REAL (DÍAS) =====
+    let anchoPx = 60; // ancho mínimo en píxeles
+    
+    if (t.fecha_vencimiento) {
+        const fechaVenc = new Date(t.fecha_vencimiento);
+        const fechaInicio = fechaInicioProyecto ? new Date(fechaInicioProyecto) : new Date();
+        const fechaFin = fechaFinProyecto ? new Date(fechaFinProyecto) : new Date();
+        fechaFin.setDate(fechaFin.getDate() + 1);
+        
+        const diffDias = Math.ceil((fechaVenc - fechaInicio) / (1000 * 60 * 60 * 24));
+        const totalDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24));
+        
+        if (totalDias > 0) {
+            // Escala: cada día = 8 píxeles (ajustable)
+            const escala = Math.max(8, Math.min(15, 800 / totalDias));
+            anchoPx = Math.max(60, diffDias * escala);
+        }
+    }
+    
+    // Ajustar según el estado
     if (t.estado === 'Completado') {
-        anchoBarra = '100%';
-    } else if (t.estado === 'En Progreso') {
-        anchoBarra = '75%';
-    } else if (t.estado === 'Bloqueada') {
-        anchoBarra = '65%';
-    } else if (t.estado === 'Pendiente') {
-        anchoBarra = '85%';  // ¡las pendientes ocupan casi todo!
-    } else {
-        anchoBarra = '80%';
+        anchoPx = Math.max(anchoPx, 80);
     }
-    // Ajustar según longitud del título
-    const tituloLen = t.titulo.length;
-    if (tituloLen > 40) {
-        anchoBarra = Math.min(parseInt(anchoBarra) + 10, 100) + '%';
-    } else if (tituloLen < 15) {
-        anchoBarra = Math.max(parseInt(anchoBarra) - 10, 50) + '%';
-    }
-    // ===== FIN NUEVO CÁLCULO =====
+    
+    // Limitar el ancho máximo
+    anchoPx = Math.min(anchoPx, 600);
+    
+    // ===== FIN CÁLCULO BASADO EN TIEMPO =====
     
     let estadoCheck = '';
     if (t.estado === 'Completado') estadoCheck = '✅';
@@ -1376,7 +1390,7 @@ function renderTareaFilaGantt(t) {
             <td class="gantt-check">${estadoCheck}</td>
             <td>
                 <div class="gantt-barra-wrapper">
-                    <div class="gantt-barra ${barraClase}" style="width:${anchoBarra};" title="${t.titulo} - ${t.estado}">
+                    <div class="gantt-barra ${barraClase}" style="width:${anchoPx}px;" title="${t.titulo} - ${t.estado} (${anchoPx}px)">
                         ${t.titulo}
                     </div>
                 </div>
@@ -1412,12 +1426,18 @@ function renderVistaGanttColapsable(tareas, proyecto) {
     if (tareas.length === 0) {
         return `<div class="text-gray-400 text-xs text-center py-3">📭 Sin tareas</div>`;
     }
+    
+    // Obtener fechas del proyecto para el cálculo de ancho
+    const fechaInicioProyecto = proyecto?.fecha_inicio || null;
+    const fechaFinProyecto = proyecto?.fecha_fin || null;
+    
     const tareasPorFase = {};
     tareas.forEach(t => {
         const fase = t.fase || 'Sin fase';
         if (!tareasPorFase[fase]) tareasPorFase[fase] = [];
         tareasPorFase[fase].push(t);
     });
+    
     let fasesOrdenadas = Object.keys(tareasPorFase);
     if (fasesMetodologia.length > 0) {
         fasesOrdenadas = fasesMetodologia.filter(f => tareasPorFase[f] && tareasPorFase[f].length > 0);
@@ -1427,6 +1447,7 @@ function renderVistaGanttColapsable(tareas, proyecto) {
     } else {
         fasesOrdenadas.sort();
     }
+    
     if (fasesOrdenadas.length === 0 || fasesOrdenadas.every(f => tareasPorFase[f].length === 0)) {
         return `
             <div class="gantt-container">
@@ -1437,17 +1458,18 @@ function renderVistaGanttColapsable(tareas, proyecto) {
                             <th style="width:14%;">Responsable</th>
                             <th style="width:8%;">Prioridad</th>
                             <th style="width:6%;">Estado</th>
-                            <th style="width:40%;">Cronograma</th>
+                            <th style="width:40%;">Cronograma (días)</th>
                             <th style="width:10%;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${tareas.map(t => renderTareaFilaGantt(t)).join('')}
+                        ${tareas.map(t => renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto)).join('')}
                     </tbody>
                 </table>
             </div>
         `;
     }
+    
     let html = `
         <div class="gantt-container">
             <table class="gantt-table">
@@ -1457,12 +1479,13 @@ function renderVistaGanttColapsable(tareas, proyecto) {
                         <th style="width:14%;">Responsable</th>
                         <th style="width:8%;">Prioridad</th>
                         <th style="width:6%;">Estado</th>
-                        <th style="width:40%;">Cronograma</th>
+                        <th style="width:40%;">Cronograma (días)</th>
                         <th style="width:10%;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
     `;
+    
     fasesOrdenadas.forEach((fase, index) => {
         const tareasFase = tareasPorFase[fase] || [];
         if (tareasFase.length === 0) return;
@@ -1486,7 +1509,7 @@ function renderVistaGanttColapsable(tareas, proyecto) {
                     <div class="gantt-container" style="border: none; border-radius: 0;">
                         <table class="gantt-table">
                             <tbody>
-                                ${tareasFase.map(t => renderTareaFilaGantt(t)).join('')}
+                                ${tareasFase.map(t => renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto)).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -1494,6 +1517,7 @@ function renderVistaGanttColapsable(tareas, proyecto) {
             </tr>
         `;
     });
+    
     html += `</tbody></table></div>`;
     return html;
 }
@@ -1776,7 +1800,7 @@ async function renderizarDetalle(id) {
                 <div class="mt-2 pt-2 border-t">
                     <div class="flex justify-between items-center mb-1">
                         <span class="text-xs font-semibold text-gray-600"><i class="fas fa-tasks mr-1"></i>${tareas.length} tareas</span>
-                        <span class="text-xs text-gray-400">Gantt v4.3</span>
+                        <span class="text-xs text-gray-400">Gantt v4.4 (Time-based)</span>
                     </div>
                     ${ganttHTML}
                 </div>
@@ -2977,7 +3001,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-console.log('✅ PM System v4.3 - Gantt con ancho mejorado cargado correctamente');
+console.log('✅ PM System v4.4 - Time-based Gantt cargado correctamente');
+console.log('📊 Las barras ahora tienen ancho basado en días, no en porcentajes');
 </script>
 
 </body>
