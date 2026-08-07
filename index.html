@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v3.7</title>
+    <title>PM System v3.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -75,11 +75,11 @@
         .gantt-check { width: 14px; text-align: center; font-size: 10px; }
         .gantt-check .completado { color: #22c55e; }
         .gantt-check .pendiente { color: #9ca3af; }
-        .gantt-acciones { display: flex; gap: 2px; flex-wrap: wrap; }
+        .gantt-acciones { display: flex; gap: 2px; flex-wrap: wrap; align-items: center; }
         .gantt-acciones button { background: none; border: none; cursor: pointer; padding: 1px 3px; border-radius: 3px; font-size: 9px; }
         .gantt-acciones .edit:hover { background: #fef3c7; color: #d97706; }
         .gantt-acciones .delete:hover { background: #fee2e2; color: #dc2626; }
-        .gantt-acciones .status-select { font-size: 8px; padding: 1px 3px; border: 1px solid #d1d5db; border-radius: 3px; background: white; }
+        .gantt-acciones .status-select { font-size: 8px; padding: 1px 4px; border: 1px solid #d1d5db; border-radius: 3px; background: white; width: 78px; }
         .gantt-fila-fase { background: #f0fdf4; font-weight: 600; cursor: pointer; }
         .gantt-fila-fase td { padding: 3px 5px; border-bottom: 2px solid #d1d5db; }
         .gantt-fila-fase .fase-icon { margin-right: 3px; font-size: 10px; }
@@ -183,7 +183,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v3.7</span>
+            <span class="text-lg font-bold text-gray-800">PM System v3.8</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -975,10 +975,10 @@ function renderTareaFilaGantt(t) {
             <td>
                 <div class="gantt-acciones">
                     <select onchange="cambiarEstadoTarea(${t.id}, this.value)" class="status-select">
-                        <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pend.</option>
-                        <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>Prog.</option>
-                        <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloq.</option>
-                        <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Comp.</option>
+                        <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                        <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>En Progreso</option>
+                        <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloqueada</option>
+                        <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Completado</option>
                     </select>
                     ${t.evidencia_url ? `<button onclick="verEvidencia('${t.evidencia_url}', '${t.evidencia_nombre || 'Evidencia'}')" class="text-blue-500 hover:text-blue-700" title="Ver evidencia"><i class="fas fa-eye"></i></button>` : ''}
                     <button onclick="editarTarea(${t.id})" class="edit" title="Editar"><i class="fas fa-edit"></i></button>
@@ -1028,11 +1028,11 @@ function renderVistaGanttColapsable(tareas, proyecto) {
             <table class="gantt-table">
                 <thead>
                     <tr>
-                        <th style="width:22%;">Tarea</th>
-                        <th style="width:10%;">Resp.</th>
+                        <th style="width:20%;">Tarea</th>
+                        <th style="width:12%;">Responsable</th>
                         <th style="width:8%;">Prioridad</th>
-                        <th style="width:4%;">Estado</th>
-                        <th style="width:46%;">Cronograma</th>
+                        <th style="width:6%;">Estado</th>
+                        <th style="width:44%;">Cronograma</th>
                         <th style="width:10%;">Acciones</th>
                     </tr>
                 </thead>
@@ -1656,7 +1656,7 @@ function ordenarPorFecha(proyectoId) {
 }
 
 // ============================================
-// CAMBIAR ESTADO DE TAREA (con evidencia)
+// CAMBIAR ESTADO DE TAREA
 // ============================================
 async function cambiarEstadoTarea(id, nuevoEstado) {
     try {
