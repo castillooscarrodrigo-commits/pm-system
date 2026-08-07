@@ -94,10 +94,10 @@
         .orden-btn { padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 500; background: #e5e7eb; color: #374151; border: none; cursor: pointer; }
         .orden-btn:hover { background: #d1d5db; }
         .orden-btn.active { background: #3b82f6; color: white; }
-        .kpi-card { padding: 8px 12px; }
-        .kpi-card .numero { font-size: 20px; font-weight: 700; }
-        .kpi-card .label { font-size: 10px; color: #6b7280; }
-        .kpi-icon { padding: 6px; border-radius: 50%; font-size: 14px; }
+        .kpi-card { padding: 6px 10px; }
+        .kpi-card .numero { font-size: 16px; font-weight: 700; }
+        .kpi-card .label { font-size: 9px; color: #6b7280; }
+        .kpi-icon { padding: 5px; border-radius: 50%; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
         .fases-compactas { display: flex; flex-wrap: wrap; gap: 3px; margin: 4px 0; }
         .fase-item { display: flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 10px; font-size: 9px; font-weight: 500; }
         .fase-item.completa { background: #d1fae5; color: #065f46; }
@@ -108,6 +108,7 @@
         .evidencia-preview { max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 8px; }
         .evidencia-link { color: #3b82f6; text-decoration: underline; cursor: pointer; }
         .evidencia-link:hover { color: #2563eb; }
+        .modal-evidencia-exito .modal-box { border-top: 4px solid #22c55e; }
     </style>
 </head>
 <body>
@@ -154,6 +155,30 @@ const PRIORIDAD_COLORS = {
 
 <div id="toast" class="toast toast-success"></div>
 
+<!-- MODAL DE ÉXITO PARA EVIDENCIA -->
+<div id="modal-evidencia-exito" class="modal modal-evidencia-exito">
+    <div class="modal-box">
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold text-green-600">✅ Evidencia Subida</h3>
+            <button onclick="cerrarModal('modal-evidencia-exito')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="evidencia-exito-contenido" class="space-y-2">
+            <p class="text-sm">Evidencia subida correctamente</p>
+            <div class="bg-gray-50 p-3 rounded-lg text-sm">
+                <p><span class="font-semibold">📎 Archivo:</span> <span id="exito-archivo"></span></p>
+                <p><span class="font-semibold">📋 Tarea:</span> <span id="exito-tarea"></span></p>
+            </div>
+        </div>
+        <div class="flex gap-2 pt-3 mt-2 border-t">
+            <button onclick="cerrarModal('modal-evidencia-exito')" class="flex-1 bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-green-700 transition">
+                <i class="fas fa-check mr-1"></i> Aceptar
+            </button>
+        </div>
+    </div>
+</div>
+
 <nav class="bg-white shadow-md border-b sticky top-0 z-10">
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
@@ -188,51 +213,51 @@ const PRIORIDAD_COLORS = {
 
     <div id="content-dashboard" class="tab-content active">
 
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-            <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <div class="numero text-blue-600" id="kpi-proyectos">0</div>
-                        <div class="label">Proyectos Activos</div>
-                    </div>
+        <!-- KPIS COMPACTOS -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
+            <div class="bg-white rounded-lg shadow p-2 card-hover">
+                <div class="flex items-center gap-2">
                     <div class="kpi-icon bg-blue-100 text-blue-600"><i class="fas fa-folder-open"></i></div>
+                    <div>
+                        <div class="text-sm font-bold text-blue-600" id="kpi-proyectos">0</div>
+                        <div class="text-[10px] text-gray-500 leading-tight">Proyectos</div>
+                    </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <div class="numero text-indigo-600" id="kpi-tareas-totales">0</div>
-                        <div class="label">Tareas Totales</div>
-                    </div>
+            <div class="bg-white rounded-lg shadow p-2 card-hover">
+                <div class="flex items-center gap-2">
                     <div class="kpi-icon bg-indigo-100 text-indigo-600"><i class="fas fa-list"></i></div>
+                    <div>
+                        <div class="text-sm font-bold text-indigo-600" id="kpi-tareas-totales">0</div>
+                        <div class="text-[10px] text-gray-500 leading-tight">Tareas</div>
+                    </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <div class="numero text-yellow-600" id="kpi-tareas">0</div>
-                        <div class="label">Tareas Pendientes</div>
-                    </div>
+            <div class="bg-white rounded-lg shadow p-2 card-hover">
+                <div class="flex items-center gap-2">
                     <div class="kpi-icon bg-yellow-100 text-yellow-600"><i class="fas fa-tasks"></i></div>
-                </div>
-                <div class="text-xs text-gray-400 mt-1">&nbsp;</div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
-                <div class="flex justify-between items-start">
                     <div>
-                        <div class="numero text-red-600" id="kpi-vencidas">0</div>
-                        <div class="label">Tareas Vencidas</div>
+                        <div class="text-sm font-bold text-yellow-600" id="kpi-tareas">0</div>
+                        <div class="text-[10px] text-gray-500 leading-tight">Pendientes</div>
                     </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-2 card-hover">
+                <div class="flex items-center gap-2">
                     <div class="kpi-icon bg-red-100 text-red-600"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <div class="text-sm font-bold text-red-600" id="kpi-vencidas">0</div>
+                        <div class="text-[10px] text-gray-500 leading-tight">Tareas Vencidas</div>
+                    </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-3 card-hover kpi-card">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <div class="numero text-green-600" id="kpi-completadas">0</div>
-                        <div class="label">Tareas Completadas</div>
-                    </div>
+            <div class="bg-white rounded-lg shadow p-2 card-hover">
+                <div class="flex items-center gap-2">
                     <div class="kpi-icon bg-green-100 text-green-600"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <div class="text-sm font-bold text-green-600" id="kpi-completadas">0</div>
+                        <div class="text-[10px] text-gray-500 leading-tight">Tareas Completadas</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1145,14 +1170,17 @@ async function subirEvidencia() {
             estado: 'Completado'
         });
         
-        alert('✅ Evidencia subida correctamente\n\n📎 Archivo: ' + archivo.name + '\n📋 Tarea: ' + tareaEnEvidencia.titulo);
-        
         cerrarModal('modal-evidencia');
+        
+        document.getElementById('exito-archivo').textContent = archivo.name;
+        document.getElementById('exito-tarea').textContent = tareaEnEvidencia.titulo;
+        abrirModal('modal-evidencia-exito');
+        
         cargarDashboard();
         
     } catch (e) {
         console.error('Error:', e);
-        alert('❌ Error al subir evidencia: ' + e.message);
+        showToast('Error al subir evidencia: ' + e.message, 'error');
     }
 }
 
@@ -1391,15 +1419,12 @@ function editarTarea(id) {
     const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
     const fasesSelect = document.getElementById('tar-fase');
     
-    // Limpiar el select
     fasesSelect.innerHTML = '';
     
-    // Obtener fases según la metodología del proyecto
     let fasesDisponibles = [];
     if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
         fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
     } else {
-        // Si no hay metodología, usar las fases que ya tienen las tareas del proyecto
         const tareasProyecto = tareasCache.filter(t => t.proyecto_id === tarea.proyecto_id);
         const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
         if (fasesExistentes.length > 0) {
@@ -1409,7 +1434,6 @@ function editarTarea(id) {
         }
     }
     
-    // Agregar las fases al selector (como opciones)
     fasesDisponibles.forEach(f => {
         const option = document.createElement('option');
         option.value = f;
@@ -1420,7 +1444,6 @@ function editarTarea(id) {
         fasesSelect.appendChild(option);
     });
     
-    // Si la tarea tiene una fase que no está en la lista, agregarla
     if (tarea.fase && !fasesDisponibles.includes(tarea.fase)) {
         const option = document.createElement('option');
         option.value = tarea.fase;
@@ -1429,53 +1452,66 @@ function editarTarea(id) {
         fasesSelect.appendChild(option);
     }
 
-    // Abrir el modal
     abrirModal('modal-tarea');
 }
 
 // ============================================
-// ABRIR MODAL TAREA DESDE DETALLE
+// GUARDAR TAREA (con detalle que no se cierra)
 // ============================================
-function abrirModalTareaDesdeDetalle(proyectoId) {
-    const select = document.getElementById('tar-proyecto');
-    select.value = proyectoId;
-    select.disabled = true;
-    document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
-    document.getElementById('tar-id').value = '';
-    document.getElementById('tar-titulo').value = '';
-    document.getElementById('tar-responsable').value = '';
-    document.getElementById('tar-prioridad').value = 'Media';
-    document.getElementById('tar-fecha-vencimiento').value = '';
-    document.getElementById('tar-descripcion').value = '';
+async function guardarTarea(e) {
+    e.preventDefault();
+    const id = document.getElementById('tar-id').value;
+    const titulo = document.getElementById('tar-titulo').value;
+    const proyecto_id = parseInt(document.getElementById('tar-proyecto').value);
+    const responsable_texto = document.getElementById('tar-responsable').value.trim();
+    const prioridad = document.getElementById('tar-prioridad').value;
+    const fase = document.getElementById('tar-fase').value;
+    const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
+    const descripcion = document.getElementById('tar-descripcion').value;
 
-    // Cargar fases disponibles
-    const proyecto = proyectosCache.find(p => p.id === proyectoId);
-    const fasesSelect = document.getElementById('tar-fase');
-    
-    fasesSelect.innerHTML = '';
-    
-    let fasesDisponibles = [];
-    if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
-        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
-    } else {
-        fasesDisponibles = ['Sin fase'];
-    }
-    
-    fasesDisponibles.forEach(f => {
-        const option = document.createElement('option');
-        option.value = f;
-        option.textContent = f;
-        fasesSelect.appendChild(option);
-    });
-    
-    if (!fasesDisponibles.includes('Sin fase')) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Sin fase';
-        fasesSelect.appendChild(option);
+    if (!titulo || !proyecto_id) {
+        showToast('Título y proyecto son obligatorios', 'error');
+        return;
     }
 
-    abrirModal('modal-tarea');
+    const data = {
+        titulo,
+        proyecto_id,
+        responsable_texto: responsable_texto || null,
+        prioridad,
+        fase: fase || null,
+        fecha_vencimiento,
+        descripcion,
+        fecha_actualizacion: new Date().toISOString()
+    };
+
+    try {
+        if (id) {
+            await supabaseUpdate('tareas', id, data);
+            showToast('✅ Tarea actualizada');
+        } else {
+            await supabaseInsert('tareas', { ...data, estado: 'Pendiente' });
+            showToast('✅ Tarea creada');
+        }
+        cerrarModal('modal-tarea');
+        document.getElementById('form-tarea').reset();
+        document.getElementById('tar-id').value = '';
+        document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
+        document.getElementById('tar-proyecto').disabled = false;
+        
+        await cargarDashboard();
+        
+        if (proyecto_id) {
+            const detalleDiv = document.getElementById(`detalle-${proyecto_id}`);
+            const btn = document.getElementById(`btn-detalle-${proyecto_id}`);
+            if (detalleDiv && btn && !detalleDiv.classList.contains('active')) {
+                toggleDetalle(proyecto_id);
+            }
+        }
+        
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+    }
 }
 
 // ============================================
@@ -1799,54 +1835,6 @@ async function crearCriteriosPorDefecto(proyectoId) {
 
     for (const c of criteriosDefecto) {
         await supabaseInsert('criterios', { ...c, proyecto_id: proyectoId });
-    }
-}
-
-// ============================================
-// GUARDAR TAREA
-// ============================================
-async function guardarTarea(e) {
-    e.preventDefault();
-    const id = document.getElementById('tar-id').value;
-    const titulo = document.getElementById('tar-titulo').value;
-    const proyecto_id = parseInt(document.getElementById('tar-proyecto').value);
-    const responsable_texto = document.getElementById('tar-responsable').value.trim();
-    const prioridad = document.getElementById('tar-prioridad').value;
-    const fase = document.getElementById('tar-fase').value;
-    const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
-    const descripcion = document.getElementById('tar-descripcion').value;
-
-    if (!titulo || !proyecto_id) {
-        showToast('Título y proyecto son obligatorios', 'error');
-        return;
-    }
-
-    const data = {
-        titulo,
-        proyecto_id,
-        responsable_texto: responsable_texto || null,
-        prioridad,
-        fase: fase || null,
-        fecha_vencimiento,
-        descripcion,
-        fecha_actualizacion: new Date().toISOString()
-    };
-
-    try {
-        if (id) {
-            await supabaseUpdate('tareas', id, data);
-            showToast('✅ Tarea actualizada');
-        } else {
-            await supabaseInsert('tareas', { ...data, estado: 'Pendiente' });
-            showToast('✅ Tarea creada');
-        }
-        cerrarModal('modal-tarea');
-        document.getElementById('form-tarea').reset();
-        document.getElementById('tar-id').value = '';
-        document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
-        cargarDashboard();
-    } catch (e) {
-        showToast('Error: ' + e.message, 'error');
     }
 }
 
