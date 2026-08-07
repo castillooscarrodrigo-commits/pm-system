@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v3.6</title>
+    <title>PM System v3.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -94,10 +94,10 @@
         .orden-btn { padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 500; background: #e5e7eb; color: #374151; border: none; cursor: pointer; }
         .orden-btn:hover { background: #d1d5db; }
         .orden-btn.active { background: #3b82f6; color: white; }
-        .kpi-card { padding: 6px 10px; }
-        .kpi-card .numero { font-size: 16px; font-weight: 700; }
-        .kpi-card .label { font-size: 9px; color: #6b7280; }
-        .kpi-icon { padding: 5px; border-radius: 50%; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
+        .kpi-card { padding: 4px 8px; }
+        .kpi-card .numero { font-size: 15px; font-weight: 700; }
+        .kpi-card .label { font-size: 8px; color: #6b7280; line-height: 1.1; }
+        .kpi-icon { padding: 4px; border-radius: 50%; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
         .fases-compactas { display: flex; flex-wrap: wrap; gap: 3px; margin: 4px 0; }
         .fase-item { display: flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 10px; font-size: 9px; font-weight: 500; }
         .fase-item.completa { background: #d1fae5; color: #065f46; }
@@ -183,7 +183,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v3.6</span>
+            <span class="text-lg font-bold text-gray-800">PM System v3.7</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -214,49 +214,49 @@ const PRIORIDAD_COLORS = {
     <div id="content-dashboard" class="tab-content active">
 
         <!-- KPIS COMPACTOS -->
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
-            <div class="bg-white rounded-lg shadow p-2 card-hover">
-                <div class="flex items-center gap-2">
+        <div class="grid grid-cols-5 gap-1.5 mb-3">
+            <div class="bg-white rounded-lg shadow p-1.5 card-hover">
+                <div class="flex items-center gap-1.5">
                     <div class="kpi-icon bg-blue-100 text-blue-600"><i class="fas fa-folder-open"></i></div>
                     <div>
-                        <div class="text-sm font-bold text-blue-600" id="kpi-proyectos">0</div>
-                        <div class="text-[10px] text-gray-500 leading-tight">Proyectos</div>
+                        <div class="numero text-blue-600" id="kpi-proyectos">0</div>
+                        <div class="label">Total Proyectos</div>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-2 card-hover">
-                <div class="flex items-center gap-2">
+            <div class="bg-white rounded-lg shadow p-1.5 card-hover">
+                <div class="flex items-center gap-1.5">
                     <div class="kpi-icon bg-indigo-100 text-indigo-600"><i class="fas fa-list"></i></div>
                     <div>
-                        <div class="text-sm font-bold text-indigo-600" id="kpi-tareas-totales">0</div>
-                        <div class="text-[10px] text-gray-500 leading-tight">Tareas</div>
+                        <div class="numero text-indigo-600" id="kpi-tareas-totales">0</div>
+                        <div class="label">Total Tareas</div>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-2 card-hover">
-                <div class="flex items-center gap-2">
+            <div class="bg-white rounded-lg shadow p-1.5 card-hover">
+                <div class="flex items-center gap-1.5">
                     <div class="kpi-icon bg-yellow-100 text-yellow-600"><i class="fas fa-tasks"></i></div>
                     <div>
-                        <div class="text-sm font-bold text-yellow-600" id="kpi-tareas">0</div>
-                        <div class="text-[10px] text-gray-500 leading-tight">Pendientes</div>
+                        <div class="numero text-yellow-600" id="kpi-tareas">0</div>
+                        <div class="label">Tareas Pendientes</div>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-2 card-hover">
-                <div class="flex items-center gap-2">
+            <div class="bg-white rounded-lg shadow p-1.5 card-hover">
+                <div class="flex items-center gap-1.5">
                     <div class="kpi-icon bg-red-100 text-red-600"><i class="fas fa-clock"></i></div>
                     <div>
-                        <div class="text-sm font-bold text-red-600" id="kpi-vencidas">0</div>
-                        <div class="text-[10px] text-gray-500 leading-tight">Tareas Vencidas</div>
+                        <div class="numero text-red-600" id="kpi-vencidas">0</div>
+                        <div class="label">Tareas Vencidas</div>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-2 card-hover">
-                <div class="flex items-center gap-2">
+            <div class="bg-white rounded-lg shadow p-1.5 card-hover">
+                <div class="flex items-center gap-1.5">
                     <div class="kpi-icon bg-green-100 text-green-600"><i class="fas fa-check-circle"></i></div>
                     <div>
-                        <div class="text-sm font-bold text-green-600" id="kpi-completadas">0</div>
-                        <div class="text-[10px] text-gray-500 leading-tight">Tareas Completadas</div>
+                        <div class="numero text-green-600" id="kpi-completadas">0</div>
+                        <div class="label">Tareas Completadas</div>
                     </div>
                 </div>
             </div>
@@ -1176,11 +1176,212 @@ async function subirEvidencia() {
         document.getElementById('exito-tarea').textContent = tareaEnEvidencia.titulo;
         abrirModal('modal-evidencia-exito');
         
-        cargarDashboard();
+        // Recargar datos sin cerrar detalle
+        await recargarDatos(tareaEnEvidencia.proyecto_id);
         
     } catch (e) {
         console.error('Error:', e);
         showToast('Error al subir evidencia: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// RECARGAR DATOS SIN CERRAR DETALLE
+// ============================================
+async function recargarDatos(proyectoId) {
+    try {
+        const nuevosProyectos = await supabaseFetch('proyectos?order=id.desc');
+        const nuevasTareas = await supabaseFetch('tareas?select=*');
+        const nuevosUsuarios = await supabaseFetch('usuarios?select=*');
+        
+        proyectosCache = nuevosProyectos;
+        tareasCache = nuevasTareas;
+        usuariosCache = nuevosUsuarios;
+        
+        const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
+        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
+        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
+
+        document.getElementById('kpi-proyectos').textContent = activos;
+        document.getElementById('kpi-tareas-totales').textContent = tareasCache.length;
+        document.getElementById('kpi-tareas').textContent = pendientes;
+        document.getElementById('kpi-vencidas').textContent = vencidas;
+        document.getElementById('kpi-completadas').textContent = completadasTotal;
+        
+        const proyectosConProgreso = proyectosCache.map(p => {
+            const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
+            const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
+            const total = tareasProyecto.length;
+            const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
+        });
+        
+        renderizarProyectos(proyectosConProgreso);
+        
+        const selectProyecto = document.getElementById('tar-proyecto');
+        selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+        
+        if (proyectoId && detallesAbiertos[proyectoId]) {
+            await renderizarDetalle(proyectoId);
+        }
+        
+    } catch (e) {
+        console.error('Error recargando datos:', e);
+    }
+}
+
+// ============================================
+// TOGGLE DETALLE
+// ============================================
+let detallesAbiertos = {};
+let ordenFechaActivo = {};
+
+async function toggleDetalle(id) {
+    const detalleDiv = document.getElementById(`detalle-${id}`);
+    const btn = document.getElementById(`btn-detalle-${id}`);
+
+    if (detallesAbiertos[id]) {
+        detalleDiv.classList.remove('active');
+        detallesAbiertos[id] = false;
+        btn.innerHTML = '<i class="fas fa-chevron-down"></i> Detalle';
+        return;
+    }
+
+    detallesAbiertos[id] = true;
+    btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar';
+    detalleDiv.classList.add('active');
+    
+    await renderizarDetalle(id);
+}
+
+// ============================================
+// RENDERIZAR DETALLE
+// ============================================
+async function renderizarDetalle(id) {
+    const detalleDiv = document.getElementById(`detalle-${id}`);
+    
+    try {
+        const proyecto = proyectosCache.find(p => p.id === id);
+        if (!proyecto) { 
+            detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Proyecto no encontrado</div>'; 
+            return; 
+        }
+
+        let tareas = tareasCache.filter(t => t.proyecto_id === id);
+        const progreso = calcularProgresoPorFases(tareas, proyecto.metodologia);
+        const total = tareas.length;
+        const completadas = tareas.filter(t => t.estado === 'Completado').length;
+
+        const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
+        let fasesStatus = [];
+        let completasFases = 0;
+        let totalFases = fasesMetodologia.length;
+        
+        if (fasesMetodologia.length > 0) {
+            fasesMetodologia.forEach(fase => {
+                const tareasFase = tareas.filter(t => t.fase === fase);
+                const todasCompletas = tareasFase.length > 0 && tareasFase.every(t => t.estado === 'Completado');
+                if (todasCompletas) completasFases++;
+                fasesStatus.push({
+                    nombre: fase,
+                    completada: todasCompletas,
+                    total: tareasFase.length,
+                    completadas: tareasFase.filter(t => t.estado === 'Completado').length
+                });
+            });
+        }
+
+        let fasesCompactasHTML = '';
+        if (fasesStatus.length > 0) {
+            fasesCompactasHTML = `
+                <div class="flex items-center gap-2 flex-wrap bg-gray-50 p-1.5 rounded border border-gray-200">
+                    <span class="text-xs font-semibold text-gray-600">${completasFases}/${totalFases} fases</span>
+                    <span class="text-xs text-gray-400">|</span>
+                    <div class="fases-compactas">
+                        ${fasesStatus.map(f => {
+                            let clase = 'sin-tareas';
+                            let icono = '⚪';
+                            let detalle = '';
+                            if (f.total === 0) { clase = 'sin-tareas'; icono = '⚪'; detalle = ''; }
+                            else if (f.completada) { clase = 'completa'; icono = '✅'; detalle = `${f.completadas}/${f.total}`; }
+                            else { clase = 'incompleta'; icono = '⏳'; detalle = `${f.completadas}/${f.total}`; }
+                            return `<span class="fase-item ${clase}"><span class="fase-check">${icono}</span>${f.nombre} <span class="fase-detalle">${detalle}</span></span>`;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        let ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
+
+        detalleDiv.innerHTML = `
+            <div class="bg-gray-50 p-2 rounded-lg mt-2">
+                <div class="flex flex-wrap justify-between items-start gap-2">
+                    <div class="flex-1 min-w-[120px]">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="status-badge ${proyecto.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : proyecto.estado === 'Crítico' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${proyecto.estado || 'Activo'}</span>
+                            ${proyecto.metodologia ? `<span class="metodologia-badge">${proyecto.metodologia}</span>` : ''}
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-1 text-xs text-gray-500">
+                            <span>${proyecto.empresa || 'Sin empresa'}</span>
+                            <span>${proyecto.area || 'Sin área'}</span>
+                            <span>${proyecto.fecha_inicio || 'No inicio'}</span>
+                            <span>${proyecto.fecha_fin || 'No fin'}</span>
+                        </div>
+                        <div class="mt-1 max-w-xs">
+                            <div class="flex justify-between text-xs">
+                                <span>Progreso</span>
+                                <span class="font-semibold">${progreso}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill ${progreso < 40 ? 'bg-red-500' : progreso < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progreso}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="ordenarPorFecha(${proyecto.id})" class="orden-btn" id="orden-btn-${proyecto.id}" title="Ordenar por fecha">
+                            <i class="fas fa-sort-amount-down-alt mr-1"></i> Fecha
+                        </button>
+                        <button onclick="generarReporteProyecto(${proyecto.id})" class="bg-green-600 text-white text-xs px-2 py-1 rounded hover:bg-green-700 transition" title="Generar reporte">
+                            <i class="fas fa-file-pdf mr-1"></i> Reporte
+                        </button>
+                        <button onclick="abrirModalTareaDesdeDetalle(${proyecto.id})" class="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 transition">
+                            <i class="fas fa-plus mr-1"></i> Tarea
+                        </button>
+                    </div>
+                </div>
+
+                ${fasesCompactasHTML}
+
+                <div class="mt-2 pt-2 border-t">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-semibold text-gray-600"><i class="fas fa-tasks mr-1"></i>${tareas.length} tareas</span>
+                        <span class="text-xs text-gray-400">Gantt</span>
+                    </div>
+                    ${ganttHTML}
+                </div>
+            </div>
+        `;
+
+        const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
+        if (fasesRows.length > 0) {
+            fasesRows.forEach((row, index) => {
+                const toggle = row.querySelector('.fase-toggle');
+                const tareasFila = row.nextElementSibling;
+                if (index === 0) {
+                    if (toggle) toggle.classList.remove('collapsed');
+                    if (tareasFila) tareasFila.classList.remove('hidden');
+                } else {
+                    if (toggle) toggle.classList.add('collapsed');
+                    if (tareasFila) tareasFila.classList.add('hidden');
+                }
+            });
+        }
+
+    } catch (e) {
+        console.error('Error:', e);
+        detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Error cargando detalle</div>';
     }
 }
 
@@ -1362,304 +1563,6 @@ async function generarReporteProyecto(proyectoId) {
 }
 
 // ============================================
-// EDITAR PROYECTO
-// ============================================
-function editarProyecto(id) {
-    const proyecto = proyectosCache.find(p => p.id === id);
-    if (!proyecto) {
-        showToast('Proyecto no encontrado', 'error');
-        return;
-    }
-
-    document.getElementById('modal-proyecto-titulo').textContent = '✏️ Editar Proyecto';
-    document.getElementById('proy-id').value = proyecto.id;
-    document.getElementById('proy-nombre').value = proyecto.nombre || '';
-    document.getElementById('proy-categoria').value = proyecto.categoria || '';
-    document.getElementById('proy-metodologia').value = proyecto.metodologia || '';
-    document.getElementById('proy-empresa').value = proyecto.empresa || '';
-    document.getElementById('proy-area').value = proyecto.area || '';
-    document.getElementById('proy-inicio').value = proyecto.fecha_inicio || '';
-    document.getElementById('proy-fecha').value = proyecto.fecha_fin || '';
-
-    const categoria = proyecto.categoria || '';
-    const metodologiaInfo = METODOLOGIAS[categoria];
-    if (metodologiaInfo) {
-        document.getElementById('metodologia-desc-texto').textContent = metodologiaInfo.desc;
-        document.getElementById('metodologia-desc').classList.add('show');
-    } else {
-        document.getElementById('metodologia-desc').classList.remove('show');
-    }
-
-    abrirModal('modal-proyecto');
-}
-
-// ============================================
-// EDITAR TAREA - CON CAMBIO DE FASE
-// ============================================
-function editarTarea(id) {
-    const tarea = tareasCache.find(t => t.id === id);
-    if (!tarea) {
-        showToast('Tarea no encontrada', 'error');
-        return;
-    }
-
-    document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
-    document.getElementById('tar-id').value = tarea.id;
-    document.getElementById('tar-titulo').value = tarea.titulo || '';
-    document.getElementById('tar-proyecto').value = tarea.proyecto_id || '';
-    document.getElementById('tar-proyecto').disabled = true;
-    document.getElementById('tar-responsable').value = tarea.responsable_texto || '';
-    document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
-    document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
-    document.getElementById('tar-descripcion').value = tarea.descripcion || '';
-
-    // ============================================
-    // CARGAR FASES DISPONIBLES
-    // ============================================
-    const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
-    const fasesSelect = document.getElementById('tar-fase');
-    
-    fasesSelect.innerHTML = '';
-    
-    let fasesDisponibles = [];
-    if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
-        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
-    } else {
-        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === tarea.proyecto_id);
-        const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
-        if (fasesExistentes.length > 0) {
-            fasesDisponibles = fasesExistentes;
-        } else {
-            fasesDisponibles = ['Sin fase'];
-        }
-    }
-    
-    fasesDisponibles.forEach(f => {
-        const option = document.createElement('option');
-        option.value = f;
-        option.textContent = f;
-        if (f === tarea.fase) {
-            option.selected = true;
-        }
-        fasesSelect.appendChild(option);
-    });
-    
-    if (tarea.fase && !fasesDisponibles.includes(tarea.fase)) {
-        const option = document.createElement('option');
-        option.value = tarea.fase;
-        option.textContent = tarea.fase + ' (actual)';
-        option.selected = true;
-        fasesSelect.appendChild(option);
-    }
-
-    abrirModal('modal-tarea');
-}
-
-// ============================================
-// GUARDAR TAREA (con detalle que no se cierra)
-// ============================================
-async function guardarTarea(e) {
-    e.preventDefault();
-    const id = document.getElementById('tar-id').value;
-    const titulo = document.getElementById('tar-titulo').value;
-    const proyecto_id = parseInt(document.getElementById('tar-proyecto').value);
-    const responsable_texto = document.getElementById('tar-responsable').value.trim();
-    const prioridad = document.getElementById('tar-prioridad').value;
-    const fase = document.getElementById('tar-fase').value;
-    const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
-    const descripcion = document.getElementById('tar-descripcion').value;
-
-    if (!titulo || !proyecto_id) {
-        showToast('Título y proyecto son obligatorios', 'error');
-        return;
-    }
-
-    const data = {
-        titulo,
-        proyecto_id,
-        responsable_texto: responsable_texto || null,
-        prioridad,
-        fase: fase || null,
-        fecha_vencimiento,
-        descripcion,
-        fecha_actualizacion: new Date().toISOString()
-    };
-
-    try {
-        if (id) {
-            await supabaseUpdate('tareas', id, data);
-            showToast('✅ Tarea actualizada');
-        } else {
-            await supabaseInsert('tareas', { ...data, estado: 'Pendiente' });
-            showToast('✅ Tarea creada');
-        }
-        cerrarModal('modal-tarea');
-        document.getElementById('form-tarea').reset();
-        document.getElementById('tar-id').value = '';
-        document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
-        document.getElementById('tar-proyecto').disabled = false;
-        
-        await cargarDashboard();
-        
-        if (proyecto_id) {
-            const detalleDiv = document.getElementById(`detalle-${proyecto_id}`);
-            const btn = document.getElementById(`btn-detalle-${proyecto_id}`);
-            if (detalleDiv && btn && !detalleDiv.classList.contains('active')) {
-                toggleDetalle(proyecto_id);
-            }
-        }
-        
-    } catch (e) {
-        showToast('Error: ' + e.message, 'error');
-    }
-}
-
-// ============================================
-// TOGGLE DETALLE
-// ============================================
-let detallesAbiertos = {};
-let ordenFechaActivo = {};
-
-async function toggleDetalle(id) {
-    const detalleDiv = document.getElementById(`detalle-${id}`);
-    const btn = document.getElementById(`btn-detalle-${id}`);
-
-    if (detallesAbiertos[id]) {
-        detalleDiv.classList.remove('active');
-        detallesAbiertos[id] = false;
-        btn.innerHTML = '<i class="fas fa-chevron-down"></i> Detalle';
-        return;
-    }
-
-    detallesAbiertos[id] = true;
-    btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar';
-    detalleDiv.classList.add('active');
-
-    try {
-        const proyecto = proyectosCache.find(p => p.id === id);
-        if (!proyecto) { 
-            detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Proyecto no encontrado</div>'; 
-            return; 
-        }
-
-        let tareas = tareasCache.filter(t => t.proyecto_id === id);
-        const progreso = calcularProgresoPorFases(tareas, proyecto.metodologia);
-        const total = tareas.length;
-        const completadas = tareas.filter(t => t.estado === 'Completado').length;
-
-        const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
-        let fasesStatus = [];
-        let completasFases = 0;
-        let totalFases = fasesMetodologia.length;
-        
-        if (fasesMetodologia.length > 0) {
-            fasesMetodologia.forEach(fase => {
-                const tareasFase = tareas.filter(t => t.fase === fase);
-                const todasCompletas = tareasFase.length > 0 && tareasFase.every(t => t.estado === 'Completado');
-                if (todasCompletas) completasFases++;
-                fasesStatus.push({
-                    nombre: fase,
-                    completada: todasCompletas,
-                    total: tareasFase.length,
-                    completadas: tareasFase.filter(t => t.estado === 'Completado').length
-                });
-            });
-        }
-
-        let fasesCompactasHTML = '';
-        if (fasesStatus.length > 0) {
-            fasesCompactasHTML = `
-                <div class="flex items-center gap-2 flex-wrap bg-gray-50 p-1.5 rounded border border-gray-200">
-                    <span class="text-xs font-semibold text-gray-600">${completasFases}/${totalFases} fases</span>
-                    <span class="text-xs text-gray-400">|</span>
-                    <div class="fases-compactas">
-                        ${fasesStatus.map(f => {
-                            let clase = 'sin-tareas';
-                            let icono = '⚪';
-                            let detalle = '';
-                            if (f.total === 0) { clase = 'sin-tareas'; icono = '⚪'; detalle = ''; }
-                            else if (f.completada) { clase = 'completa'; icono = '✅'; detalle = `${f.completadas}/${f.total}`; }
-                            else { clase = 'incompleta'; icono = '⏳'; detalle = `${f.completadas}/${f.total}`; }
-                            return `<span class="fase-item ${clase}"><span class="fase-check">${icono}</span>${f.nombre} <span class="fase-detalle">${detalle}</span></span>`;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        let ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
-
-        detalleDiv.innerHTML = `
-            <div class="bg-gray-50 p-2 rounded-lg mt-2">
-                <div class="flex flex-wrap justify-between items-start gap-2">
-                    <div class="flex-1 min-w-[120px]">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="status-badge ${proyecto.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : proyecto.estado === 'Crítico' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${proyecto.estado || 'Activo'}</span>
-                            ${proyecto.metodologia ? `<span class="metodologia-badge">${proyecto.metodologia}</span>` : ''}
-                        </div>
-                        <div class="flex flex-wrap gap-2 mt-1 text-xs text-gray-500">
-                            <span>${proyecto.empresa || 'Sin empresa'}</span>
-                            <span>${proyecto.area || 'Sin área'}</span>
-                            <span>${proyecto.fecha_inicio || 'No inicio'}</span>
-                            <span>${proyecto.fecha_fin || 'No fin'}</span>
-                        </div>
-                        <div class="mt-1 max-w-xs">
-                            <div class="flex justify-between text-xs">
-                                <span>Progreso</span>
-                                <span class="font-semibold">${progreso}%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill ${progreso < 40 ? 'bg-red-500' : progreso < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progreso}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex gap-1">
-                        <button onclick="ordenarPorFecha(${proyecto.id})" class="orden-btn" id="orden-btn-${proyecto.id}" title="Ordenar por fecha">
-                            <i class="fas fa-sort-amount-down-alt mr-1"></i> Fecha
-                        </button>
-                        <button onclick="generarReporteProyecto(${proyecto.id})" class="bg-green-600 text-white text-xs px-2 py-1 rounded hover:bg-green-700 transition" title="Generar reporte">
-                            <i class="fas fa-file-pdf mr-1"></i> Reporte
-                        </button>
-                        <button onclick="abrirModalTareaDesdeDetalle(${proyecto.id})" class="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 transition">
-                            <i class="fas fa-plus mr-1"></i> Tarea
-                        </button>
-                    </div>
-                </div>
-
-                ${fasesCompactasHTML}
-
-                <div class="mt-2 pt-2 border-t">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs font-semibold text-gray-600"><i class="fas fa-tasks mr-1"></i>${tareas.length} tareas</span>
-                        <span class="text-xs text-gray-400">Gantt</span>
-                    </div>
-                    ${ganttHTML}
-                </div>
-            </div>
-        `;
-
-        const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
-        if (fasesRows.length > 0) {
-            fasesRows.forEach((row, index) => {
-                const toggle = row.querySelector('.fase-toggle');
-                const tareasFila = row.nextElementSibling;
-                if (index === 0) {
-                    if (toggle) toggle.classList.remove('collapsed');
-                    if (tareasFila) tareasFila.classList.remove('hidden');
-                } else {
-                    if (toggle) toggle.classList.add('collapsed');
-                    if (tareasFila) tareasFila.classList.add('hidden');
-                }
-            });
-        }
-
-    } catch (e) {
-        console.error('Error:', e);
-        detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Error cargando detalle</div>';
-    }
-}
-
-// ============================================
 // ORDENAR POR FECHA
 // ============================================
 function ordenarPorFecha(proyectoId) {
@@ -1756,7 +1659,7 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
             if (tarea.evidencia_url) {
                 await supabaseUpdate('tareas', id, { estado: nuevoEstado });
                 showToast('✅ Tarea completada');
-                cargarDashboard();
+                await recargarDatos(tarea.proyecto_id);
                 return;
             }
             
@@ -1767,14 +1670,14 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
             } else {
                 await supabaseUpdate('tareas', id, { estado: nuevoEstado });
                 showToast('✅ Tarea completada');
-                cargarDashboard();
+                await recargarDatos(tarea.proyecto_id);
                 return;
             }
         }
         
         await supabaseUpdate('tareas', id, { estado: nuevoEstado });
         showToast('Estado actualizado');
-        cargarDashboard();
+        await recargarDatos(tarea.proyecto_id);
     } catch (e) {
         showToast('Error al actualizar estado', 'error');
     }
@@ -1835,6 +1738,57 @@ async function crearCriteriosPorDefecto(proyectoId) {
 
     for (const c of criteriosDefecto) {
         await supabaseInsert('criterios', { ...c, proyecto_id: proyectoId });
+    }
+}
+
+// ============================================
+// GUARDAR TAREA
+// ============================================
+async function guardarTarea(e) {
+    e.preventDefault();
+    const id = document.getElementById('tar-id').value;
+    const titulo = document.getElementById('tar-titulo').value;
+    const proyecto_id = parseInt(document.getElementById('tar-proyecto').value);
+    const responsable_texto = document.getElementById('tar-responsable').value.trim();
+    const prioridad = document.getElementById('tar-prioridad').value;
+    const fase = document.getElementById('tar-fase').value;
+    const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
+    const descripcion = document.getElementById('tar-descripcion').value;
+
+    if (!titulo || !proyecto_id) {
+        showToast('Título y proyecto son obligatorios', 'error');
+        return;
+    }
+
+    const data = {
+        titulo,
+        proyecto_id,
+        responsable_texto: responsable_texto || null,
+        prioridad,
+        fase: fase || null,
+        fecha_vencimiento,
+        descripcion,
+        fecha_actualizacion: new Date().toISOString()
+    };
+
+    try {
+        if (id) {
+            await supabaseUpdate('tareas', id, data);
+            showToast('✅ Tarea actualizada');
+        } else {
+            await supabaseInsert('tareas', { ...data, estado: 'Pendiente' });
+            showToast('✅ Tarea creada');
+        }
+        cerrarModal('modal-tarea');
+        document.getElementById('form-tarea').reset();
+        document.getElementById('tar-id').value = '';
+        document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
+        document.getElementById('tar-proyecto').disabled = false;
+        
+        await recargarDatos(proyecto_id);
+        
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
     }
 }
 
@@ -2364,6 +2318,97 @@ function generarReportes() {
             </div>
         </div>
     `;
+}
+
+// ============================================
+// EDITAR PROYECTO
+// ============================================
+function editarProyecto(id) {
+    const proyecto = proyectosCache.find(p => p.id === id);
+    if (!proyecto) {
+        showToast('Proyecto no encontrado', 'error');
+        return;
+    }
+
+    document.getElementById('modal-proyecto-titulo').textContent = '✏️ Editar Proyecto';
+    document.getElementById('proy-id').value = proyecto.id;
+    document.getElementById('proy-nombre').value = proyecto.nombre || '';
+    document.getElementById('proy-categoria').value = proyecto.categoria || '';
+    document.getElementById('proy-metodologia').value = proyecto.metodologia || '';
+    document.getElementById('proy-empresa').value = proyecto.empresa || '';
+    document.getElementById('proy-area').value = proyecto.area || '';
+    document.getElementById('proy-inicio').value = proyecto.fecha_inicio || '';
+    document.getElementById('proy-fecha').value = proyecto.fecha_fin || '';
+
+    const categoria = proyecto.categoria || '';
+    const metodologiaInfo = METODOLOGIAS[categoria];
+    if (metodologiaInfo) {
+        document.getElementById('metodologia-desc-texto').textContent = metodologiaInfo.desc;
+        document.getElementById('metodologia-desc').classList.add('show');
+    } else {
+        document.getElementById('metodologia-desc').classList.remove('show');
+    }
+
+    abrirModal('modal-proyecto');
+}
+
+// ============================================
+// EDITAR TAREA
+// ============================================
+function editarTarea(id) {
+    const tarea = tareasCache.find(t => t.id === id);
+    if (!tarea) {
+        showToast('Tarea no encontrada', 'error');
+        return;
+    }
+
+    document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
+    document.getElementById('tar-id').value = tarea.id;
+    document.getElementById('tar-titulo').value = tarea.titulo || '';
+    document.getElementById('tar-proyecto').value = tarea.proyecto_id || '';
+    document.getElementById('tar-proyecto').disabled = true;
+    document.getElementById('tar-responsable').value = tarea.responsable_texto || '';
+    document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
+    document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
+    document.getElementById('tar-descripcion').value = tarea.descripcion || '';
+
+    const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
+    const fasesSelect = document.getElementById('tar-fase');
+    
+    fasesSelect.innerHTML = '';
+    
+    let fasesDisponibles = [];
+    if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
+        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
+    } else {
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === tarea.proyecto_id);
+        const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
+        if (fasesExistentes.length > 0) {
+            fasesDisponibles = fasesExistentes;
+        } else {
+            fasesDisponibles = ['Sin fase'];
+        }
+    }
+    
+    fasesDisponibles.forEach(f => {
+        const option = document.createElement('option');
+        option.value = f;
+        option.textContent = f;
+        if (f === tarea.fase) {
+            option.selected = true;
+        }
+        fasesSelect.appendChild(option);
+    });
+    
+    if (tarea.fase && !fasesDisponibles.includes(tarea.fase)) {
+        const option = document.createElement('option');
+        option.value = tarea.fase;
+        option.textContent = tarea.fase + ' (actual)';
+        option.selected = true;
+        fasesSelect.appendChild(option);
+    }
+
+    abrirModal('modal-tarea');
 }
 
 // ============================================
