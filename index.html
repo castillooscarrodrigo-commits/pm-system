@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v3.10</title>
+    <title>PM System v4.0 - Gantt Mejorado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Estilos mejorados */
         body { 
             background: #f3f4f6; 
             font-family: 'Segoe UI', system-ui, sans-serif; 
@@ -250,96 +249,141 @@
             display: block; 
             animation: fadeIn 0.3s ease;
         }
+        
+        /* ============================================ */
+        /* GANTT v4.0 - ESTILOS MEJORADOS               */
+        /* ============================================ */
         .gantt-container { 
             overflow-x: auto; 
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .gantt-table { 
             width: 100%; 
             border-collapse: collapse; 
-            font-size: 11px; 
+            font-size: 12px; 
+            min-width: 700px;
         }
         .gantt-table th { 
             text-align: left; 
-            padding: 3px 5px; 
-            background: #f3f4f6; 
+            padding: 8px 12px; 
+            background: #f8fafc; 
             border-bottom: 2px solid #d1d5db; 
             font-weight: 600; 
-            font-size: 10px; 
+            font-size: 11px;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 5;
         }
         .gantt-table td { 
-            padding: 2px 5px; 
-            border-bottom: 1px solid #e5e7eb; 
+            padding: 8px 12px; 
+            border-bottom: 1px solid #f1f5f9; 
             vertical-align: middle; 
         }
-        .gantt-table tr:hover { 
-            background: #f9fafb; 
+        .gantt-table tr:hover td { 
+            background: #f8fafc; 
         }
-        .gantt-barra { 
-            height: 14px; 
-            border-radius: 3px; 
-            position: relative; 
-            min-width: 20px; 
-            display: flex; 
-            align-items: center; 
-            padding: 0 4px; 
-            color: white; 
-            font-size: 7px; 
-            font-weight: 600; 
+        
+        /* === BARRAS DE GANTT v4.0 === */
+        .gantt-barra-wrapper {
+            position: relative;
+            width: 100%;
+            height: 32px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        .gantt-barra {
+            position: absolute;
+            left: 0;
+            top: 3px;
+            height: 26px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 12px;
+            font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            transition: width 0.5s ease;
-        }
-        .gantt-barra.pendiente { background: #fcd34d; color: #78350f; }
-        .gantt-barra.progreso { background: #60a5fa; color: #1e3a5f; }
-        .gantt-barra.completado { background: #34d399; color: #064e3b; }
-        .gantt-barra.bloqueada { background: #f87171; color: #7f1d1d; }
-        .gantt-barra.hold { background: #9ca3af; color: #1f2937; }
-        .gantt-titulo { font-weight: 500; font-size: 10px; }
-        .gantt-responsable { font-size: 8px; color: #6b7280; }
-        .gantt-fecha { font-size: 8px; color: #9ca3af; }
-        .gantt-check { width: 14px; text-align: center; font-size: 10px; }
-        .gantt-check .completado { color: #22c55e; }
-        .gantt-check .pendiente { color: #9ca3af; }
-        .gantt-acciones { 
-            display: flex; 
-            gap: 2px; 
-            flex-wrap: wrap; 
-            align-items: center; 
-        }
-        .gantt-acciones button { 
-            background: none; 
-            border: none; 
-            cursor: pointer; 
-            padding: 1px 3px; 
-            border-radius: 3px; 
-            font-size: 9px;
-            transition: all 0.2s ease;
-        }
-        .gantt-acciones .edit:hover { 
-            background: #fef3c7; 
-            color: #d97706; 
-        }
-        .gantt-acciones .delete:hover { 
-            background: #fee2e2; 
-            color: #dc2626; 
-        }
-        .gantt-acciones .status-select { 
-            font-size: 8px; 
-            padding: 1px 4px; 
-            border: 1px solid #d1d5db; 
-            border-radius: 3px; 
-            background: white; 
-            width: 78px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            min-width: 40px;
+            letter-spacing: 0.3px;
             cursor: pointer;
         }
-        .gantt-acciones .status-select:focus {
-            outline: none;
-            border-color: #3b82f6;
+        .gantt-barra:hover {
+            transform: scaleY(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            z-index: 2;
         }
+        
+        /* Colores vibrantes para cada estado */
+        .gantt-barra.pendiente { 
+            background: linear-gradient(135deg, #fcd34d, #f59e0b);
+            color: #78350f;
+            border: 1px solid #d97706;
+        }
+        .gantt-barra.pendiente::before {
+            content: "⏳ ";
+            font-size: 13px;
+        }
+        
+        .gantt-barra.progreso { 
+            background: linear-gradient(135deg, #60a5fa, #2563eb);
+            color: #ffffff;
+            border: 1px solid #1d4ed8;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+        }
+        .gantt-barra.progreso::before {
+            content: "🔄 ";
+            font-size: 13px;
+        }
+        
+        .gantt-barra.completado { 
+            background: linear-gradient(135deg, #6ee7b7, #10b981);
+            color: #064e3b;
+            border: 1px solid #059669;
+        }
+        .gantt-barra.completado::before {
+            content: "✅ ";
+            font-size: 13px;
+        }
+        
+        .gantt-barra.bloqueada { 
+            background: linear-gradient(135deg, #fca5a5, #ef4444);
+            color: #ffffff;
+            border: 1px solid #dc2626;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+        }
+        .gantt-barra.bloqueada::before {
+            content: "🚫 ";
+            font-size: 13px;
+        }
+        
+        .gantt-barra.hold { 
+            background: linear-gradient(135deg, #cbd5e1, #6b7280);
+            color: #ffffff;
+            border: 1px solid #4b5563;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+        }
+        .gantt-barra.hold::before {
+            content: "⏸️ ";
+            font-size: 13px;
+        }
+        
+        /* === FILAS DE FASE MEJORADAS === */
         .gantt-fila-fase { 
-            background: #f0fdf4; 
-            font-weight: 600; 
+            background: #f0fdf4;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -347,57 +391,137 @@
             background: #dcfce7;
         }
         .gantt-fila-fase td { 
-            padding: 3px 5px; 
-            border-bottom: 2px solid #d1d5db; 
+            padding: 8px 12px;
+            border-bottom: 2px solid #d1d5db;
         }
         .gantt-fila-fase .fase-icon { 
-            margin-right: 3px; 
-            font-size: 10px; 
+            margin-right: 6px; 
+            font-size: 12px; 
         }
         .gantt-fila-fase .fase-estado { 
-            font-size: 8px; 
-            font-weight: 400; 
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 8px;
         }
-        .gantt-fila-fase .fase-completa { color: #059669; }
-        .gantt-fila-fase .fase-incompleta { color: #dc2626; }
+        .gantt-fila-fase .fase-completa { 
+            color: #059669;
+            background: #d1fae5;
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+        .gantt-fila-fase .fase-incompleta { 
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
         .gantt-fila-fase .fase-toggle { 
-            font-size: 10px; 
-            margin-right: 4px; 
-            transition: transform 0.3s ease; 
-            display: inline-block; 
+            font-size: 12px;
+            margin-right: 6px;
+            transition: transform 0.3s ease;
+            display: inline-block;
         }
         .gantt-fila-fase .fase-toggle.collapsed { 
             transform: rotate(-90deg); 
         }
         .gantt-fila-fase .fase-tareas-count { 
-            font-size: 8px; 
-            font-weight: 400; 
-            color: #6b7280; 
+            font-size: 11px;
+            font-weight: 400;
+            color: #6b7280;
+            margin-left: 8px;
         }
+        
+        /* === FILAS DE TAREA === */
         .tarea-row { 
             transition: opacity 0.3s ease; 
         }
         .tarea-row.hidden { 
             display: none; 
         }
-        .orden-btn { 
-            padding: 2px 10px; 
-            border-radius: 12px; 
-            font-size: 10px; 
+        
+        /* === CELDAS DE TEXTO === */
+        .gantt-titulo { 
             font-weight: 500; 
-            background: #e5e7eb; 
-            color: #374151; 
-            border: none; 
+            font-size: 12px;
+            color: #1f2937;
+        }
+        .gantt-responsable { 
+            font-size: 11px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .gantt-responsable::before {
+            content: "👤";
+            font-size: 12px;
+        }
+        .gantt-fecha { 
+            font-size: 10px;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .gantt-fecha::before {
+            content: "📅";
+            font-size: 10px;
+        }
+        
+        /* === CHECK DE ESTADO === */
+        .gantt-check { 
+            width: 30px;
+            text-align: center;
+            font-size: 16px;
+        }
+        .gantt-check .completado { color: #22c55e; }
+        .gantt-check .pendiente { color: #9ca3af; }
+        .gantt-check .bloqueada { color: #ef4444; }
+        .gantt-check .progreso { color: #3b82f6; }
+        
+        /* === ACCIONES === */
+        .gantt-acciones { 
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .gantt-acciones button { 
+            background: none;
+            border: none;
             cursor: pointer;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 11px;
             transition: all 0.2s ease;
         }
-        .orden-btn:hover { 
-            background: #d1d5db; 
+        .gantt-acciones .edit:hover { 
+            background: #fef3c7;
+            color: #d97706;
+            transform: scale(1.1);
         }
-        .orden-btn.active { 
-            background: #3b82f6; 
-            color: white; 
+        .gantt-acciones .delete:hover { 
+            background: #fee2e2;
+            color: #dc2626;
+            transform: scale(1.1);
         }
+        .gantt-acciones .status-select { 
+            font-size: 10px;
+            padding: 2px 6px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .gantt-acciones .status-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+        }
+        
+        /* === KPI CARDS === */
         .kpi-card { 
             padding: 4px 8px; 
             transition: all 0.3s ease;
@@ -421,26 +545,30 @@
             width: 20px; 
             height: 20px; 
         }
+        
+        /* === FASE ITEMS COMPACTOS === */
         .fases-compactas { 
             display: flex; 
             flex-wrap: wrap; 
-            gap: 3px; 
+            gap: 4px; 
             margin: 4px 0; 
         }
         .fase-item { 
             display: flex; 
             align-items: center; 
-            gap: 3px; 
-            padding: 1px 6px; 
-            border-radius: 10px; 
-            font-size: 9px; 
+            gap: 4px; 
+            padding: 2px 10px; 
+            border-radius: 12px; 
+            font-size: 10px; 
             font-weight: 500; 
         }
         .fase-item.completa { background: #d1fae5; color: #065f46; }
         .fase-item.incompleta { background: #fee2e2; color: #991b1b; }
         .fase-item.sin-tareas { background: #e5e7eb; color: #6b7280; }
-        .fase-item .fase-check { font-size: 9px; }
-        .fase-item .fase-detalle { font-size: 7px; opacity: 0.7; }
+        .fase-item .fase-check { font-size: 10px; }
+        .fase-item .fase-detalle { font-size: 9px; opacity: 0.7; }
+        
+        /* === EVIDENCIA PREVIEW === */
         .evidencia-preview { 
             max-width: 100%; 
             max-height: 300px; 
@@ -456,7 +584,8 @@
         .evidencia-link:hover { 
             color: #2563eb; 
         }
-        .modal-evidencia-exito .modal-box { border-top: 4px solid #22c55e; }
+        
+        /* === BOTONES === */
         .btn-respaldo { 
             background: #6b7280; 
             color: white; 
@@ -472,6 +601,25 @@
             transform: translateY(-1px);
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+        .orden-btn { 
+            padding: 2px 10px; 
+            border-radius: 12px; 
+            font-size: 10px; 
+            font-weight: 500; 
+            background: #e5e7eb; 
+            color: #374151; 
+            border: none; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .orden-btn:hover { 
+            background: #d1d5db; 
+        }
+        .orden-btn.active { 
+            background: #3b82f6; 
+            color: white; 
+        }
+        
         .proyecto-card {
             transition: all 0.3s ease;
             border: 1px solid #e5e7eb;
@@ -479,6 +627,7 @@
         .proyecto-card:hover {
             border-color: #3b82f6;
         }
+        
         /* Scrollbar personalizado */
         ::-webkit-scrollbar {
             width: 6px;
@@ -495,15 +644,14 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #a8b0b8;
         }
-        /* Loading shimmer */
-        .shimmer {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
+        
+        /* Animación de entrada para barras */
+        @keyframes barraEntrada {
+            from { width: 0 !important; opacity: 0; }
+            to { opacity: 1; }
         }
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
+        .gantt-barra {
+            animation: barraEntrada 0.6s ease forwards;
         }
     </style>
 </head>
@@ -560,35 +708,15 @@ let tareaEnEvidencia = null;
 
 <div id="toast" class="toast toast-success"></div>
 
-<!-- MODAL DE ÉXITO PARA EVIDENCIA -->
-<div id="modal-evidencia-exito" class="modal modal-evidencia-exito">
-    <div class="modal-box">
-        <div class="flex justify-between items-start mb-3">
-            <h3 class="text-lg font-bold text-green-600">✅ Evidencia Subida</h3>
-            <button onclick="cerrarModal('modal-evidencia-exito')" class="text-gray-400 hover:text-gray-600 transition">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div id="evidencia-exito-contenido" class="space-y-2">
-            <p class="text-sm">Evidencia subida correctamente</p>
-            <div class="bg-gray-50 p-3 rounded-lg text-sm">
-                <p><span class="font-semibold">📎 Archivo:</span> <span id="exito-archivo"></span></p>
-                <p><span class="font-semibold">📋 Tarea:</span> <span id="exito-tarea"></span></p>
-            </div>
-        </div>
-        <div class="flex gap-2 pt-3 mt-2 border-t">
-            <button onclick="cerrarModal('modal-evidencia-exito')" class="flex-1 bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-green-700 transition">
-                <i class="fas fa-check mr-1"></i> Aceptar
-            </button>
-        </div>
-    </div>
-</div>
-
+<!-- MODALES (se mantienen igual) -->
+<!-- ============================================ -->
+<!-- NAV -->
 <nav class="bg-white shadow-md border-b sticky top-0 z-10">
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v3.10</span>
+            <span class="text-lg font-bold text-gray-800">PM System v4.0</span>
+            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">Gantt HD</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -598,6 +726,7 @@ let tareaEnEvidencia = null;
 
 <div class="max-w-7xl mx-auto px-4 py-4">
 
+    <!-- TABS -->
     <div class="flex gap-1 mb-4 border-b pb-2 flex-wrap">
         <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn active">
             <i class="fas fa-chart-pie mr-1"></i> Dashboard
@@ -619,9 +748,9 @@ let tareaEnEvidencia = null;
         </button>
     </div>
 
+    <!-- DASHBOARD -->
     <div id="content-dashboard" class="tab-content active">
-
-        <!-- KPIS COMPACTOS -->
+        <!-- KPIS -->
         <div class="grid grid-cols-5 gap-1.5 mb-3">
             <div class="bg-white rounded-lg shadow p-1.5 card-hover">
                 <div class="flex items-center gap-1.5">
@@ -670,6 +799,7 @@ let tareaEnEvidencia = null;
             </div>
         </div>
 
+        <!-- LISTA DE PROYECTOS -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="px-4 py-2 border-b flex flex-wrap justify-between items-center gap-2">
                 <h2 class="text-sm font-semibold text-gray-800">Proyectos</h2>
@@ -696,6 +826,7 @@ let tareaEnEvidencia = null;
         </div>
     </div>
 
+    <!-- OTRAS PESTAÑAS -->
     <div id="content-proyectos" class="tab-content">
         <div class="bg-white rounded-lg shadow p-4">
             <h2 class="text-lg font-bold mb-3">Todos los Proyectos</h2>
@@ -1038,12 +1169,35 @@ let tareaEnEvidencia = null;
     </div>
 </div>
 
+<div id="modal-evidencia-exito" class="modal modal-evidencia-exito">
+    <div class="modal-box">
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold text-green-600">✅ Evidencia Subida</h3>
+            <button onclick="cerrarModal('modal-evidencia-exito')" class="text-gray-400 hover:text-gray-600 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="evidencia-exito-contenido" class="space-y-2">
+            <p class="text-sm">Evidencia subida correctamente</p>
+            <div class="bg-gray-50 p-3 rounded-lg text-sm">
+                <p><span class="font-semibold">📎 Archivo:</span> <span id="exito-archivo"></span></p>
+                <p><span class="font-semibold">📋 Tarea:</span> <span id="exito-tarea"></span></p>
+            </div>
+        </div>
+        <div class="flex gap-2 pt-3 mt-2 border-t">
+            <button onclick="cerrarModal('modal-evidencia-exito')" class="flex-1 bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-green-700 transition">
+                <i class="fas fa-check mr-1"></i> Aceptar
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- ============================================ -->
-<!-- SCRIPT PRINCIPAL -->
+<!-- SCRIPT PRINCIPAL - v4.0 -->
 <!-- ============================================ -->
 <script>
 // ============================================
-// FUNCIONES DE SUPABASE CON MANEJO DE ERRORES MEJORADO
+// FUNCIONES DE SUPABASE CON MANEJO DE ERRORES
 // ============================================
 async function supabaseFetch(query) {
     try {
@@ -1133,7 +1287,7 @@ async function supabaseDelete(table, id) {
 }
 
 // ============================================
-// TOAST MEJORADO
+// TOAST
 // ============================================
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
@@ -1157,17 +1311,6 @@ function abrirModal(id) {
 function cerrarModal(id) { 
     document.getElementById(id).classList.remove('show'); 
     document.body.style.overflow = '';
-    // Resetear campos específicos
-    if (id === 'modal-proyecto') {
-        document.getElementById('proy-id').value = '';
-        document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
-        document.getElementById('metodologia-desc').classList.remove('show');
-    }
-    if (id === 'modal-tarea') {
-        document.getElementById('tar-id').value = '';
-        document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
-        document.getElementById('tar-proyecto').disabled = false;
-    }
 }
 
 // ============================================
@@ -1178,15 +1321,6 @@ function showTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById('content-' + tab).classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
-    
-    // Cargar contenido según la pestaña
-    switch(tab) {
-        case 'recursos': cargarRecursos(); break;
-        case 'reportes': generarReportes(); break;
-        case 'proveedores': cargarProveedores(); break;
-        case 'respaldos': cargarRespaldos(); break;
-        case 'proyectos': cargarTodosLosProyectos(); break;
-    }
 }
 
 // ============================================
@@ -1226,7 +1360,7 @@ function calcularFechaFin() {
 }
 
 // ============================================
-// CALCULAR PROGRESO POR FASES MEJORADO
+// FUNCIONES AUXILIARES
 // ============================================
 function calcularProgresoPorFases(tareas, metodologia) {
     const fasesMetodologia = FASES_POR_METODOLOGIA[metodologia]?.fases || [];
@@ -1252,10 +1386,6 @@ function calcularProgresoPorFases(tareas, metodologia) {
     return totalFasesConTareas > 0 ? Math.round((fasesCompletas / totalFasesConTareas) * 100) : 0;
 }
 
-// ============================================
-// FUNCIONES AUXILIARES MEJORADAS
-// ============================================
-
 function getBarraClase(estado) {
     const clases = {
         'Pendiente': 'pendiente',
@@ -1269,17 +1399,6 @@ function getBarraClase(estado) {
 
 function getPrioridadClase(prioridad) {
     return PRIORIDAD_COLORS[prioridad] || 'prioridad-media';
-}
-
-function getEstadoBadgeClase(estado) {
-    const clases = {
-        'Pendiente': 'badge-pendiente',
-        'En Progreso': 'badge-progreso',
-        'Completado': 'badge-completado',
-        'Bloqueada': 'badge-bloqueada',
-        'Hold': 'badge-hold'
-    };
-    return clases[estado] || 'badge-pendiente';
 }
 
 function formatDate(dateString) {
@@ -1296,32 +1415,26 @@ function formatDate(dateString) {
     }
 }
 
-function getFechaClase(fechaString) {
-    if (!fechaString) return 'futura';
-    try {
-        const fecha = new Date(fechaString);
-        const hoy = new Date();
-        const diffDias = Math.ceil((fecha - hoy) / (1000 * 60 * 60 * 24));
-        if (diffDias < 0) return 'vencida';
-        if (diffDias <= 3) return 'proxima';
-        return 'futura';
-    } catch {
-        return 'futura';
-    }
-}
-
+// ============================================
+// RENDER TAREA FILA GANTT v4.0
+// ============================================
 function renderTareaFilaGantt(t) {
     const barraClase = getBarraClase(t.estado);
     const prioridadClase = getPrioridadClase(t.prioridad);
     const prioridadLabel = t.prioridad || 'Media';
     const responsable = t.responsable_texto || '-';
     const fechaStr = formatDate(t.fecha_vencimiento);
-    const fechaClase = getFechaClase(t.fecha_vencimiento);
     
     let anchoBarra = '30%';
     if (t.estado === 'Completado') anchoBarra = '100%';
     else if (t.estado === 'En Progreso') anchoBarra = '60%';
     else if (t.estado === 'Bloqueada') anchoBarra = '40%';
+    
+    let estadoCheck = '';
+    if (t.estado === 'Completado') estadoCheck = '✅';
+    else if (t.estado === 'Bloqueada') estadoCheck = '🚫';
+    else if (t.estado === 'En Progreso') estadoCheck = '🔄';
+    else estadoCheck = '○';
     
     let evidenciaHTML = '';
     if (t.evidencia_url) {
@@ -1336,21 +1449,21 @@ function renderTareaFilaGantt(t) {
             </td>
             <td><div class="gantt-responsable">${responsable}</div></td>
             <td><span class="prioridad-badge ${prioridadClase}">${prioridadLabel}</span></td>
-            <td class="gantt-check">${t.estado === 'Completado' ? '✅' : t.estado === 'Bloqueada' ? '🚫' : '○'}</td>
+            <td class="gantt-check">${estadoCheck}</td>
             <td>
-                <div style="position:relative; width:100%; height:14px; background:#f3f4f6; border-radius:3px; overflow:hidden;">
-                    <div class="gantt-barra ${barraClase}" style="position:absolute; left:0; width:${anchoBarra};">
-                        ${t.titulo.substring(0, 15)}${t.titulo.length > 15 ? '…' : ''}
+                <div class="gantt-barra-wrapper">
+                    <div class="gantt-barra ${barraClase}" style="width:${anchoBarra};" title="${t.titulo} - ${t.estado}">
+                        ${t.titulo.substring(0, 20)}${t.titulo.length > 20 ? '…' : ''}
                     </div>
                 </div>
             </td>
             <td>
                 <div class="gantt-acciones">
                     <select onchange="cambiarEstadoTarea(${t.id}, this.value)" class="status-select">
-                        <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                        <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>En Progreso</option>
-                        <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>Bloqueada</option>
-                        <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>Completado</option>
+                        <option value="Pendiente" ${t.estado === 'Pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
+                        <option value="En Progreso" ${t.estado === 'En Progreso' ? 'selected' : ''}>🔄 Progreso</option>
+                        <option value="Bloqueada" ${t.estado === 'Bloqueada' ? 'selected' : ''}>🚫 Bloqueada</option>
+                        <option value="Completado" ${t.estado === 'Completado' ? 'selected' : ''}>✅ Completado</option>
                     </select>
                     ${t.evidencia_url ? `<button onclick="verEvidencia('${t.evidencia_url}', '${t.evidencia_nombre || 'Evidencia'}')" class="text-blue-500 hover:text-blue-700" title="Ver evidencia"><i class="fas fa-eye"></i></button>` : ''}
                     <button onclick="editarTarea(${t.id})" class="edit" title="Editar"><i class="fas fa-edit"></i></button>
@@ -1371,17 +1484,13 @@ function toggleFase(row) {
     }
 }
 
-// ============================================
-// RENDER VISTA GANTT MEJORADA
-// ============================================
 function renderVistaGanttColapsable(tareas, proyecto) {
     const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto?.metodologia]?.fases || [];
     
     if (tareas.length === 0) {
-        return `<div class="text-gray-400 text-xs text-center py-2">Sin tareas</div>`;
+        return `<div class="text-gray-400 text-xs text-center py-3">📭 Sin tareas</div>`;
     }
 
-    // Agrupar tareas por fase
     const tareasPorFase = {};
     tareas.forEach(t => {
         const fase = t.fase || 'Sin fase';
@@ -1389,11 +1498,9 @@ function renderVistaGanttColapsable(tareas, proyecto) {
         tareasPorFase[fase].push(t);
     });
 
-    // Ordenar fases según metodología
     let fasesOrdenadas = Object.keys(tareasPorFase);
     if (fasesMetodologia.length > 0) {
         fasesOrdenadas = fasesMetodologia.filter(f => tareasPorFase[f] && tareasPorFase[f].length > 0);
-        // Añadir fases que no están en la metodología
         Object.keys(tareasPorFase).forEach(f => {
             if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
         });
@@ -1401,18 +1508,17 @@ function renderVistaGanttColapsable(tareas, proyecto) {
         fasesOrdenadas.sort();
     }
 
-    // Si no hay fases con tareas, mostrar todas las tareas en una sola tabla
     if (fasesOrdenadas.length === 0 || fasesOrdenadas.every(f => tareasPorFase[f].length === 0)) {
         return `
             <div class="gantt-container">
                 <table class="gantt-table">
                     <thead>
                         <tr>
-                            <th style="width:20%;">Tarea</th>
-                            <th style="width:12%;">Responsable</th>
+                            <th style="width:22%;">Tarea</th>
+                            <th style="width:14%;">Responsable</th>
                             <th style="width:8%;">Prioridad</th>
                             <th style="width:6%;">Estado</th>
-                            <th style="width:44%;">Cronograma</th>
+                            <th style="width:40%;">Cronograma</th>
                             <th style="width:10%;">Acciones</th>
                         </tr>
                     </thead>
@@ -1429,11 +1535,11 @@ function renderVistaGanttColapsable(tareas, proyecto) {
             <table class="gantt-table">
                 <thead>
                     <tr>
-                        <th style="width:20%;">Tarea</th>
-                        <th style="width:12%;">Responsable</th>
+                        <th style="width:22%;">Tarea</th>
+                        <th style="width:14%;">Responsable</th>
                         <th style="width:8%;">Prioridad</th>
                         <th style="width:6%;">Estado</th>
-                        <th style="width:44%;">Cronograma</th>
+                        <th style="width:40%;">Cronograma</th>
                         <th style="width:10%;">Acciones</th>
                     </tr>
                 </thead>
@@ -1447,7 +1553,6 @@ function renderVistaGanttColapsable(tareas, proyecto) {
         const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
         const totalTareasFase = tareasFase.length;
         const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
-        const tieneTareas = totalTareasFase > 0;
 
         html += `
             <tr class="gantt-fila-fase" onclick="toggleFase(this)">
@@ -1455,15 +1560,15 @@ function renderVistaGanttColapsable(tareas, proyecto) {
                     <span class="fase-toggle ${index === 0 ? '' : 'collapsed'}">▼</span>
                     <span class="fase-icon"><i class="fas fa-flag"></i></span>
                     ${fase}
-                    <span class="fase-estado ${todasCompletas && tieneTareas ? 'fase-completa' : 'fase-incompleta'}">
-                        ${todasCompletas && tieneTareas ? '✅' : `⏳ ${completadasFase}/${totalTareasFase}`}
+                    <span class="fase-estado ${todasCompletas ? 'fase-completa' : 'fase-incompleta'}">
+                        ${todasCompletas ? '✅ Completada' : `⏳ ${completadasFase}/${totalTareasFase}`}
                     </span>
                     <span class="fase-tareas-count">(${totalTareasFase} tareas)</span>
                 </td>
             </tr>
             <tr class="tarea-row ${index === 0 ? '' : 'hidden'}">
                 <td colspan="6">
-                    <div class="gantt-container">
+                    <div class="gantt-container" style="border: none; border-radius: 0;">
                         <table class="gantt-table">
                             <tbody>
                                 ${tareasFase.map(t => renderTareaFilaGantt(t)).join('')}
@@ -1482,75 +1587,6 @@ function renderVistaGanttColapsable(tareas, proyecto) {
     `;
 
     return html;
-}
-
-// ============================================
-// RECARGAR DATOS MEJORADO
-// ============================================
-async function recargarDatos(proyectoId) {
-    try {
-        const [nuevosProyectos, nuevasTareas, nuevosUsuarios] = await Promise.all([
-            supabaseFetch('proyectos?order=id.desc'),
-            supabaseFetch('tareas?select=*'),
-            supabaseFetch('usuarios?select=*')
-        ]);
-        
-        proyectosCache = nuevosProyectos;
-        tareasCache = nuevasTareas;
-        usuariosCache = nuevosUsuarios;
-        
-        // Actualizar KPIs
-        const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
-        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
-        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
-        const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
-
-        document.getElementById('kpi-proyectos').textContent = activos;
-        document.getElementById('kpi-tareas-totales').textContent = tareasCache.length;
-        document.getElementById('kpi-tareas').textContent = pendientes;
-        document.getElementById('kpi-vencidas').textContent = vencidas;
-        document.getElementById('kpi-completadas').textContent = completadasTotal;
-        
-        // Actualizar proyectos con progreso
-        const proyectosConProgreso = proyectosCache.map(p => {
-            const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
-            const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
-            const total = tareasProyecto.length;
-            const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
-            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
-        });
-        
-        renderizarProyectos(proyectosConProgreso);
-        
-        // Actualizar select de proyectos
-        const selectProyecto = document.getElementById('tar-proyecto');
-        if (selectProyecto) {
-            const currentValue = selectProyecto.value;
-            selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
-            if (currentValue && proyectosCache.some(p => p.id == currentValue)) {
-                selectProyecto.value = currentValue;
-            }
-        }
-        
-        // Actualizar select de proveedores
-        const selectProv = document.getElementById('prov-proyecto');
-        if (selectProv) {
-            const currentValue = selectProv.value;
-            selectProv.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
-            if (currentValue && proyectosCache.some(p => p.id == currentValue)) {
-                selectProv.value = currentValue;
-            }
-        }
-        
-        // Si hay un detalle abierto, recargarlo
-        if (proyectoId && detallesAbiertos[proyectoId]) {
-            await renderizarDetalle(proyectoId);
-        }
-        
-    } catch (e) {
-        console.error('Error recargando datos:', e);
-        showToast('Error al recargar datos', 'error');
-    }
 }
 
 // ============================================
@@ -1618,34 +1654,15 @@ function filtrarProyectos(filtro) {
 function buscarProyectos() {
     const termino = document.getElementById('buscar-proyectos').value.toLowerCase().trim();
     const proyectos = document.querySelectorAll('.proyecto-card');
-    let visibleCount = 0;
-    
     proyectos.forEach(p => {
         const nombre = p.querySelector('.proyecto-nombre')?.textContent?.toLowerCase() || '';
         const empresa = p.querySelector('.proyecto-empresa')?.textContent?.toLowerCase() || '';
-        const area = p.querySelector('.proyecto-area')?.textContent?.toLowerCase() || '';
-        const match = nombre.includes(termino) || empresa.includes(termino) || area.includes(termino);
-        p.style.display = match ? '' : 'none';
-        if (match) visibleCount++;
+        p.style.display = (nombre.includes(termino) || empresa.includes(termino)) ? '' : 'none';
     });
-    
-    // Mostrar mensaje si no hay resultados
-    const lista = document.getElementById('lista-proyectos');
-    const noResults = lista.querySelector('.no-results');
-    if (visibleCount === 0 && termino.length > 0) {
-        if (!noResults) {
-            const msg = document.createElement('div');
-            msg.className = 'no-results text-center py-4 text-gray-500 text-sm';
-            msg.textContent = 'No se encontraron proyectos que coincidan con la búsqueda.';
-            lista.appendChild(msg);
-        }
-    } else if (noResults) {
-        noResults.remove();
-    }
 }
 
 // ============================================
-// RENDERIZAR PROYECTOS MEJORADO
+// RENDERIZAR PROYECTOS
 // ============================================
 function renderizarProyectos(proyectos) {
     const lista = document.getElementById('lista-proyectos');
@@ -1702,7 +1719,7 @@ function renderizarProyectos(proyectos) {
                         ${p.metodologia ? `<span class="metodologia-badge">${p.metodologia}</span>` : ''}
                     </div>
                     <div class="proyecto-empresa text-xs text-gray-500 mt-0.5">${p.empresa || 'Sin empresa'}</div>
-                    <div class="proyecto-area text-xs text-gray-500">${p.area || 'Sin área'}</div>
+                    <div class="text-xs text-gray-500">${p.area || 'Sin área'}</div>
                     <div class="flex flex-wrap items-center gap-3 mt-1 text-xs">
                         <span><i class="fas fa-calendar-plus text-gray-400"></i> ${p.fecha_inicio || 'No definida'}</span>
                         <span><i class="fas fa-calendar text-gray-400"></i> ${p.fecha_fin || 'No definida'}</span>
@@ -1742,43 +1759,36 @@ function renderizarProyectos(proyectos) {
             </div>
         </div>
     `}).join('');
-    
-    // Eliminar mensaje de "no resultados" si existe
-    const noResults = lista.querySelector('.no-results');
-    if (noResults) noResults.remove();
 }
 
 // ============================================
-// TOGGLE DETALLE MEJORADO
+// TOGGLE DETALLE
 // ============================================
+let detallesAbiertosGlobal = {};
+
 async function toggleDetalle(id) {
     const detalleDiv = document.getElementById(`detalle-${id}`);
     const btn = document.getElementById(`btn-detalle-${id}`);
 
     if (!detalleDiv || !btn) return;
 
-    if (detallesAbiertos[id]) {
+    if (detallesAbiertosGlobal[id]) {
         detalleDiv.classList.remove('active');
-        detallesAbiertos[id] = false;
+        detallesAbiertosGlobal[id] = false;
         btn.innerHTML = '<i class="fas fa-chevron-down"></i> Detalle';
         return;
     }
 
-    detallesAbiertos[id] = true;
+    detallesAbiertosGlobal[id] = true;
     btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar';
     detalleDiv.classList.add('active');
     
     await renderizarDetalle(id);
 }
 
-// ============================================
-// RENDERIZAR DETALLE MEJORADO
-// ============================================
 async function renderizarDetalle(id) {
     const detalleDiv = document.getElementById(`detalle-${id}`);
-    if (!detalleDiv || !detalleDiv.classList.contains('active')) {
-        return;
-    }
+    if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
     
     try {
         const proyecto = proyectosCache.find(p => p.id === id);
@@ -1823,7 +1833,6 @@ async function renderizarDetalle(id) {
             });
         }
 
-        // Construir HTML de fases compactas
         let fasesCompactasHTML = '';
         if (fasesStatus.length > 0) {
             fasesCompactasHTML = `
@@ -1904,14 +1913,14 @@ async function renderizarDetalle(id) {
                 <div class="mt-2 pt-2 border-t">
                     <div class="flex justify-between items-center mb-1">
                         <span class="text-xs font-semibold text-gray-600"><i class="fas fa-tasks mr-1"></i>${tareas.length} tareas</span>
-                        <span class="text-xs text-gray-400">Gantt</span>
+                        <span class="text-xs text-gray-400">Gantt v4.0</span>
                     </div>
                     ${ganttHTML}
                 </div>
             </div>
         `;
 
-        // Inicializar el estado de las fases: primera expandida, el resto colapsadas
+        // Inicializar estado de fases
         const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
         if (fasesRows.length > 0) {
             fasesRows.forEach((row, index) => {
@@ -1934,8 +1943,10 @@ async function renderizarDetalle(id) {
 }
 
 // ============================================
-// ORDENAR POR FECHA MEJORADO
+// ORDENAR POR FECHA
 // ============================================
+let ordenFechaActivoGlobal = {};
+
 function ordenarPorFecha(proyectoId) {
     const btn = document.getElementById(`orden-btn-${proyectoId}`);
     const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
@@ -1944,8 +1955,8 @@ function ordenarPorFecha(proyectoId) {
     
     let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
     
-    ordenFechaActivo[proyectoId] = !ordenFechaActivo[proyectoId];
-    const ascendente = ordenFechaActivo[proyectoId];
+    ordenFechaActivoGlobal[proyectoId] = !ordenFechaActivoGlobal[proyectoId];
+    const ascendente = ordenFechaActivoGlobal[proyectoId];
     btn.innerHTML = ascendente ? '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
     
     tareas.sort((a, b) => {
@@ -1954,11 +1965,9 @@ function ordenarPorFecha(proyectoId) {
         return ascendente ? fechaA - fechaB : fechaB - fechaA;
     });
     
-    // Reconstruir el Gantt con el nuevo orden
     const proyecto = proyectosCache.find(p => p.id === proyectoId);
     const ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
     
-    // Reemplazar solo la parte del Gantt
     const ganttContainer = detalleDiv.querySelector('.gantt-container');
     if (ganttContainer) {
         const tempDiv = document.createElement('div');
@@ -1971,7 +1980,7 @@ function ordenarPorFecha(proyectoId) {
 }
 
 // ============================================
-// GENERAR REPORTE DEL PROYECTO MEJORADO
+// GENERAR REPORTE DEL PROYECTO
 // ============================================
 async function generarReporteProyecto(proyectoId) {
     try {
@@ -2005,7 +2014,6 @@ async function generarReporteProyecto(proyectoId) {
         
         const tareasConEvidencia = tareas.filter(t => t.evidencia_url);
         
-        // Construir HTML de tareas por fase
         let tareasHTML = '';
         if (tareas.length === 0) {
             tareasHTML = '<p class="text-sm text-gray-500">No hay tareas registradas.</p>';
@@ -2020,7 +2028,6 @@ async function generarReporteProyecto(proyectoId) {
             let fasesOrdenadas = Object.keys(fasesTareas);
             if (fasesMetodologia.length > 0) {
                 fasesOrdenadas = fasesMetodologia.filter(f => fasesTareas[f] && fasesTareas[f].length > 0);
-                // Añadir fases que no están en la metodología
                 Object.keys(fasesTareas).forEach(f => {
                     if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
                 });
@@ -2050,7 +2057,6 @@ async function generarReporteProyecto(proyectoId) {
             });
         }
         
-        // Proveedores HTML
         let proveedoresHTML = '';
         if (proveedores.length > 0) {
             proveedoresHTML = `
@@ -2066,7 +2072,6 @@ async function generarReporteProyecto(proyectoId) {
             `;
         }
         
-        // Evidencia HTML
         let evidenciaHTML = '';
         if (tareasConEvidencia.length > 0) {
             evidenciaHTML = `
@@ -2165,7 +2170,7 @@ async function generarReporteProyecto(proyectoId) {
 }
 
 // ============================================
-// VER EVIDENCIA MEJORADO
+// VER EVIDENCIA
 // ============================================
 function verEvidencia(url, nombre) {
     const contenido = document.getElementById('ver-evidencia-contenido');
@@ -2199,7 +2204,7 @@ function verEvidencia(url, nombre) {
 }
 
 // ============================================
-// SUBIR EVIDENCIA MEJORADO
+// SUBIR EVIDENCIA
 // ============================================
 function abrirModalEvidencia(tareaId) {
     const tarea = tareasCache.find(t => t.id === tareaId);
@@ -2272,7 +2277,7 @@ async function subirEvidencia() {
 }
 
 // ============================================
-// ELIMINAR PROYECTO CON RESPALDO MEJORADO
+// ELIMINAR PROYECTO CON RESPALDO
 // ============================================
 async function eliminarProyecto(id) {
     const proyecto = proyectosCache.find(p => p.id === id);
@@ -2339,8 +2344,7 @@ async function eliminarProyecto(id) {
         
         showToast(`🗑️ Proyecto "${proyecto.nombre}" eliminado. Respaldo guardado.`, 'success');
 
-        // Recargar datos y limpiar detalles abiertos
-        detallesAbiertos = {};
+        detallesAbiertosGlobal = {};
         await cargarDashboard();
 
         const recuperar = confirm(
@@ -2359,7 +2363,7 @@ async function eliminarProyecto(id) {
 }
 
 // ============================================
-// RECUPERAR PROYECTO MEJORADO
+// RECUPERAR PROYECTO
 // ============================================
 async function recuperarProyecto(respaldoId) {
     try {
@@ -2423,7 +2427,7 @@ async function recuperarProyecto(respaldoId) {
 }
 
 // ============================================
-// VER RESPALDOS MEJORADO
+// VER RESPALDOS
 // ============================================
 async function verRespaldos() {
     try {
@@ -2480,7 +2484,7 @@ async function verRespaldos() {
 }
 
 // ============================================
-// CARGAR RESPALDOS EN TAB MEJORADO
+// CARGAR RESPALDOS EN TAB
 // ============================================
 async function cargarRespaldos() {
     try {
@@ -2571,7 +2575,7 @@ function cargarTodosLosProyectos() {
 }
 
 // ============================================
-// CAMBIAR ESTADO DE TAREA MEJORADO
+// CAMBIAR ESTADO DE TAREA
 // ============================================
 async function cambiarEstadoTarea(id, nuevoEstado) {
     try {
@@ -2612,7 +2616,7 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
 }
 
 // ============================================
-// GUARDAR PROYECTO MEJORADO
+// GUARDAR PROYECTO
 // ============================================
 async function guardarProyecto(e) {
     e.preventDefault();
@@ -2686,7 +2690,7 @@ async function crearCriteriosPorDefecto(proyectoId) {
 }
 
 // ============================================
-// GUARDAR TAREA MEJORADO
+// GUARDAR TAREA
 // ============================================
 async function guardarTarea(e) {
     e.preventDefault();
@@ -2738,7 +2742,7 @@ async function guardarTarea(e) {
 }
 
 // ============================================
-// GUARDAR USUARIO MEJORADO
+// GUARDAR USUARIO
 // ============================================
 async function guardarUsuario(e) {
     e.preventDefault();
@@ -2771,7 +2775,7 @@ async function guardarUsuario(e) {
 }
 
 // ============================================
-// ELIMINAR TAREA MEJORADO
+// ELIMINAR TAREA
 // ============================================
 async function eliminarTarea(id) {
     if (!confirm('¿Eliminar esta tarea?')) return;
@@ -2812,7 +2816,6 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
     if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
         fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
     } else {
-        // Usar fases existentes en el proyecto
         const tareasProyecto = tareasCache.filter(t => t.proyecto_id === proyectoId);
         const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
         if (fasesExistentes.length > 0) {
@@ -2834,7 +2837,7 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
 }
 
 // ============================================
-// PROVEEDORES MEJORADO
+// PROVEEDORES
 // ============================================
 async function cargarProveedores() {
     try {
@@ -2993,7 +2996,7 @@ async function eliminarProveedor(id) {
 }
 
 // ============================================
-// CALIFICAR PROVEEDOR MEJORADO
+// CALIFICAR PROVEEDOR
 // ============================================
 async function calificarProveedor(proveedorId) {
     try {
@@ -3012,10 +3015,8 @@ async function calificarProveedor(proveedorId) {
             return;
         }
 
-        // Obtener calificaciones existentes
         const calificacionesExistentes = await supabaseFetch(`calificaciones?proveedor_id=eq.${proveedorId}&select=*`);
 
-        // Crear el modal dinámicamente
         const modalContainer = document.createElement('div');
         modalContainer.id = 'modal-calificacion';
         modalContainer.className = 'modal show';
@@ -3065,15 +3066,14 @@ async function calificarProveedor(proveedorId) {
         `;
 
         document.body.appendChild(modalContainer);
+        modalContainer.classList.add('show');
 
-        // Cerrar al hacer clic fuera
         modalContainer.addEventListener('click', (e) => {
             if (e.target === modalContainer) {
                 cerrarModalCalificacion();
             }
         });
 
-        // Función global para cerrar
         window.cerrarModalCalificacion = function() {
             const modal = document.getElementById('modal-calificacion');
             if (modal) modal.remove();
@@ -3096,7 +3096,6 @@ async function guardarCalificacion(e, proveedorId) {
             const criterioId = parseInt(input.id.replace('cal-', ''));
             const puntaje = parseInt(input.value);
             
-            // Verificar si ya existe calificación
             const existentes = await supabaseFetch(
                 `calificaciones?proveedor_id=eq.${proveedorId}&criterio_id=eq.${criterioId}&select=id`
             );
@@ -3129,7 +3128,7 @@ function cerrarModalCalificacion() {
 }
 
 // ============================================
-// VER DETALLE PROVEEDOR MEJORADO
+// VER DETALLE PROVEEDOR
 // ============================================
 async function verDetalleProveedor(proveedorId) {
     try {
@@ -3222,7 +3221,7 @@ async function verDetalleProveedor(proveedorId) {
 }
 
 // ============================================
-// RECURSOS MEJORADO
+// RECURSOS
 // ============================================
 async function cargarRecursos() {
     try {
@@ -3267,7 +3266,7 @@ async function cargarRecursos() {
 }
 
 // ============================================
-// REPORTES MEJORADO
+// REPORTES
 // ============================================
 function generarReportes() {
     const container = document.getElementById('contenido-reportes');
@@ -3330,7 +3329,7 @@ function generarReportes() {
 }
 
 // ============================================
-// EDITAR PROYECTO MEJORADO
+// EDITAR PROYECTO
 // ============================================
 function editarProyecto(id) {
     const proyecto = proyectosCache.find(p => p.id === id);
@@ -3362,7 +3361,7 @@ function editarProyecto(id) {
 }
 
 // ============================================
-// EDITAR TAREA MEJORADO
+// EDITAR TAREA
 // ============================================
 function editarTarea(id) {
     const tarea = tareasCache.find(t => t.id === id);
@@ -3421,12 +3420,58 @@ function editarTarea(id) {
 }
 
 // ============================================
+// RECARGAR DATOS
+// ============================================
+async function recargarDatos(proyectoId) {
+    try {
+        const [nuevosProyectos, nuevasTareas, nuevosUsuarios] = await Promise.all([
+            supabaseFetch('proyectos?order=id.desc'),
+            supabaseFetch('tareas?select=*'),
+            supabaseFetch('usuarios?select=*')
+        ]);
+        
+        proyectosCache = nuevosProyectos;
+        tareasCache = nuevasTareas;
+        usuariosCache = nuevosUsuarios;
+        
+        // Actualizar KPIs
+        const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
+        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
+        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
+
+        document.getElementById('kpi-proyectos').textContent = activos;
+        document.getElementById('kpi-tareas-totales').textContent = tareasCache.length;
+        document.getElementById('kpi-tareas').textContent = pendientes;
+        document.getElementById('kpi-vencidas').textContent = vencidas;
+        document.getElementById('kpi-completadas').textContent = completadasTotal;
+        
+        const proyectosConProgreso = proyectosCache.map(p => {
+            const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
+            const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
+            const total = tareasProyecto.length;
+            const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
+        });
+        
+        renderizarProyectos(proyectosConProgreso);
+        
+        if (proyectoId && detallesAbiertosGlobal[proyectoId]) {
+            await renderizarDetalle(proyectoId);
+        }
+        
+    } catch (e) {
+        console.error('Error recargando datos:', e);
+        showToast('Error al recargar datos', 'error');
+    }
+}
+
+// ============================================
 // INICIALIZAR
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
     cargarDashboard();
 
-    // Cerrar modales al hacer clic fuera
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -3439,7 +3484,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Cerrar con tecla ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal.show').forEach(modal => {
@@ -3452,7 +3496,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Actualizar tab contenido cuando se cambia de pestaña
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.id.replace('tab-', '');
@@ -3467,7 +3510,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-console.log('✅ PM System v3.10 cargado correctamente');
+console.log('✅ PM System v4.0 - Gantt HD cargado correctamente');
 </script>
 
 </body>
