@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v3.8</title>
+    <title>PM System v3.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -23,6 +23,7 @@
         .toast { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; border-radius: 10px; color: white; z-index: 200; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); font-size: 13px; }
         .toast-success { background: #22c55e; }
         .toast-error { background: #ef4444; }
+        .toast-info { background: #3b82f6; }
         .toast.show { display: block; }
         .badge-estado { font-size: 9px; padding: 1px 8px; border-radius: 10px; font-weight: 500; }
         .badge-pendiente { background: #fef3c7; color: #d97706; }
@@ -109,6 +110,8 @@
         .evidencia-link { color: #3b82f6; text-decoration: underline; cursor: pointer; }
         .evidencia-link:hover { color: #2563eb; }
         .modal-evidencia-exito .modal-box { border-top: 4px solid #22c55e; }
+        .btn-respaldo { background: #6b7280; color: white; padding: 3px 12px; border-radius: 12px; font-size: 10px; border: none; cursor: pointer; }
+        .btn-respaldo:hover { background: #4b5563; }
     </style>
 </head>
 <body>
@@ -183,7 +186,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v3.8</span>
+            <span class="text-lg font-bold text-gray-800">PM System v3.9</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -208,6 +211,9 @@ const PRIORIDAD_COLORS = {
         </button>
         <button onclick="showTab('proveedores')" id="tab-proveedores" class="tab-btn">
             <i class="fas fa-handshake mr-1"></i> Proveedores
+        </button>
+        <button onclick="showTab('respaldos')" id="tab-respaldos" class="tab-btn">
+            <i class="fas fa-history mr-1"></i> Respaldos
         </button>
     </div>
 
@@ -277,6 +283,9 @@ const PRIORIDAD_COLORS = {
                     <button onclick="abrirModal('modal-proyecto')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 transition">
                         <i class="fas fa-plus mr-1"></i> Nuevo
                     </button>
+                    <button onclick="verRespaldos()" class="btn-respaldo">
+                        <i class="fas fa-history mr-1"></i> Respaldos
+                    </button>
                 </div>
             </div>
             <div class="p-4 space-y-3" id="lista-proyectos">
@@ -320,6 +329,13 @@ const PRIORIDAD_COLORS = {
                 </button>
             </div>
             <div id="lista-proveedores"></div>
+        </div>
+    </div>
+
+    <div id="content-respaldos" class="tab-content">
+        <div class="bg-white rounded-lg shadow p-4">
+            <h2 class="text-lg font-bold mb-3"><i class="fas fa-history mr-2"></i>Proyectos Eliminados (Respaldos)</h2>
+            <div id="lista-respaldos"></div>
         </div>
     </div>
 
@@ -681,9 +697,9 @@ function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = 'toast';
-    toast.classList.add(type === 'success' ? 'toast-success' : 'toast-error');
+    toast.classList.add(type === 'success' ? 'toast-success' : type === 'info' ? 'toast-info' : 'toast-error');
     toast.classList.add('show');
-    setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    setTimeout(() => { toast.classList.remove('show'); }, 4000);
 }
 
 // ============================================
@@ -703,6 +719,7 @@ function showTab(tab) {
     if (tab === 'recursos') cargarRecursos();
     if (tab === 'reportes') generarReportes();
     if (tab === 'proveedores') cargarProveedores();
+    if (tab === 'respaldos') cargarRespaldos();
 }
 
 // ============================================
@@ -1656,6 +1673,272 @@ function ordenarPorFecha(proyectoId) {
 }
 
 // ============================================
+// ELIMINAR PROYECTO (CON RESPALDO Y CONFIRMACIÓN)
+// ============================================
+async function eliminarProyecto(id) {
+    const proyecto = proyectosCache.find(p => p.id === id);
+    if (!proyecto) {
+        showToast('Proyecto no encontrado', 'error');
+        return;
+    }
+
+    const confirmar = confirm(
+        `⚠️ ¿ELIMINAR PROYECTO?\n\n` +
+        `📋 Proyecto: ${proyecto.nombre}\n` +
+        `🏢 Empresa: ${proyecto.empresa || 'Sin empresa'}\n` +
+        `📊 Tareas: ${tareasCache.filter(t => t.proyecto_id === id).length}\n\n` +
+        `✅ Se guardará un respaldo antes de eliminar.\n` +
+        `❌ Esta acción NO se puede deshacer.\n\n` +
+        `¿Estás seguro de eliminar este proyecto?`
+    );
+    
+    if (!confirmar) {
+        showToast('❌ Eliminación cancelada');
+        return;
+    }
+
+    const confirmar2 = confirm(
+        `🔄 CONFIRMACIÓN FINAL\n\n` +
+        `¿Realmente deseas eliminar "${proyecto.nombre}"?\n` +
+        `Se guardará un respaldo en la base de datos.`
+    );
+    
+    if (!confirmar2) {
+        showToast('❌ Eliminación cancelada');
+        return;
+    }
+
+    try {
+        showToast('⏳ Guardando respaldo...', 'info');
+
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === id);
+        
+        const respaldo = {
+            proyecto_id: proyecto.id,
+            nombre: proyecto.nombre,
+            categoria: proyecto.categoria,
+            metodologia: proyecto.metodologia,
+            empresa: proyecto.empresa,
+            area: proyecto.area,
+            fecha_inicio: proyecto.fecha_inicio,
+            fecha_fin: proyecto.fecha_fin,
+            estado: proyecto.estado,
+            progreso: proyecto.progreso,
+            tareas: JSON.stringify(tareasProyecto),
+            eliminado_por: 'Oscar Castillo'
+        };
+
+        const insertRes = await supabaseInsert('proyectos_eliminados', respaldo);
+        
+        if (!insertRes || insertRes.length === 0) {
+            throw new Error('Error al guardar respaldo');
+        }
+
+        showToast('✅ Respaldo guardado correctamente', 'success');
+
+        await supabaseDelete('proyectos', id);
+        
+        showToast(`🗑️ Proyecto "${proyecto.nombre}" eliminado. Respaldo guardado.`, 'success');
+
+        cargarDashboard();
+
+        const recuperar = confirm(
+            `✅ Proyecto eliminado con respaldo.\n\n` +
+            `¿Quieres recuperar el proyecto desde el respaldo ahora?`
+        );
+        
+        if (recuperar) {
+            await recuperarProyecto(insertRes[0].id);
+        }
+
+    } catch (e) {
+        console.error('Error:', e);
+        showToast('❌ Error al eliminar: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// RECUPERAR PROYECTO DESDE RESPALDO
+// ============================================
+async function recuperarProyecto(respaldoId) {
+    try {
+        const respaldos = await supabaseFetch(`proyectos_eliminados?id=eq.${respaldoId}`);
+        const respaldo = respaldos[0];
+        
+        if (!respaldo) {
+            showToast('❌ Respaldo no encontrado', 'error');
+            return;
+        }
+
+        showToast('⏳ Recuperando proyecto...', 'info');
+
+        const nuevoProyecto = await supabaseInsert('proyectos', {
+            nombre: respaldo.nombre + ' (recuperado)',
+            categoria: respaldo.categoria,
+            metodologia: respaldo.metodologia,
+            empresa: respaldo.empresa,
+            area: respaldo.area,
+            fecha_inicio: respaldo.fecha_inicio,
+            fecha_fin: respaldo.fecha_fin,
+            estado: 'Activo',
+            progreso: 0
+        });
+
+        if (!nuevoProyecto || nuevoProyecto.length === 0) {
+            throw new Error('Error al recuperar proyecto');
+        }
+
+        const proyectoRecuperado = nuevoProyecto[0];
+
+        if (respaldo.tareas) {
+            const tareas = JSON.parse(respaldo.tareas);
+            for (const tarea of tareas) {
+                await supabaseInsert('tareas', {
+                    titulo: tarea.titulo,
+                    descripcion: tarea.descripcion,
+                    proyecto_id: proyectoRecuperado.id,
+                    responsable_texto: tarea.responsable_texto,
+                    prioridad: tarea.prioridad,
+                    fase: tarea.fase,
+                    fecha_vencimiento: tarea.fecha_vencimiento,
+                    estado: tarea.estado || 'Pendiente'
+                });
+            }
+        }
+
+        showToast(`✅ Proyecto "${respaldo.nombre}" recuperado exitosamente`, 'success');
+        
+        await supabaseUpdate('proyectos_eliminados', respaldoId, {
+            estado_recuperado: true,
+            fecha_recuperado: new Date().toISOString()
+        });
+
+        cargarDashboard();
+
+    } catch (e) {
+        console.error('Error:', e);
+        showToast('❌ Error al recuperar: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// VER RESPALDOS
+// ============================================
+async function verRespaldos() {
+    try {
+        const respaldos = await supabaseFetch('proyectos_eliminados?order=fecha_eliminacion.desc');
+        
+        if (respaldos.length === 0) {
+            showToast('📭 No hay proyectos eliminados', 'info');
+            return;
+        }
+
+        let mensaje = '📋 PROYECTOS ELIMINADOS (RESPALDOS)\n';
+        mensaje += '═══════════════════════════════\n\n';
+        
+        respaldos.forEach((r, index) => {
+            const tareas = r.tareas ? JSON.parse(r.tareas) : [];
+            const recuperado = r.estado_recuperado ? '✅ RECUPERADO' : '❌ NO RECUPERADO';
+            mensaje += `${index + 1}. ${r.nombre} ${recuperado}\n`;
+            mensaje += `   🏢 ${r.empresa || 'Sin empresa'}\n`;
+            mensaje += `   📊 ${tareas.length} tareas\n`;
+            mensaje += `   📅 Eliminado: ${new Date(r.fecha_eliminacion).toLocaleDateString()}\n`;
+            mensaje += `   🆔 Respaldo ID: ${r.id}\n\n`;
+        });
+
+        mensaje += '═══════════════════════════════\n';
+        mensaje += '¿Quieres recuperar algún proyecto?\n';
+        mensaje += 'Escribe el número del proyecto o 0 para cancelar.';
+
+        const opcion = prompt(mensaje);
+        
+        if (opcion && opcion !== '0') {
+            const index = parseInt(opcion) - 1;
+            if (index >= 0 && index < respaldos.length) {
+                const respaldo = respaldos[index];
+                if (respaldo.estado_recuperado) {
+                    showToast('⚠️ Este proyecto ya fue recuperado', 'info');
+                    return;
+                }
+                const confirmar = confirm(
+                    `¿Recuperar "${respaldo.nombre}"?\n` +
+                    `Se creará como: "${respaldo.nombre} (recuperado)"`
+                );
+                if (confirmar) {
+                    await recuperarProyecto(respaldo.id);
+                }
+            } else {
+                showToast('❌ Opción inválida', 'error');
+            }
+        }
+        
+    } catch (e) {
+        console.error('Error:', e);
+        showToast('Error al cargar respaldos', 'error');
+    }
+}
+
+// ============================================
+// CARGAR RESPALDOS EN TAB
+// ============================================
+async function cargarRespaldos() {
+    try {
+        const respaldos = await supabaseFetch('proyectos_eliminados?order=fecha_eliminacion.desc');
+        const lista = document.getElementById('lista-respaldos');
+        
+        if (respaldos.length === 0) {
+            lista.innerHTML = '<div class="text-center py-8 text-gray-500 text-sm">No hay proyectos eliminados</div>';
+            return;
+        }
+
+        lista.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs">#</th>
+                            <th class="px-3 py-2 text-left text-xs">Proyecto</th>
+                            <th class="px-3 py-2 text-left text-xs">Empresa</th>
+                            <th class="px-3 py-2 text-left text-xs">Tareas</th>
+                            <th class="px-3 py-2 text-left text-xs">Eliminado</th>
+                            <th class="px-3 py-2 text-left text-xs">Estado</th>
+                            <th class="px-3 py-2 text-left text-xs">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${respaldos.map((r, index) => {
+                            const tareas = r.tareas ? JSON.parse(r.tareas) : [];
+                            const recuperado = r.estado_recuperado;
+                            return `
+                            <tr class="border-t hover:bg-gray-50 ${recuperado ? 'bg-green-50' : ''}">
+                                <td class="px-3 py-2 text-xs">${index + 1}</td>
+                                <td class="px-3 py-2 text-xs font-medium">${r.nombre}</td>
+                                <td class="px-3 py-2 text-xs text-gray-500">${r.empresa || '-'}</td>
+                                <td class="px-3 py-2 text-xs text-center">${tareas.length}</td>
+                                <td class="px-3 py-2 text-xs text-gray-500">${new Date(r.fecha_eliminacion).toLocaleDateString()}</td>
+                                <td class="px-3 py-2 text-xs">
+                                    ${recuperado ? '<span class="text-green-600">✅ Recuperado</span>' : '<span class="text-red-600">❌ No recuperado</span>'}
+                                </td>
+                                <td class="px-3 py-2 text-xs">
+                                    ${!recuperado ? `<button onclick="recuperarProyecto(${r.id})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">🔄 Recuperar</button>` : ''}
+                                </td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2 text-xs text-gray-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                ${respaldos.length} proyectos eliminados
+            </div>
+        `;
+    } catch (e) {
+        console.error('Error:', e);
+        document.getElementById('lista-respaldos').innerHTML = '<div class="text-red-500 text-sm">Error cargando respaldos</div>';
+    }
+}
+
+// ============================================
 // CAMBIAR ESTADO DE TAREA
 // ============================================
 async function cambiarEstadoTarea(id, nuevoEstado) {
@@ -1829,20 +2112,6 @@ async function guardarUsuario(e) {
         cargarRecursos();
     } catch (e) {
         showToast('Error: ' + e.message, 'error');
-    }
-}
-
-// ============================================
-// ELIMINAR PROYECTO
-// ============================================
-async function eliminarProyecto(id) {
-    if (!confirm('¿Eliminar este proyecto y todas sus tareas?')) return;
-    try {
-        await supabaseDelete('proyectos', id);
-        showToast('Proyecto eliminado');
-        cargarDashboard();
-    } catch (e) {
-        showToast('Error al eliminar', 'error');
     }
 }
 
@@ -2449,6 +2718,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (btn.textContent.includes('Recursos')) cargarRecursos();
             if (btn.textContent.includes('Reportes')) generarReportes();
             if (btn.textContent.includes('Proveedores')) cargarProveedores();
+            if (btn.textContent.includes('Respaldos')) cargarRespaldos();
         });
     });
 });
