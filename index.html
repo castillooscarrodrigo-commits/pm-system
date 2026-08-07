@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>PM System v4.4 - Gantt Basado en Tiempo</title>
+    <title>PM System v4.5 - KPIs Mejorados</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
@@ -40,6 +40,93 @@
             from { transform: translateX(100px); opacity: 0; }
             to   { transform: translateX(0); opacity: 1; }
         }
+
+        /* ===== KPI CARDS ===== */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        @media (max-width: 768px) {
+            .kpi-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 480px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .kpi-card {
+            background: white;
+            border-radius: 10px;
+            padding: 10px 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #f1f5f9;
+        }
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .kpi-card .kpi-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .kpi-card .kpi-number {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .kpi-card .kpi-label {
+            font-size: 10px;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .kpi-card .kpi-change {
+            font-size: 9px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 10px;
+        }
+        .kpi-card .kpi-change.up { background: #d1fae5; color: #065f46; }
+        .kpi-card .kpi-change.down { background: #fee2e2; color: #991b1b; }
+        .kpi-card .kpi-change.neutral { background: #e5e7eb; color: #6b7280; }
+
+        /* Colores específicos para cada KPI */
+        .kpi-total { border-left: 3px solid #3b82f6; }
+        .kpi-total .kpi-icon { background: #dbeafe; color: #2563eb; }
+        .kpi-total .kpi-number { color: #2563eb; }
+
+        .kpi-progreso { border-left: 3px solid #8b5cf6; }
+        .kpi-progreso .kpi-icon { background: #ede9fe; color: #7c3aed; }
+        .kpi-progreso .kpi-number { color: #7c3aed; }
+
+        .kpi-pendientes { border-left: 3px solid #f59e0b; }
+        .kpi-pendientes .kpi-icon { background: #fef3c7; color: #d97706; }
+        .kpi-pendientes .kpi-number { color: #d97706; }
+
+        .kpi-completadas { border-left: 3px solid #22c55e; }
+        .kpi-completadas .kpi-icon { background: #d1fae5; color: #16a34a; }
+        .kpi-completadas .kpi-number { color: #16a34a; }
+
+        .kpi-vencidas { border-left: 3px solid #ef4444; }
+        .kpi-vencidas .kpi-icon { background: #fee2e2; color: #dc2626; }
+        .kpi-vencidas .kpi-number { color: #dc2626; }
+
+        .kpi-proyectos { border-left: 3px solid #06b6d4; }
+        .kpi-proyectos .kpi-icon { background: #cffafe; color: #0891b2; }
+        .kpi-proyectos .kpi-number { color: #0891b2; }
 
         /* ============================================ */
         /* GANTT BASADO EN TIEMPO (v4.4)               */
@@ -85,7 +172,6 @@
             background: #f8fafc;
         }
 
-        /* === CONTENEDOR DE LA BARRA (ancho fijo en píxeles) === */
         .gantt-barra-wrapper {
             position: relative;
             width: 100%;
@@ -97,7 +183,6 @@
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
         }
 
-        /* === LA BARRA CON ANCHO FIJO EN PÍXELES === */
         .gantt-barra {
             position: absolute;
             left: 0;
@@ -119,170 +204,82 @@
             cursor: pointer;
             border: 2px solid rgba(0,0,0,0.08);
         }
-        
         .gantt-barra:hover {
             transform: scaleY(1.05);
             box-shadow: 0 6px 16px rgba(0,0,0,0.25);
             z-index: 2;
         }
 
-        /* --- PENDIENTE: NARANJA FUERTE --- */
         .gantt-barra.pendiente {
             background: linear-gradient(135deg, #f97316, #ea580c);
             color: #ffffff;
             border-color: #c2410c;
             text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
-        .gantt-barra.pendiente::before {
-            content: "⏳ ";
-            font-size: 15px;
-        }
+        .gantt-barra.pendiente::before { content: "⏳ "; font-size: 15px; }
 
-        /* --- PROGRESO: AZUL INTENSO --- */
         .gantt-barra.progreso {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: #fff;
             border-color: #1e40af;
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        .gantt-barra.progreso::before {
-            content: "🔄 ";
-            font-size: 15px;
-        }
+        .gantt-barra.progreso::before { content: "🔄 "; font-size: 15px; }
 
-        /* --- COMPLETADO: VERDE OSCURO --- */
         .gantt-barra.completado {
             background: linear-gradient(135deg, #34d399, #059669);
             color: #064e3b;
             border-color: #047857;
         }
-        .gantt-barra.completado::before {
-            content: "✅ ";
-            font-size: 15px;
-        }
+        .gantt-barra.completado::before { content: "✅ "; font-size: 15px; }
 
-        /* --- BLOQUEADA: ROJO INTENSO --- */
         .gantt-barra.bloqueada {
             background: linear-gradient(135deg, #f87171, #dc2626);
             color: #fff;
             border-color: #b91c1c;
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        .gantt-barra.bloqueada::before {
-            content: "🚫 ";
-            font-size: 15px;
-        }
+        .gantt-barra.bloqueada::before { content: "🚫 "; font-size: 15px; }
 
-        /* --- HOLD: GRIS OSCURO --- */
         .gantt-barra.hold {
             background: linear-gradient(135deg, #9ca3af, #4b5563);
             color: #fff;
             border-color: #374151;
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        .gantt-barra.hold::before {
-            content: "⏸️ ";
-            font-size: 15px;
-        }
+        .gantt-barra.hold::before { content: "⏸️ "; font-size: 15px; }
 
-        /* === FILAS DE FASE === */
         .gantt-fila-fase {
             background: #f0fdf4;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .gantt-fila-fase:hover {
-            background: #dcfce7;
-        }
-        .gantt-fila-fase td {
-            padding: 10px 14px;
-            border-bottom: 2px solid #d1d5db;
-        }
-        .gantt-fila-fase .fase-icon {
-            margin-right: 6px;
-            font-size: 14px;
-        }
-        .gantt-fila-fase .fase-estado {
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
-            padding: 2px 12px;
-            border-radius: 20px;
-        }
-        .gantt-fila-fase .fase-completa {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        .gantt-fila-fase .fase-incompleta {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        .gantt-fila-fase .fase-toggle {
-            font-size: 14px;
-            margin-right: 6px;
-            transition: transform 0.3s ease;
-            display: inline-block;
-        }
-        .gantt-fila-fase .fase-toggle.collapsed {
-            transform: rotate(-90deg);
-        }
-        .gantt-fila-fase .fase-tareas-count {
-            font-size: 12px;
-            font-weight: 400;
-            color: #6b7280;
-            margin-left: 10px;
-        }
+        .gantt-fila-fase:hover { background: #dcfce7; }
+        .gantt-fila-fase td { padding: 10px 14px; border-bottom: 2px solid #d1d5db; }
+        .gantt-fila-fase .fase-icon { margin-right: 6px; font-size: 14px; }
+        .gantt-fila-fase .fase-estado { font-size: 12px; font-weight: 600; margin-left: 10px; padding: 2px 12px; border-radius: 20px; }
+        .gantt-fila-fase .fase-completa { background: #d1fae5; color: #065f46; }
+        .gantt-fila-fase .fase-incompleta { background: #fee2e2; color: #991b1b; }
+        .gantt-fila-fase .fase-toggle { font-size: 14px; margin-right: 6px; transition: transform 0.3s ease; display: inline-block; }
+        .gantt-fila-fase .fase-toggle.collapsed { transform: rotate(-90deg); }
+        .gantt-fila-fase .fase-tareas-count { font-size: 12px; font-weight: 400; color: #6b7280; margin-left: 10px; }
 
-        /* === FILAS DE TAREA === */
-        .tarea-row {
-            transition: opacity 0.3s ease;
-        }
-        .tarea-row.hidden {
-            display: none;
-        }
+        .tarea-row { transition: opacity 0.3s ease; }
+        .tarea-row.hidden { display: none; }
 
-        /* === TEXTO DE TAREA === */
-        .gantt-titulo {
-            font-weight: 600;
-            font-size: 13px;
-            color: #0f172a;
-        }
-        .gantt-responsable {
-            font-size: 12px;
-            color: #475569;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .gantt-responsable::before {
-            content: "👤";
-            font-size: 13px;
-        }
-        .gantt-fecha {
-            font-size: 11px;
-            color: #94a3b8;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .gantt-fecha::before {
-            content: "📅";
-            font-size: 12px;
-        }
+        .gantt-titulo { font-weight: 600; font-size: 13px; color: #0f172a; }
+        .gantt-responsable { font-size: 12px; color: #475569; display: flex; align-items: center; gap: 4px; }
+        .gantt-responsable::before { content: "👤"; font-size: 13px; }
+        .gantt-fecha { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+        .gantt-fecha::before { content: "📅"; font-size: 12px; }
 
-        /* === CHECK DE ESTADO === */
-        .gantt-check {
-            width: 36px;
-            text-align: center;
-            font-size: 18px;
-        }
+        .gantt-check { width: 36px; text-align: center; font-size: 18px; }
         .gantt-check .completado { color: #22c55e; }
         .gantt-check .pendiente { color: #f97316; }
         .gantt-check .bloqueada { color: #ef4444; }
         .gantt-check .progreso { color: #3b82f6; }
 
-        /* === ACCIONES === */
         .gantt-acciones {
             display: flex;
             gap: 6px;
@@ -298,16 +295,8 @@
             font-size: 12px;
             transition: all 0.2s ease;
         }
-        .gantt-acciones .edit:hover {
-            background: #fef3c7;
-            color: #d97706;
-            transform: scale(1.1);
-        }
-        .gantt-acciones .delete:hover {
-            background: #fee2e2;
-            color: #dc2626;
-            transform: scale(1.1);
-        }
+        .gantt-acciones .edit:hover { background: #fef3c7; color: #d97706; transform: scale(1.1); }
+        .gantt-acciones .delete:hover { background: #fee2e2; color: #dc2626; transform: scale(1.1); }
         .gantt-acciones .status-select {
             font-size: 11px;
             padding: 3px 8px;
@@ -341,67 +330,13 @@
             color: white;
             box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
         }
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-        .tab-content.active {
-            display: block;
-        }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .card-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        .kpi-card { padding: 4px 8px; transition: all 0.3s ease; }
-        .kpi-card .numero { font-size: 15px; font-weight: 700; }
-        .kpi-card .label { font-size: 8px; color: #6b7280; line-height: 1.1; }
-        .kpi-icon {
-            padding: 4px;
-            border-radius: 50%;
-            font-size: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-        }
-        .prioridad-badge {
-            font-size: 9px;
-            padding: 2px 8px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-        .prioridad-baja { background: #e5e7eb; color: #6b7280; }
-        .prioridad-media { background: #fef3c7; color: #d97706; }
-        .prioridad-alta { background: #fee2e2; color: #dc2626; }
-        .prioridad-critica { background: #7f1d1d; color: #fecaca; }
-        .evidencia-tag {
-            background: #dbeafe;
-            color: #2563eb;
-            padding: 1px 8px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 500;
-            display: inline-block;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .evidencia-tag:hover {
-            background: #bfdbfe;
-            transform: scale(1.05);
-        }
-        .status-badge {
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 600;
-            display: inline-block;
-        }
+
         .modal {
             display: none;
             position: fixed;
@@ -429,6 +364,7 @@
             from { transform: translateY(20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
+
         .btn-respaldo {
             background: #6b7280;
             color: white;
@@ -439,11 +375,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .btn-respaldo:hover {
-            background: #4b5563;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+        .btn-respaldo:hover { background: #4b5563; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
         .filtro-btn {
             padding: 3px 12px;
             border-radius: 16px;
@@ -470,10 +403,8 @@
             width: 160px;
             transition: all 0.2s ease;
         }
-        .buscar-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
+        .buscar-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
         .metodologia-badge {
             padding: 2px 8px;
             border-radius: 10px;
@@ -482,40 +413,49 @@
             background: #e0e7ff;
             color: #4338ca;
         }
+        .status-badge {
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .prioridad-badge {
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .prioridad-baja { background: #e5e7eb; color: #6b7280; }
+        .prioridad-media { background: #fef3c7; color: #d97706; }
+        .prioridad-alta { background: #fee2e2; color: #dc2626; }
+        .prioridad-critica { background: #7f1d1d; color: #fecaca; }
+
+        .evidencia-tag {
+            background: #dbeafe;
+            color: #2563eb;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .evidencia-tag:hover { background: #bfdbfe; transform: scale(1.05); }
+
         .proyecto-card {
             transition: all 0.3s ease;
             border: 1px solid #e5e7eb;
         }
-        .proyecto-card:hover {
-            border-color: #3b82f6;
-        }
-        .proyecto-detalle {
-            display: none;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 2px solid #e5e7eb;
-        }
-        .proyecto-detalle.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        .progress-bar {
-            height: 6px;
-            border-radius: 3px;
-            background: #e5e7eb;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .fases-compactas {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin: 4px 0;
-        }
+        .proyecto-card:hover { border-color: #3b82f6; }
+        .proyecto-detalle { display: none; margin-top: 10px; padding-top: 10px; border-top: 2px solid #e5e7eb; }
+        .proyecto-detalle.active { display: block; animation: fadeIn 0.3s ease; }
+
+        .progress-bar { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .fases-compactas { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
         .fase-item {
             display: flex;
             align-items: center;
@@ -530,6 +470,7 @@
         .fase-item.sin-tareas { background: #e5e7eb; color: #6b7280; }
         .fase-item .fase-check { font-size: 10px; }
         .fase-item .fase-detalle { font-size: 9px; opacity: 0.7; }
+
         .orden-btn {
             padding: 2px 10px;
             border-radius: 12px;
@@ -542,6 +483,7 @@
             transition: all 0.2s ease;
         }
         .orden-btn:hover { background: #d1d5db; }
+
         .evidencia-preview {
             max-width: 100%;
             max-height: 300px;
@@ -557,21 +499,11 @@
             background: #e0e7ff;
             color: #4338ca;
         }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #c1c7cd;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a8b0b8;
-        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #c1c7cd; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8b0b8; }
     </style>
 </head>
 <body>
@@ -632,8 +564,8 @@ let tareaEnEvidencia = null;
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v4.4</span>
-            <span class="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full font-semibold">Time Gantt</span>
+            <span class="text-lg font-bold text-gray-800">PM System v4.5</span>
+            <span class="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full font-semibold">KPIs+</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -668,50 +600,71 @@ let tareaEnEvidencia = null;
 
     <!-- DASHBOARD -->
     <div id="content-dashboard" class="tab-content active">
-        <!-- KPIS -->
-        <div class="grid grid-cols-5 gap-1.5 mb-3">
-            <div class="bg-white rounded-lg shadow p-1.5 card-hover">
-                <div class="flex items-center gap-1.5">
-                    <div class="kpi-icon bg-blue-100 text-blue-600"><i class="fas fa-folder-open"></i></div>
+        
+        <!-- ===== KPIS MEJORADOS CON 6 CARDS ===== -->
+        <div class="kpi-grid">
+            <!-- 1. Total Proyectos -->
+            <div class="kpi-card kpi-proyectos">
+                <div class="flex items-center gap-3">
+                    <div class="kpi-icon"><i class="fas fa-folder-open"></i></div>
                     <div>
-                        <div class="numero text-blue-600" id="kpi-proyectos">0</div>
-                        <div class="label">Total Proyectos</div>
+                        <div class="kpi-number" id="kpi-proyectos">0</div>
+                        <div class="kpi-label">Total Proyectos</div>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-1.5 card-hover">
-                <div class="flex items-center gap-1.5">
-                    <div class="kpi-icon bg-indigo-100 text-indigo-600"><i class="fas fa-list"></i></div>
+            
+            <!-- 2. Total Tareas -->
+            <div class="kpi-card kpi-total">
+                <div class="flex items-center gap-3">
+                    <div class="kpi-icon"><i class="fas fa-list"></i></div>
                     <div>
-                        <div class="numero text-indigo-600" id="kpi-tareas-totales">0</div>
-                        <div class="label">Total Tareas</div>
+                        <div class="kpi-number" id="kpi-tareas-totales">0</div>
+                        <div class="kpi-label">Total Tareas</div>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-1.5 card-hover">
-                <div class="flex items-center gap-1.5">
-                    <div class="kpi-icon bg-yellow-100 text-yellow-600"><i class="fas fa-tasks"></i></div>
+            
+            <!-- 3. En Progreso (NUEVO) -->
+            <div class="kpi-card kpi-progreso">
+                <div class="flex items-center gap-3">
+                    <div class="kpi-icon"><i class="fas fa-spinner"></i></div>
                     <div>
-                        <div class="numero text-yellow-600" id="kpi-tareas">0</div>
-                        <div class="label">Tareas Pendientes</div>
+                        <div class="kpi-number" id="kpi-en-progreso">0</div>
+                        <div class="kpi-label">En Progreso</div>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-1.5 card-hover">
-                <div class="flex items-center gap-1.5">
-                    <div class="kpi-icon bg-red-100 text-red-600"><i class="fas fa-clock"></i></div>
+            
+            <!-- 4. Pendientes -->
+            <div class="kpi-card kpi-pendientes">
+                <div class="flex items-center gap-3">
+                    <div class="kpi-icon"><i class="fas fa-tasks"></i></div>
                     <div>
-                        <div class="numero text-red-600" id="kpi-vencidas">0</div>
-                        <div class="label">Tareas Vencidas</div>
+                        <div class="kpi-number" id="kpi-tareas">0</div>
+                        <div class="kpi-label">Pendientes</div>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-1.5 card-hover">
-                <div class="flex items-center gap-1.5">
-                    <div class="kpi-icon bg-green-100 text-green-600"><i class="fas fa-check-circle"></i></div>
+            
+            <!-- 5. Completadas -->
+            <div class="kpi-card kpi-completadas">
+                <div class="flex items-center gap-3">
+                    <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
                     <div>
-                        <div class="numero text-green-600" id="kpi-completadas">0</div>
-                        <div class="label">Tareas Completadas</div>
+                        <div class="kpi-number" id="kpi-completadas">0</div>
+                        <div class="kpi-label">Completadas</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 6. Vencidas -->
+            <div class="kpi-card kpi-vencidas">
+                <div class="flex items-center gap-3">
+                    <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <div class="kpi-number" id="kpi-vencidas">0</div>
+                        <div class="kpi-label">Vencidas</div>
                     </div>
                 </div>
             </div>
@@ -744,7 +697,7 @@ let tareaEnEvidencia = null;
         </div>
     </div>
 
-    <!-- OTRAS PESTAÑAS (simplificadas) -->
+    <!-- OTRAS PESTAÑAS -->
     <div id="content-proyectos" class="tab-content">
         <div class="bg-white rounded-lg shadow p-4">
             <h2 class="text-lg font-bold mb-3">Todos los Proyectos</h2>
@@ -1111,7 +1064,7 @@ let tareaEnEvidencia = null;
 </div>
 
 <!-- ============================================ -->
-<!-- SCRIPT PRINCIPAL - v4.4 (Time Gantt)        -->
+<!-- SCRIPT PRINCIPAL - v4.5                      -->
 <!-- ============================================ -->
 <script>
 // ============================================
@@ -1330,7 +1283,7 @@ function formatDate(dateString) {
 }
 
 // ============================================
-// RENDER TAREA FILA GANTT v4.4 - ANCHO BASADO EN TIEMPO
+// RENDER TAREA FILA GANTT - v4.4 (Time-based)
 // ============================================
 function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const barraClase = getBarraClase(t.estado);
@@ -1339,34 +1292,21 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const responsable = t.responsable_texto || '-';
     const fechaStr = formatDate(t.fecha_vencimiento);
     
-    // ===== CALCULAR ANCHO BASADO EN TIEMPO REAL (DÍAS) =====
-    let anchoPx = 60; // ancho mínimo en píxeles
-    
+    let anchoPx = 60;
     if (t.fecha_vencimiento) {
         const fechaVenc = new Date(t.fecha_vencimiento);
         const fechaInicio = fechaInicioProyecto ? new Date(fechaInicioProyecto) : new Date();
         const fechaFin = fechaFinProyecto ? new Date(fechaFinProyecto) : new Date();
         fechaFin.setDate(fechaFin.getDate() + 1);
-        
         const diffDias = Math.ceil((fechaVenc - fechaInicio) / (1000 * 60 * 60 * 24));
         const totalDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24));
-        
         if (totalDias > 0) {
-            // Escala: cada día = 8 píxeles (ajustable)
             const escala = Math.max(8, Math.min(15, 800 / totalDias));
             anchoPx = Math.max(60, diffDias * escala);
         }
     }
-    
-    // Ajustar según el estado
-    if (t.estado === 'Completado') {
-        anchoPx = Math.max(anchoPx, 80);
-    }
-    
-    // Limitar el ancho máximo
+    if (t.estado === 'Completado') anchoPx = Math.max(anchoPx, 80);
     anchoPx = Math.min(anchoPx, 600);
-    
-    // ===== FIN CÁLCULO BASADO EN TIEMPO =====
     
     let estadoCheck = '';
     if (t.estado === 'Completado') estadoCheck = '✅';
@@ -1426,18 +1366,14 @@ function renderVistaGanttColapsable(tareas, proyecto) {
     if (tareas.length === 0) {
         return `<div class="text-gray-400 text-xs text-center py-3">📭 Sin tareas</div>`;
     }
-    
-    // Obtener fechas del proyecto para el cálculo de ancho
     const fechaInicioProyecto = proyecto?.fecha_inicio || null;
     const fechaFinProyecto = proyecto?.fecha_fin || null;
-    
     const tareasPorFase = {};
     tareas.forEach(t => {
         const fase = t.fase || 'Sin fase';
         if (!tareasPorFase[fase]) tareasPorFase[fase] = [];
         tareasPorFase[fase].push(t);
     });
-    
     let fasesOrdenadas = Object.keys(tareasPorFase);
     if (fasesMetodologia.length > 0) {
         fasesOrdenadas = fasesMetodologia.filter(f => tareasPorFase[f] && tareasPorFase[f].length > 0);
@@ -1447,7 +1383,6 @@ function renderVistaGanttColapsable(tareas, proyecto) {
     } else {
         fasesOrdenadas.sort();
     }
-    
     if (fasesOrdenadas.length === 0 || fasesOrdenadas.every(f => tareasPorFase[f].length === 0)) {
         return `
             <div class="gantt-container">
@@ -1469,7 +1404,6 @@ function renderVistaGanttColapsable(tareas, proyecto) {
             </div>
         `;
     }
-    
     let html = `
         <div class="gantt-container">
             <table class="gantt-table">
@@ -1485,7 +1419,6 @@ function renderVistaGanttColapsable(tareas, proyecto) {
                 </thead>
                 <tbody>
     `;
-    
     fasesOrdenadas.forEach((fase, index) => {
         const tareasFase = tareasPorFase[fase] || [];
         if (tareasFase.length === 0) return;
@@ -1517,13 +1450,12 @@ function renderVistaGanttColapsable(tareas, proyecto) {
             </tr>
         `;
     });
-    
     html += `</tbody></table></div>`;
     return html;
 }
 
 // ============================================
-// CARGAR DASHBOARD
+// CARGAR DASHBOARD - CON NUEVO KPI "EN PROGRESO"
 // ============================================
 async function cargarDashboard() {
     try {
@@ -1544,16 +1476,21 @@ async function cargarDashboard() {
             return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
         });
 
+        // ===== CÁLCULO DE KPIS =====
         const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
-        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
-        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        const totalTareas = tareasCache.length;
+        const enProgreso = tareasCache.filter(t => t.estado === 'En Progreso').length;
+        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
         const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
+        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
 
+        // ===== ACTUALIZAR KPIS =====
         document.getElementById('kpi-proyectos').textContent = activos;
-        document.getElementById('kpi-tareas-totales').textContent = tareasCache.length;
+        document.getElementById('kpi-tareas-totales').textContent = totalTareas;
+        document.getElementById('kpi-en-progreso').textContent = enProgreso;
         document.getElementById('kpi-tareas').textContent = pendientes;
-        document.getElementById('kpi-vencidas').textContent = vencidas;
         document.getElementById('kpi-completadas').textContent = completadasTotal;
+        document.getElementById('kpi-vencidas').textContent = vencidas;
 
         const selectProyecto = document.getElementById('tar-proyecto');
         selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
@@ -1800,7 +1737,7 @@ async function renderizarDetalle(id) {
                 <div class="mt-2 pt-2 border-t">
                     <div class="flex justify-between items-center mb-1">
                         <span class="text-xs font-semibold text-gray-600"><i class="fas fa-tasks mr-1"></i>${tareas.length} tareas</span>
-                        <span class="text-xs text-gray-400">Gantt v4.4 (Time-based)</span>
+                        <span class="text-xs text-gray-400">Gantt v4.4</span>
                     </div>
                     ${ganttHTML}
                 </div>
@@ -2941,14 +2878,17 @@ async function recargarDatos(proyectoId) {
         tareasCache = nuevasTareas;
         usuariosCache = nuevosUsuarios;
         const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
-        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
-        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        const totalTareas = tareasCache.length;
+        const enProgreso = tareasCache.filter(t => t.estado === 'En Progreso').length;
+        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
         const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
+        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
         document.getElementById('kpi-proyectos').textContent = activos;
-        document.getElementById('kpi-tareas-totales').textContent = tareasCache.length;
+        document.getElementById('kpi-tareas-totales').textContent = totalTareas;
+        document.getElementById('kpi-en-progreso').textContent = enProgreso;
         document.getElementById('kpi-tareas').textContent = pendientes;
-        document.getElementById('kpi-vencidas').textContent = vencidas;
         document.getElementById('kpi-completadas').textContent = completadasTotal;
+        document.getElementById('kpi-vencidas').textContent = vencidas;
         const proyectosConProgreso = proyectosCache.map(p => {
             const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
             const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
@@ -3001,8 +2941,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-console.log('✅ PM System v4.4 - Time-based Gantt cargado correctamente');
-console.log('📊 Las barras ahora tienen ancho basado en días, no en porcentajes');
+console.log('✅ PM System v4.5 - KPIs mejorados cargado correctamente');
+console.log('📊 Nuevo KPI: "En Progreso" añadido al dashboard');
 </script>
 
 </body>
