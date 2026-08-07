@@ -3,29 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM System v3.9</title>
+    <title>PM System v3.10</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #f3f4f6; font-family: 'Segoe UI', system-ui, sans-serif; }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .status-badge { padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; display: inline-block; }
-        .progress-bar { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-        .tab-btn { padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; background: #f3f4f6; color: #6b7280; cursor: pointer; border: none; }
-        .tab-btn.active { background: #3b82f6; color: white; }
-        .tab-content { display: none; animation: fadeIn 0.3s ease; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
-        .modal.show { display: flex; }
-        .modal-box { background: white; border-radius: 16px; max-width: 600px; width: 100%; padding: 20px; max-height: 90vh; overflow-y: auto; }
-        .toast { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; border-radius: 10px; color: white; z-index: 200; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); font-size: 13px; }
-        .toast-success { background: #22c55e; }
-        .toast-error { background: #ef4444; }
-        .toast-info { background: #3b82f6; }
+        /* Estilos mejorados */
+        body { 
+            background: #f3f4f6; 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+        }
+        .card-hover:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            transition: all 0.3s ease;
+        }
+        .status-badge { 
+            padding: 2px 10px; 
+            border-radius: 20px; 
+            font-size: 10px; 
+            font-weight: 600; 
+            display: inline-block; 
+        }
+        .progress-bar { 
+            height: 6px; 
+            border-radius: 3px; 
+            background: #e5e7eb; 
+            overflow: hidden; 
+        }
+        .progress-fill { 
+            height: 100%; 
+            border-radius: 3px; 
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .tab-btn { 
+            padding: 6px 14px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: 500; 
+            background: #f3f4f6; 
+            color: #6b7280; 
+            cursor: pointer; 
+            border: none; 
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active { 
+            background: #3b82f6; 
+            color: white; 
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        .tab-btn:hover:not(.active) {
+            background: #e5e7eb;
+        }
+        .tab-content { 
+            display: none; 
+            animation: fadeIn 0.3s ease; 
+        }
+        .tab-content.active { 
+            display: block; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 100; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 16px;
+            backdrop-filter: blur(4px);
+        }
+        .modal.show { 
+            display: flex; 
+        }
+        .modal-box { 
+            background: white; 
+            border-radius: 16px; 
+            max-width: 600px; 
+            width: 100%; 
+            padding: 24px; 
+            max-height: 90vh; 
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px; 
+            padding: 12px 24px; 
+            border-radius: 12px; 
+            color: white; 
+            z-index: 200; 
+            display: none; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2); 
+            font-size: 13px;
+            font-weight: 500;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-success { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .toast-error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .toast-info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
         .toast.show { display: block; }
-        .badge-estado { font-size: 9px; padding: 1px 8px; border-radius: 10px; font-weight: 500; }
+        .badge-estado { 
+            font-size: 9px; 
+            padding: 2px 8px; 
+            border-radius: 10px; 
+            font-weight: 500; 
+        }
         .badge-pendiente { background: #fef3c7; color: #d97706; }
         .badge-progreso { background: #dbeafe; color: #2563eb; }
         .badge-completado { background: #d1fae5; color: #059669; }
@@ -35,36 +132,164 @@
         .badge-media { background: #fef3c7; color: #d97706; }
         .badge-alta { background: #fee2e2; color: #dc2626; }
         .badge-critica { background: #7f1d1d; color: #fecaca; }
-        .metodologia-badge { padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; background: #e0e7ff; color: #4338ca; }
-        .proyecto-detalle { display: none; margin-top: 10px; padding-top: 10px; border-top: 2px solid #e5e7eb; }
-        .proyecto-detalle.active { display: block; }
-        .filtro-btn { padding: 3px 10px; border-radius: 16px; font-size: 11px; font-weight: 500; background: #f3f4f6; color: #6b7280; cursor: pointer; border: 1px solid transparent; }
-        .filtro-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
-        .filtro-btn:hover { background: #e5e7eb; }
-        .filtro-btn.active:hover { background: #2563eb; }
-        .buscar-input { padding: 4px 10px; border: 1px solid #d1d5db; border-radius: 16px; font-size: 12px; outline: none; width: 160px; }
-        .buscar-input:focus { border-color: #3b82f6; }
-        .prioridad-badge { font-size: 8px; padding: 1px 6px; border-radius: 8px; font-weight: 600; }
+        .metodologia-badge { 
+            padding: 2px 8px; 
+            border-radius: 10px; 
+            font-size: 9px; 
+            font-weight: 600; 
+            background: #e0e7ff; 
+            color: #4338ca; 
+        }
+        .proyecto-detalle { 
+            display: none; 
+            margin-top: 10px; 
+            padding-top: 10px; 
+            border-top: 2px solid #e5e7eb; 
+        }
+        .proyecto-detalle.active { 
+            display: block; 
+            animation: fadeIn 0.3s ease;
+        }
+        .filtro-btn { 
+            padding: 3px 12px; 
+            border-radius: 16px; 
+            font-size: 11px; 
+            font-weight: 500; 
+            background: #f3f4f6; 
+            color: #6b7280; 
+            cursor: pointer; 
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .filtro-btn.active { 
+            background: #3b82f6; 
+            color: white; 
+            border-color: #3b82f6; 
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        }
+        .filtro-btn:hover:not(.active) { 
+            background: #e5e7eb; 
+        }
+        .filtro-btn.active:hover { 
+            background: #2563eb; 
+        }
+        .buscar-input { 
+            padding: 4px 12px; 
+            border: 1px solid #d1d5db; 
+            border-radius: 16px; 
+            font-size: 12px; 
+            outline: none; 
+            width: 160px;
+            transition: all 0.2s ease;
+        }
+        .buscar-input:focus { 
+            border-color: #3b82f6; 
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .prioridad-badge { 
+            font-size: 8px; 
+            padding: 1px 6px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+        }
         .prioridad-baja { background: #e5e7eb; color: #6b7280; }
         .prioridad-media { background: #fef3c7; color: #d97706; }
         .prioridad-alta { background: #fee2e2; color: #dc2626; }
         .prioridad-critica { background: #7f1d1d; color: #fecaca; }
-        .fecha-vencimiento { font-size: 10px; padding: 1px 8px; border-radius: 8px; }
+        .fecha-vencimiento { 
+            font-size: 10px; 
+            padding: 1px 8px; 
+            border-radius: 8px; 
+        }
         .fecha-vencimiento.vencida { background: #fee2e2; color: #dc2626; }
         .fecha-vencimiento.proxima { background: #fef3c7; color: #d97706; }
         .fecha-vencimiento.futura { background: #d1fae5; color: #059669; }
-        .area-badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; background: #e0e7ff; color: #4338ca; }
-        .responsable-tag { background: #e0e7ff; color: #4338ca; padding: 1px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; display: inline-block; }
-        .evidencia-tag { background: #dbeafe; color: #2563eb; padding: 1px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; display: inline-block; cursor: pointer; }
-        .evidencia-tag:hover { background: #bfdbfe; }
-        .metodologia-desc { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #166534; margin-top: 4px; display: none; }
-        .metodologia-desc.show { display: block; }
-        .gantt-container { overflow-x: auto; }
-        .gantt-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        .gantt-table th { text-align: left; padding: 3px 5px; background: #f3f4f6; border-bottom: 2px solid #d1d5db; font-weight: 600; font-size: 10px; }
-        .gantt-table td { padding: 2px 5px; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
-        .gantt-table tr:hover { background: #f9fafb; }
-        .gantt-barra { height: 14px; border-radius: 3px; position: relative; min-width: 20px; display: flex; align-items: center; padding: 0 4px; color: white; font-size: 7px; font-weight: 600; white-space: nowrap; }
+        .area-badge { 
+            padding: 2px 8px; 
+            border-radius: 10px; 
+            font-size: 10px; 
+            font-weight: 500; 
+            background: #e0e7ff; 
+            color: #4338ca; 
+        }
+        .responsable-tag { 
+            background: #e0e7ff; 
+            color: #4338ca; 
+            padding: 1px 8px; 
+            border-radius: 10px; 
+            font-size: 10px; 
+            font-weight: 500; 
+            display: inline-block; 
+        }
+        .evidencia-tag { 
+            background: #dbeafe; 
+            color: #2563eb; 
+            padding: 1px 8px; 
+            border-radius: 10px; 
+            font-size: 10px; 
+            font-weight: 500; 
+            display: inline-block; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .evidencia-tag:hover { 
+            background: #bfdbfe; 
+            transform: scale(1.05);
+        }
+        .metodologia-desc { 
+            background: #f0fdf4; 
+            border: 1px solid #bbf7d0; 
+            border-radius: 6px; 
+            padding: 6px 12px; 
+            font-size: 12px; 
+            color: #166534; 
+            margin-top: 4px; 
+            display: none; 
+        }
+        .metodologia-desc.show { 
+            display: block; 
+            animation: fadeIn 0.3s ease;
+        }
+        .gantt-container { 
+            overflow-x: auto; 
+        }
+        .gantt-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 11px; 
+        }
+        .gantt-table th { 
+            text-align: left; 
+            padding: 3px 5px; 
+            background: #f3f4f6; 
+            border-bottom: 2px solid #d1d5db; 
+            font-weight: 600; 
+            font-size: 10px; 
+        }
+        .gantt-table td { 
+            padding: 2px 5px; 
+            border-bottom: 1px solid #e5e7eb; 
+            vertical-align: middle; 
+        }
+        .gantt-table tr:hover { 
+            background: #f9fafb; 
+        }
+        .gantt-barra { 
+            height: 14px; 
+            border-radius: 3px; 
+            position: relative; 
+            min-width: 20px; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 4px; 
+            color: white; 
+            font-size: 7px; 
+            font-weight: 600; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: width 0.5s ease;
+        }
         .gantt-barra.pendiente { background: #fcd34d; color: #78350f; }
         .gantt-barra.progreso { background: #60a5fa; color: #1e3a5f; }
         .gantt-barra.completado { background: #34d399; color: #064e3b; }
@@ -76,42 +301,210 @@
         .gantt-check { width: 14px; text-align: center; font-size: 10px; }
         .gantt-check .completado { color: #22c55e; }
         .gantt-check .pendiente { color: #9ca3af; }
-        .gantt-acciones { display: flex; gap: 2px; flex-wrap: wrap; align-items: center; }
-        .gantt-acciones button { background: none; border: none; cursor: pointer; padding: 1px 3px; border-radius: 3px; font-size: 9px; }
-        .gantt-acciones .edit:hover { background: #fef3c7; color: #d97706; }
-        .gantt-acciones .delete:hover { background: #fee2e2; color: #dc2626; }
-        .gantt-acciones .status-select { font-size: 8px; padding: 1px 4px; border: 1px solid #d1d5db; border-radius: 3px; background: white; width: 78px; }
-        .gantt-fila-fase { background: #f0fdf4; font-weight: 600; cursor: pointer; }
-        .gantt-fila-fase td { padding: 3px 5px; border-bottom: 2px solid #d1d5db; }
-        .gantt-fila-fase .fase-icon { margin-right: 3px; font-size: 10px; }
-        .gantt-fila-fase .fase-estado { font-size: 8px; font-weight: 400; }
+        .gantt-acciones { 
+            display: flex; 
+            gap: 2px; 
+            flex-wrap: wrap; 
+            align-items: center; 
+        }
+        .gantt-acciones button { 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            padding: 1px 3px; 
+            border-radius: 3px; 
+            font-size: 9px;
+            transition: all 0.2s ease;
+        }
+        .gantt-acciones .edit:hover { 
+            background: #fef3c7; 
+            color: #d97706; 
+        }
+        .gantt-acciones .delete:hover { 
+            background: #fee2e2; 
+            color: #dc2626; 
+        }
+        .gantt-acciones .status-select { 
+            font-size: 8px; 
+            padding: 1px 4px; 
+            border: 1px solid #d1d5db; 
+            border-radius: 3px; 
+            background: white; 
+            width: 78px;
+            cursor: pointer;
+        }
+        .gantt-acciones .status-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .gantt-fila-fase { 
+            background: #f0fdf4; 
+            font-weight: 600; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .gantt-fila-fase:hover {
+            background: #dcfce7;
+        }
+        .gantt-fila-fase td { 
+            padding: 3px 5px; 
+            border-bottom: 2px solid #d1d5db; 
+        }
+        .gantt-fila-fase .fase-icon { 
+            margin-right: 3px; 
+            font-size: 10px; 
+        }
+        .gantt-fila-fase .fase-estado { 
+            font-size: 8px; 
+            font-weight: 400; 
+        }
         .gantt-fila-fase .fase-completa { color: #059669; }
         .gantt-fila-fase .fase-incompleta { color: #dc2626; }
-        .gantt-fila-fase .fase-toggle { font-size: 10px; margin-right: 4px; transition: transform 0.2s; display: inline-block; }
-        .gantt-fila-fase .fase-toggle.collapsed { transform: rotate(-90deg); }
-        .gantt-fila-fase .fase-tareas-count { font-size: 8px; font-weight: 400; color: #6b7280; }
-        .tarea-row { transition: opacity 0.2s; }
-        .tarea-row.hidden { display: none; }
-        .orden-btn { padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 500; background: #e5e7eb; color: #374151; border: none; cursor: pointer; }
-        .orden-btn:hover { background: #d1d5db; }
-        .orden-btn.active { background: #3b82f6; color: white; }
-        .kpi-card { padding: 4px 8px; }
-        .kpi-card .numero { font-size: 15px; font-weight: 700; }
-        .kpi-card .label { font-size: 8px; color: #6b7280; line-height: 1.1; }
-        .kpi-icon { padding: 4px; border-radius: 50%; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
-        .fases-compactas { display: flex; flex-wrap: wrap; gap: 3px; margin: 4px 0; }
-        .fase-item { display: flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 10px; font-size: 9px; font-weight: 500; }
+        .gantt-fila-fase .fase-toggle { 
+            font-size: 10px; 
+            margin-right: 4px; 
+            transition: transform 0.3s ease; 
+            display: inline-block; 
+        }
+        .gantt-fila-fase .fase-toggle.collapsed { 
+            transform: rotate(-90deg); 
+        }
+        .gantt-fila-fase .fase-tareas-count { 
+            font-size: 8px; 
+            font-weight: 400; 
+            color: #6b7280; 
+        }
+        .tarea-row { 
+            transition: opacity 0.3s ease; 
+        }
+        .tarea-row.hidden { 
+            display: none; 
+        }
+        .orden-btn { 
+            padding: 2px 10px; 
+            border-radius: 12px; 
+            font-size: 10px; 
+            font-weight: 500; 
+            background: #e5e7eb; 
+            color: #374151; 
+            border: none; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .orden-btn:hover { 
+            background: #d1d5db; 
+        }
+        .orden-btn.active { 
+            background: #3b82f6; 
+            color: white; 
+        }
+        .kpi-card { 
+            padding: 4px 8px; 
+            transition: all 0.3s ease;
+        }
+        .kpi-card .numero { 
+            font-size: 15px; 
+            font-weight: 700; 
+        }
+        .kpi-card .label { 
+            font-size: 8px; 
+            color: #6b7280; 
+            line-height: 1.1; 
+        }
+        .kpi-icon { 
+            padding: 4px; 
+            border-radius: 50%; 
+            font-size: 10px; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 20px; 
+            height: 20px; 
+        }
+        .fases-compactas { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 3px; 
+            margin: 4px 0; 
+        }
+        .fase-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 3px; 
+            padding: 1px 6px; 
+            border-radius: 10px; 
+            font-size: 9px; 
+            font-weight: 500; 
+        }
         .fase-item.completa { background: #d1fae5; color: #065f46; }
         .fase-item.incompleta { background: #fee2e2; color: #991b1b; }
         .fase-item.sin-tareas { background: #e5e7eb; color: #6b7280; }
         .fase-item .fase-check { font-size: 9px; }
         .fase-item .fase-detalle { font-size: 7px; opacity: 0.7; }
-        .evidencia-preview { max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 8px; }
-        .evidencia-link { color: #3b82f6; text-decoration: underline; cursor: pointer; }
-        .evidencia-link:hover { color: #2563eb; }
+        .evidencia-preview { 
+            max-width: 100%; 
+            max-height: 300px; 
+            border-radius: 8px; 
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .evidencia-link { 
+            color: #3b82f6; 
+            text-decoration: underline; 
+            cursor: pointer; 
+        }
+        .evidencia-link:hover { 
+            color: #2563eb; 
+        }
         .modal-evidencia-exito .modal-box { border-top: 4px solid #22c55e; }
-        .btn-respaldo { background: #6b7280; color: white; padding: 3px 12px; border-radius: 12px; font-size: 10px; border: none; cursor: pointer; }
-        .btn-respaldo:hover { background: #4b5563; }
+        .btn-respaldo { 
+            background: #6b7280; 
+            color: white; 
+            padding: 3px 12px; 
+            border-radius: 12px; 
+            font-size: 10px; 
+            border: none; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-respaldo:hover { 
+            background: #4b5563; 
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .proyecto-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+        .proyecto-card:hover {
+            border-color: #3b82f6;
+        }
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c1c7cd;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8b0b8;
+        }
+        /* Loading shimmer */
+        .shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
     </style>
 </head>
 <body>
@@ -154,6 +547,15 @@ const PRIORIDAD_COLORS = {
     'Alta': 'prioridad-alta',
     'Crítica': 'prioridad-critica'
 };
+
+// Variables globales para caché
+let proyectosCache = [];
+let tareasCache = [];
+let usuariosCache = [];
+let detallesAbiertos = {};
+let ordenFechaActivo = {};
+let filtroActual = 'todos';
+let tareaEnEvidencia = null;
 </script>
 
 <div id="toast" class="toast toast-success"></div>
@@ -163,7 +565,7 @@ const PRIORIDAD_COLORS = {
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
             <h3 class="text-lg font-bold text-green-600">✅ Evidencia Subida</h3>
-            <button onclick="cerrarModal('modal-evidencia-exito')" class="text-gray-400 hover:text-gray-600">
+            <button onclick="cerrarModal('modal-evidencia-exito')" class="text-gray-400 hover:text-gray-600 transition">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -186,7 +588,7 @@ const PRIORIDAD_COLORS = {
     <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v3.9</span>
+            <span class="text-lg font-bold text-gray-800">PM System v3.10</span>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
@@ -349,7 +751,7 @@ const PRIORIDAD_COLORS = {
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
             <h3 class="text-lg font-bold" id="modal-proyecto-titulo">🚀 Nuevo Proyecto</h3>
-            <button onclick="cerrarModal('modal-proyecto')" class="text-gray-400 hover:text-gray-600">
+            <button onclick="cerrarModal('modal-proyecto')" class="text-gray-400 hover:text-gray-600 transition">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -358,11 +760,11 @@ const PRIORIDAD_COLORS = {
             <div class="space-y-2">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Nombre *</label>
-                    <input id="proy-nombre" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Nombre del proyecto">
+                    <input id="proy-nombre" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Nombre del proyecto">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Categoría *</label>
-                    <select id="proy-categoria" required class="w-full border rounded-lg px-3 py-1.5 text-sm" onchange="actualizarMetodologia()">
+                    <select id="proy-categoria" required class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" onchange="actualizarMetodologia()">
                         <option value="">Selecciona...</option>
                         <option value="Proyectos de Inversión">Inversión</option>
                         <option value="Proyectos de Tecnología">Tecnología</option>
@@ -386,17 +788,17 @@ const PRIORIDAD_COLORS = {
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Empresa</label>
-                        <input id="proy-empresa" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Empresa">
+                        <input id="proy-empresa" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Empresa">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
-                        <input id="proy-area" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Área">
+                        <input id="proy-area" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Área">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Fecha Inicio</label>
-                        <input id="proy-inicio" type="date" class="w-full border rounded-lg px-3 py-1.5 text-sm" onchange="calcularFechaFin()">
+                        <input id="proy-inicio" type="date" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" onchange="calcularFechaFin()">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Fecha Fin</label>
@@ -420,7 +822,7 @@ const PRIORIDAD_COLORS = {
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
             <h3 class="text-lg font-bold" id="modal-tarea-titulo">📋 Nueva Tarea</h3>
-            <button onclick="cerrarModal('modal-tarea')" class="text-gray-400 hover:text-gray-600">
+            <button onclick="cerrarModal('modal-tarea')" class="text-gray-400 hover:text-gray-600 transition">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -429,20 +831,20 @@ const PRIORIDAD_COLORS = {
             <div class="space-y-2">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Título *</label>
-                    <input id="tar-titulo" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Título">
+                    <input id="tar-titulo" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Título">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Proyecto</label>
-                    <select id="tar-proyecto" class="w-full border rounded-lg px-3 py-1.5 text-sm"></select>
+                    <select id="tar-proyecto" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></select>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Responsable</label>
-                        <input id="tar-responsable" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Responsable">
+                        <input id="tar-responsable" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Responsable">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Prioridad</label>
-                        <select id="tar-prioridad" class="w-full border rounded-lg px-3 py-1.5 text-sm">
+                        <select id="tar-prioridad" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                             <option value="Baja">Baja</option>
                             <option value="Media" selected>Media</option>
                             <option value="Alta">Alta</option>
@@ -453,18 +855,18 @@ const PRIORIDAD_COLORS = {
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Fase</label>
-                        <select id="tar-fase" class="w-full border rounded-lg px-3 py-1.5 text-sm">
+                        <select id="tar-fase" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                             <option value="">Sin fase</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
-                        <input id="tar-fecha-vencimiento" type="date" class="w-full border rounded-lg px-3 py-1.5 text-sm">
+                        <input id="tar-fecha-vencimiento" type="date" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
-                    <textarea id="tar-descripcion" class="w-full border rounded-lg px-3 py-1.5 text-sm" rows="2" placeholder="Descripción"></textarea>
+                    <textarea id="tar-descripcion" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" rows="2" placeholder="Descripción"></textarea>
                 </div>
             </div>
             <div class="flex gap-2 pt-3 mt-2 border-t">
@@ -484,7 +886,7 @@ const PRIORIDAD_COLORS = {
     <div class="modal-box" style="max-width: 450px;">
         <div class="flex justify-between items-start mb-3">
             <h3 class="text-lg font-bold">📎 Subir Evidencia</h3>
-            <button onclick="cerrarModal('modal-evidencia')" class="text-gray-400 hover:text-gray-600">
+            <button onclick="cerrarModal('modal-evidencia')" class="text-gray-400 hover:text-gray-600 transition">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -495,12 +897,12 @@ const PRIORIDAD_COLORS = {
             <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1">Archivo de evidencia</label>
                 <input id="evidencia-archivo" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.zip" 
-                       class="w-full border rounded-lg px-3 py-2 text-sm">
+                       class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                 <div class="text-xs text-gray-400 mt-1">Formatos: PDF, Word, Excel, Imagen, ZIP</div>
             </div>
             <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1">Comentario adicional</label>
-                <textarea id="evidencia-comentario" class="w-full border rounded-lg px-3 py-2 text-sm" rows="2" placeholder="Comentario sobre la evidencia..."></textarea>
+                <textarea id="evidencia-comentario" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" rows="2" placeholder="Comentario sobre la evidencia..."></textarea>
             </div>
         </div>
         <div class="flex gap-2 pt-3 mt-2 border-t">
@@ -519,7 +921,7 @@ const PRIORIDAD_COLORS = {
     <div class="modal-box" style="max-width: 500px;">
         <div class="flex justify-between items-start mb-3">
             <h3 class="text-lg font-bold">📎 Evidencia</h3>
-            <button onclick="cerrarModal('modal-ver-evidencia')" class="text-gray-400 hover:text-gray-600">
+            <button onclick="cerrarModal('modal-ver-evidencia')" class="text-gray-400 hover:text-gray-600 transition">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -533,7 +935,7 @@ const PRIORIDAD_COLORS = {
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
             <h3 class="text-lg font-bold">👤 Agregar Recurso</h3>
-            <button onclick="cerrarModal('modal-usuario')" class="text-gray-400 hover:text-gray-600">
+            <button onclick="cerrarModal('modal-usuario')" class="text-gray-400 hover:text-gray-600 transition">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -541,16 +943,16 @@ const PRIORIDAD_COLORS = {
             <div class="space-y-2">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Nombre *</label>
-                    <input id="usr-nombre" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Nombre completo">
+                    <input id="usr-nombre" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Nombre completo">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                    <input id="usr-email" type="email" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="correo@ejemplo.com">
+                    <input id="usr-email" type="email" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="correo@ejemplo.com">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
-                        <select id="usr-rol" class="w-full border rounded-lg px-3 py-1.5 text-sm">
+                        <select id="usr-rol" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                             <option value="Project Manager">Project Manager</option>
                             <option value="Desarrollador">Desarrollador</option>
                             <option value="Diseñador">Diseñador</option>
@@ -561,7 +963,7 @@ const PRIORIDAD_COLORS = {
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
-                        <input id="usr-area" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Ej: Tecnología">
+                        <input id="usr-area" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Ej: Tecnología">
                     </div>
                 </div>
             </div>
@@ -581,7 +983,7 @@ const PRIORIDAD_COLORS = {
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
             <h3 class="text-lg font-bold">🏢 Nuevo Proveedor</h3>
-            <button onclick="cerrarModal('modal-proveedor')" class="text-gray-400 hover:text-gray-600">
+            <button onclick="cerrarModal('modal-proveedor')" class="text-gray-400 hover:text-gray-600 transition">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -589,25 +991,25 @@ const PRIORIDAD_COLORS = {
             <div class="space-y-2">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Nombre *</label>
-                    <input id="prov-nombre" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Nombre del proveedor">
+                    <input id="prov-nombre" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Nombre del proveedor">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Contacto</label>
-                    <input id="prov-contacto" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Contacto">
+                    <input id="prov-contacto" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Contacto">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
-                        <input id="prov-telefono" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Teléfono">
+                        <input id="prov-telefono" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Teléfono">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                        <input id="prov-email" type="email" class="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="correo@proveedor.com">
+                        <input id="prov-email" type="email" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="correo@proveedor.com">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Proyecto</label>
-                    <select id="prov-proyecto" class="w-full border rounded-lg px-3 py-1.5 text-sm"></select>
+                    <select id="prov-proyecto" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></select>
                 </div>
             </div>
             <div class="flex gap-2 pt-3 mt-2 border-t">
@@ -626,7 +1028,7 @@ const PRIORIDAD_COLORS = {
     <div class="modal-box" style="max-width: 600px;">
         <div class="flex justify-between items-start mb-3">
             <h3 class="text-lg font-bold">📋 Detalle del Proveedor</h3>
-            <button onclick="cerrarModal('modal-detalle-proveedor')" class="text-gray-400 hover:text-gray-600">
+            <button onclick="cerrarModal('modal-detalle-proveedor')" class="text-gray-400 hover:text-gray-600 transition">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -641,57 +1043,97 @@ const PRIORIDAD_COLORS = {
 <!-- ============================================ -->
 <script>
 // ============================================
-// FUNCIONES DE SUPABASE
+// FUNCIONES DE SUPABASE CON MANEJO DE ERRORES MEJORADO
 // ============================================
 async function supabaseFetch(query) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${query}`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
-    if (!res.ok) throw new Error('Error fetching data');
-    return res.json();
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${query}`, {
+            headers: { 
+                'apikey': SUPABASE_KEY, 
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`HTTP ${res.status}: ${errorText}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error('Error en supabaseFetch:', error);
+        throw error;
+    }
 }
 
 async function supabaseInsert(table, data) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-        method: 'POST',
-        headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-        },
-        body: JSON.stringify(data)
-    });
-    if (!res.ok) throw new Error('Error inserting data');
-    return res.json();
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`HTTP ${res.status}: ${errorText}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error('Error en supabaseInsert:', error);
+        throw error;
+    }
 }
 
 async function supabaseUpdate(table, id, data) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-        },
-        body: JSON.stringify(data)
-    });
-    if (!res.ok) throw new Error('Error updating data');
-    return res.json();
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+            method: 'PATCH',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`HTTP ${res.status}: ${errorText}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error('Error en supabaseUpdate:', error);
+        throw error;
+    }
 }
 
 async function supabaseDelete(table, id) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
-        method: 'DELETE',
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
-    if (!res.ok) throw new Error('Error deleting data');
-    return res;
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+            method: 'DELETE',
+            headers: { 
+                'apikey': SUPABASE_KEY, 
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Prefer': 'return=representation'
+            }
+        });
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`HTTP ${res.status}: ${errorText}`);
+        }
+        return res;
+    } catch (error) {
+        console.error('Error en supabaseDelete:', error);
+        throw error;
+    }
 }
 
 // ============================================
-// TOAST
+// TOAST MEJORADO
 // ============================================
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
@@ -699,14 +1141,34 @@ function showToast(message, type = 'success') {
     toast.className = 'toast';
     toast.classList.add(type === 'success' ? 'toast-success' : type === 'info' ? 'toast-info' : 'toast-error');
     toast.classList.add('show');
-    setTimeout(() => { toast.classList.remove('show'); }, 4000);
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => { 
+        toast.classList.remove('show'); 
+    }, 4000);
 }
 
 // ============================================
 // MODALES
 // ============================================
-function abrirModal(id) { document.getElementById(id).classList.add('show'); }
-function cerrarModal(id) { document.getElementById(id).classList.remove('show'); }
+function abrirModal(id) { 
+    document.getElementById(id).classList.add('show'); 
+    document.body.style.overflow = 'hidden';
+}
+function cerrarModal(id) { 
+    document.getElementById(id).classList.remove('show'); 
+    document.body.style.overflow = '';
+    // Resetear campos específicos
+    if (id === 'modal-proyecto') {
+        document.getElementById('proy-id').value = '';
+        document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
+        document.getElementById('metodologia-desc').classList.remove('show');
+    }
+    if (id === 'modal-tarea') {
+        document.getElementById('tar-id').value = '';
+        document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
+        document.getElementById('tar-proyecto').disabled = false;
+    }
+}
 
 // ============================================
 // TABS
@@ -716,10 +1178,15 @@ function showTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById('content-' + tab).classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
-    if (tab === 'recursos') cargarRecursos();
-    if (tab === 'reportes') generarReportes();
-    if (tab === 'proveedores') cargarProveedores();
-    if (tab === 'respaldos') cargarRespaldos();
+    
+    // Cargar contenido según la pestaña
+    switch(tab) {
+        case 'recursos': cargarRecursos(); break;
+        case 'reportes': generarReportes(); break;
+        case 'proveedores': cargarProveedores(); break;
+        case 'respaldos': cargarRespaldos(); break;
+        case 'proyectos': cargarTodosLosProyectos(); break;
+    }
 }
 
 // ============================================
@@ -748,7 +1215,10 @@ function actualizarMetodologia() {
 function calcularFechaFin() {
     const fechaInicio = document.getElementById('proy-inicio').value;
     const metodologia = document.getElementById('proy-metodologia').value;
-    if (!fechaInicio || !metodologia) { document.getElementById('proy-fecha').value = ''; return; }
+    if (!fechaInicio || !metodologia) { 
+        document.getElementById('proy-fecha').value = ''; 
+        return; 
+    }
     const duracion = FASES_POR_METODOLOGIA[metodologia]?.duracion_total || DURACION_DEFAULT;
     const fecha = new Date(fechaInicio);
     fecha.setDate(fecha.getDate() + duracion);
@@ -756,7 +1226,7 @@ function calcularFechaFin() {
 }
 
 // ============================================
-// CALCULAR PROGRESO POR FASES
+// CALCULAR PROGRESO POR FASES MEJORADO
 // ============================================
 function calcularProgresoPorFases(tareas, metodologia) {
     const fasesMetodologia = FASES_POR_METODOLOGIA[metodologia]?.fases || [];
@@ -767,181 +1237,23 @@ function calcularProgresoPorFases(tareas, metodologia) {
         return total > 0 ? Math.round((completadas / total) * 100) : 0;
     }
 
+    let totalFasesConTareas = 0;
     let fasesCompletas = 0;
-    const totalFases = fasesMetodologia.length;
     
     fasesMetodologia.forEach(fase => {
         const tareasFase = tareas.filter(t => t.fase === fase);
-        if (tareasFase.length === 0) return;
-        const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
-        if (todasCompletas) fasesCompletas++;
-    });
-
-    return Math.round((fasesCompletas / totalFases) * 100);
-}
-
-// ============================================
-// CARGAR DASHBOARD
-// ============================================
-let proyectosCache = [];
-let tareasCache = [];
-let usuariosCache = [];
-
-async function cargarDashboard() {
-    try {
-        proyectosCache = await supabaseFetch('proyectos?order=id.desc');
-        tareasCache = await supabaseFetch('tareas?select=*');
-        usuariosCache = await supabaseFetch('usuarios?select=*');
-
-        const proyectosConProgreso = proyectosCache.map(p => {
-            const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
-            const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
-            const total = tareasProyecto.length;
-            const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
-            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
-        });
-
-        const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
-        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
-        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
-        const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
-
-        document.getElementById('kpi-proyectos').textContent = activos;
-        document.getElementById('kpi-tareas-totales').textContent = tareasCache.length;
-        document.getElementById('kpi-tareas').textContent = pendientes;
-        document.getElementById('kpi-vencidas').textContent = vencidas;
-        document.getElementById('kpi-completadas').textContent = completadasTotal;
-
-        const selectProyecto = document.getElementById('tar-proyecto');
-        selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
-
-        renderizarProyectos(proyectosConProgreso);
-
-    } catch (e) {
-        console.error('Error:', e);
-        document.getElementById('lista-proyectos').innerHTML = `
-            <div class="text-center py-6 text-red-500 text-sm">
-                <i class="fas fa-exclamation-circle text-2xl mb-2 block"></i>
-                Error cargando datos
-            </div>
-        `;
-    }
-}
-
-// ============================================
-// FILTRAR Y BUSCAR PROYECTOS
-// ============================================
-let filtroActual = 'todos';
-
-function filtrarProyectos(filtro) {
-    filtroActual = filtro;
-    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('filtro-' + filtro)?.classList.add('active');
-    cargarDashboard();
-}
-
-function buscarProyectos() {
-    const termino = document.getElementById('buscar-proyectos').value.toLowerCase();
-    const proyectos = document.querySelectorAll('.proyecto-card');
-    proyectos.forEach(p => {
-        const nombre = p.querySelector('.proyecto-nombre')?.textContent?.toLowerCase() || '';
-        const empresa = p.querySelector('.proyecto-empresa')?.textContent?.toLowerCase() || '';
-        p.style.display = (nombre.includes(termino) || empresa.includes(termino)) ? '' : 'none';
-    });
-}
-
-// ============================================
-// RENDERIZAR PROYECTOS
-// ============================================
-function renderizarProyectos(proyectos) {
-    const lista = document.getElementById('lista-proyectos');
-    if (proyectos.length === 0) {
-        lista.innerHTML = `<div class="text-center py-6 text-gray-500 text-sm">No hay proyectos aún. Crea uno nuevo.</div>`;
-        return;
-    }
-
-    let filtrados = proyectos;
-    if (filtroActual !== 'todos') {
-        filtrados = proyectos.filter(p => p.estado === filtroActual);
-    }
-
-    if (filtrados.length === 0) {
-        lista.innerHTML = `<div class="text-center py-6 text-gray-500 text-sm">No hay proyectos con el filtro "${filtroActual}"</div>`;
-        return;
-    }
-
-    lista.innerHTML = filtrados.map(p => {
-        const duracion = FASES_POR_METODOLOGIA[p.metodologia]?.duracion_total || DURACION_DEFAULT;
-        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
-        const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
-        const fasesMetodologia = FASES_POR_METODOLOGIA[p.metodologia]?.fases || [];
-        let fasesInfo = '';
-        if (fasesMetodologia.length > 0) {
-            let completas = 0;
-            let total = fasesMetodologia.length;
-            fasesMetodologia.forEach(fase => {
-                const tareasFase = tareasProyecto.filter(t => t.fase === fase);
-                if (tareasFase.length > 0 && tareasFase.every(t => t.estado === 'Completado')) {
-                    completas++;
-                }
-            });
-            fasesInfo = ` • ${completas}/${total} fases`;
+        if (tareasFase.length > 0) {
+            totalFasesConTareas++;
+            const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
+            if (todasCompletas) fasesCompletas++;
         }
+    });
 
-        return `
-        <div class="proyecto-card border rounded-lg p-3 hover:shadow-md transition ${p.estado === 'Crítico' ? 'border-l-4 border-l-red-500' : ''}">
-            <div class="flex flex-wrap justify-between items-start gap-3">
-                <div class="flex-1">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <h3 class="proyecto-nombre font-semibold text-gray-800 text-sm">${p.nombre}</h3>
-                        <span class="status-badge ${p.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : p.estado === 'Crítico' ? 'bg-red-100 text-red-700' : p.estado === 'Monitoreo' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}">${p.estado || 'Activo'}</span>
-                        ${p.metodologia ? `<span class="metodologia-badge">${p.metodologia}</span>` : ''}
-                    </div>
-                    <div class="proyecto-empresa text-xs text-gray-500 mt-0.5">${p.empresa || 'Sin empresa'}</div>
-                    <div class="text-xs text-gray-500">${p.area || 'Sin área'}</div>
-                    <div class="flex flex-wrap items-center gap-3 mt-1 text-xs">
-                        <span><i class="fas fa-calendar-plus text-gray-400"></i> ${p.fecha_inicio || 'No definida'}</span>
-                        <span><i class="fas fa-calendar text-gray-400"></i> ${p.fecha_fin || 'No definida'}</span>
-                        <span><i class="fas fa-clock text-gray-400"></i> ${duracion} días</span>
-                    </div>
-                    <div class="text-xs text-gray-400 mt-0.5">
-                        <i class="fas fa-tasks mr-1"></i>
-                        ${p.total_tareas} tareas • ${completadas} completadas${fasesInfo}
-                    </div>
-                </div>
-                <div class="w-40">
-                    <div class="flex justify-between text-xs mb-1">
-                        <span>Progreso</span>
-                        <span class="font-semibold">${p.progreso_calculado}%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill ${p.progreso_calculado < 30 ? 'bg-red-500' : p.progreso_calculado < 60 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${p.progreso_calculado}%"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="flex flex-wrap gap-1.5 mt-2 pt-2 border-t">
-                <button onclick="toggleDetalle(${p.id})" class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded hover:bg-blue-100" id="btn-detalle-${p.id}">
-                    <i class="fas fa-chevron-down"></i> Detalle
-                </button>
-                <button onclick="editarProyecto(${p.id})" class="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded hover:bg-yellow-100">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button onclick="eliminarProyecto(${p.id})" class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded hover:bg-red-100">
-                    <i class="fas fa-trash"></i>
-                </button>
-                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded ml-auto">
-                    <i class="fas fa-tasks"></i> ${p.total_tareas}
-                </span>
-            </div>
-            <div id="detalle-${p.id}" class="proyecto-detalle">
-                <div class="text-center py-3 text-gray-400 text-sm">Cargando...</div>
-            </div>
-        </div>
-    `}).join('');
+    return totalFasesConTareas > 0 ? Math.round((fasesCompletas / totalFasesConTareas) * 100) : 0;
 }
 
 // ============================================
-// FUNCIONES AUXILIARES
+// FUNCIONES AUXILIARES MEJORADAS
 // ============================================
 
 function getBarraClase(estado) {
@@ -955,13 +1267,56 @@ function getBarraClase(estado) {
     return clases[estado] || 'pendiente';
 }
 
+function getPrioridadClase(prioridad) {
+    return PRIORIDAD_COLORS[prioridad] || 'prioridad-media';
+}
+
+function getEstadoBadgeClase(estado) {
+    const clases = {
+        'Pendiente': 'badge-pendiente',
+        'En Progreso': 'badge-progreso',
+        'Completado': 'badge-completado',
+        'Bloqueada': 'badge-bloqueada',
+        'Hold': 'badge-hold'
+    };
+    return clases[estado] || 'badge-pendiente';
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+    } catch {
+        return dateString;
+    }
+}
+
+function getFechaClase(fechaString) {
+    if (!fechaString) return 'futura';
+    try {
+        const fecha = new Date(fechaString);
+        const hoy = new Date();
+        const diffDias = Math.ceil((fecha - hoy) / (1000 * 60 * 60 * 24));
+        if (diffDias < 0) return 'vencida';
+        if (diffDias <= 3) return 'proxima';
+        return 'futura';
+    } catch {
+        return 'futura';
+    }
+}
+
 function renderTareaFilaGantt(t) {
     const barraClase = getBarraClase(t.estado);
-    const prioridadClase = PRIORIDAD_COLORS[t.prioridad] || 'prioridad-media';
+    const prioridadClase = getPrioridadClase(t.prioridad);
     const prioridadLabel = t.prioridad || 'Media';
     const responsable = t.responsable_texto || '-';
-    
-    let vencimiento = t.fecha_vencimiento ? new Date(t.fecha_vencimiento).toLocaleDateString() : '-';
+    const fechaStr = formatDate(t.fecha_vencimiento);
+    const fechaClase = getFechaClase(t.fecha_vencimiento);
     
     let anchoBarra = '30%';
     if (t.estado === 'Completado') anchoBarra = '100%';
@@ -970,14 +1325,14 @@ function renderTareaFilaGantt(t) {
     
     let evidenciaHTML = '';
     if (t.evidencia_url) {
-        evidenciaHTML = `<span class="evidencia-tag" onclick="verEvidencia('${t.evidencia_url}', '${t.evidencia_nombre || 'Evidencia'}')" title="Ver evidencia">📎</span>`;
+        evidenciaHTML = `<span class="evidencia-tag" onclick="event.stopPropagation(); verEvidencia('${t.evidencia_url}', '${t.evidencia_nombre || 'Evidencia'}')" title="Ver evidencia">📎</span>`;
     }
     
     return `
         <tr>
             <td>
                 <div class="gantt-titulo">${t.titulo} ${evidenciaHTML}</div>
-                <div class="gantt-fecha">${vencimiento}</div>
+                <div class="gantt-fecha">${fechaStr}</div>
             </td>
             <td><div class="gantt-responsable">${responsable}</div></td>
             <td><span class="prioridad-badge ${prioridadClase}">${prioridadLabel}</span></td>
@@ -1016,13 +1371,17 @@ function toggleFase(row) {
     }
 }
 
+// ============================================
+// RENDER VISTA GANTT MEJORADA
+// ============================================
 function renderVistaGanttColapsable(tareas, proyecto) {
-    const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
+    const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto?.metodologia]?.fases || [];
     
     if (tareas.length === 0) {
         return `<div class="text-gray-400 text-xs text-center py-2">Sin tareas</div>`;
     }
 
+    // Agrupar tareas por fase
     const tareasPorFase = {};
     tareas.forEach(t => {
         const fase = t.fase || 'Sin fase';
@@ -1030,14 +1389,39 @@ function renderVistaGanttColapsable(tareas, proyecto) {
         tareasPorFase[fase].push(t);
     });
 
+    // Ordenar fases según metodología
     let fasesOrdenadas = Object.keys(tareasPorFase);
     if (fasesMetodologia.length > 0) {
-        fasesOrdenadas = fasesMetodologia.filter(f => tareasPorFase[f]);
+        fasesOrdenadas = fasesMetodologia.filter(f => tareasPorFase[f] && tareasPorFase[f].length > 0);
+        // Añadir fases que no están en la metodología
         Object.keys(tareasPorFase).forEach(f => {
             if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
         });
     } else {
         fasesOrdenadas.sort();
+    }
+
+    // Si no hay fases con tareas, mostrar todas las tareas en una sola tabla
+    if (fasesOrdenadas.length === 0 || fasesOrdenadas.every(f => tareasPorFase[f].length === 0)) {
+        return `
+            <div class="gantt-container">
+                <table class="gantt-table">
+                    <thead>
+                        <tr>
+                            <th style="width:20%;">Tarea</th>
+                            <th style="width:12%;">Responsable</th>
+                            <th style="width:8%;">Prioridad</th>
+                            <th style="width:6%;">Estado</th>
+                            <th style="width:44%;">Cronograma</th>
+                            <th style="width:10%;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tareas.map(t => renderTareaFilaGantt(t)).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
     }
 
     let html = `
@@ -1056,25 +1440,28 @@ function renderVistaGanttColapsable(tareas, proyecto) {
                 <tbody>
     `;
 
-    fasesOrdenadas.forEach(fase => {
+    fasesOrdenadas.forEach((fase, index) => {
         const tareasFase = tareasPorFase[fase] || [];
+        if (tareasFase.length === 0) return;
+        
         const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
         const totalTareasFase = tareasFase.length;
         const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
+        const tieneTareas = totalTareasFase > 0;
 
         html += `
             <tr class="gantt-fila-fase" onclick="toggleFase(this)">
                 <td colspan="6">
-                    <span class="fase-toggle collapsed">▼</span>
+                    <span class="fase-toggle ${index === 0 ? '' : 'collapsed'}">▼</span>
                     <span class="fase-icon"><i class="fas fa-flag"></i></span>
                     ${fase}
-                    <span class="fase-estado ${todasCompletas ? 'fase-completa' : 'fase-incompleta'}">
-                        ${todasCompletas ? '✅' : `⏳ ${completadasFase}/${totalTareasFase}`}
+                    <span class="fase-estado ${todasCompletas && tieneTareas ? 'fase-completa' : 'fase-incompleta'}">
+                        ${todasCompletas && tieneTareas ? '✅' : `⏳ ${completadasFase}/${totalTareasFase}`}
                     </span>
                     <span class="fase-tareas-count">(${totalTareasFase} tareas)</span>
                 </td>
             </tr>
-            <tr class="tarea-row hidden">
+            <tr class="tarea-row ${index === 0 ? '' : 'hidden'}">
                 <td colspan="6">
                     <div class="gantt-container">
                         <table class="gantt-table">
@@ -1098,122 +1485,21 @@ function renderVistaGanttColapsable(tareas, proyecto) {
 }
 
 // ============================================
-// VER EVIDENCIA
-// ============================================
-function verEvidencia(url, nombre) {
-    const contenido = document.getElementById('ver-evidencia-contenido');
-    
-    const extensionesImagen = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
-    const ext = url.split('.').pop().toLowerCase();
-    const esImagen = extensionesImagen.includes(ext);
-    
-    if (esImagen) {
-        contenido.innerHTML = `
-            <div class="text-center">
-                <img src="${url}" alt="${nombre}" class="evidencia-preview">
-                <div class="text-xs text-gray-500 mt-2">${nombre}</div>
-                <a href="${url}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-block">📥 Descargar</a>
-            </div>
-        `;
-    } else {
-        contenido.innerHTML = `
-            <div class="text-center py-4">
-                <div class="text-4xl mb-3">📄</div>
-                <div class="font-medium text-sm">${nombre}</div>
-                <div class="text-xs text-gray-500 mt-1">Archivo no visualizable directamente</div>
-                <a href="${url}" target="_blank" class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
-                    📥 Descargar archivo
-                </a>
-            </div>
-        `;
-    }
-    
-    abrirModal('modal-ver-evidencia');
-}
-
-// ============================================
-// SUBIR EVIDENCIA
-// ============================================
-let tareaEnEvidencia = null;
-
-function abrirModalEvidencia(tareaId) {
-    const tarea = tareasCache.find(t => t.id === tareaId);
-    if (!tarea) {
-        showToast('Tarea no encontrada', 'error');
-        return;
-    }
-    tareaEnEvidencia = tarea;
-    document.getElementById('evidencia-tarea-titulo').textContent = tarea.titulo;
-    document.getElementById('evidencia-archivo').value = '';
-    document.getElementById('evidencia-comentario').value = '';
-    abrirModal('modal-evidencia');
-}
-
-async function subirEvidencia() {
-    const archivoInput = document.getElementById('evidencia-archivo');
-    const comentario = document.getElementById('evidencia-comentario').value;
-    
-    if (!archivoInput.files || archivoInput.files.length === 0) {
-        showToast('Selecciona un archivo', 'error');
-        return;
-    }
-    
-    const archivo = archivoInput.files[0];
-    const tareaId = tareaEnEvidencia.id;
-    const extension = archivo.name.split('.').pop();
-    const nombreArchivo = `tarea_${tareaId}_${Date.now()}.${extension}`;
-    
-    try {
-        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/evidencias/${nombreArchivo}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                'apikey': SUPABASE_KEY
-            },
-            body: archivo
-        });
-        
-        if (!uploadRes.ok) {
-            const errorText = await uploadRes.text();
-            throw new Error('Error al subir archivo: ' + errorText);
-        }
-        
-        const urlPublica = `${SUPABASE_URL}/storage/v1/object/public/evidencias/${nombreArchivo}`;
-        
-        await supabaseUpdate('tareas', tareaId, {
-            evidencia_url: urlPublica,
-            evidencia_nombre: archivo.name,
-            evidencia_tipo: archivo.type,
-            estado: 'Completado'
-        });
-        
-        cerrarModal('modal-evidencia');
-        
-        document.getElementById('exito-archivo').textContent = archivo.name;
-        document.getElementById('exito-tarea').textContent = tareaEnEvidencia.titulo;
-        abrirModal('modal-evidencia-exito');
-        
-        await recargarDatos(tareaEnEvidencia.proyecto_id);
-        
-    } catch (e) {
-        console.error('Error:', e);
-        showToast('Error al subir evidencia: ' + e.message, 'error');
-    }
-}
-
-// ============================================
-// RECARGAR DATOS SIN CERRAR DETALLE
+// RECARGAR DATOS MEJORADO
 // ============================================
 async function recargarDatos(proyectoId) {
     try {
-        const nuevosProyectos = await supabaseFetch('proyectos?order=id.desc');
-        const nuevasTareas = await supabaseFetch('tareas?select=*');
-        const nuevosUsuarios = await supabaseFetch('usuarios?select=*');
+        const [nuevosProyectos, nuevasTareas, nuevosUsuarios] = await Promise.all([
+            supabaseFetch('proyectos?order=id.desc'),
+            supabaseFetch('tareas?select=*'),
+            supabaseFetch('usuarios?select=*')
+        ]);
         
         proyectosCache = nuevosProyectos;
         tareasCache = nuevasTareas;
         usuariosCache = nuevosUsuarios;
         
+        // Actualizar KPIs
         const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
         const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
         const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
@@ -1225,6 +1511,7 @@ async function recargarDatos(proyectoId) {
         document.getElementById('kpi-vencidas').textContent = vencidas;
         document.getElementById('kpi-completadas').textContent = completadasTotal;
         
+        // Actualizar proyectos con progreso
         const proyectosConProgreso = proyectosCache.map(p => {
             const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
             const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
@@ -1235,31 +1522,240 @@ async function recargarDatos(proyectoId) {
         
         renderizarProyectos(proyectosConProgreso);
         
+        // Actualizar select de proyectos
         const selectProyecto = document.getElementById('tar-proyecto');
         if (selectProyecto) {
+            const currentValue = selectProyecto.value;
             selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+            if (currentValue && proyectosCache.some(p => p.id == currentValue)) {
+                selectProyecto.value = currentValue;
+            }
         }
         
+        // Actualizar select de proveedores
+        const selectProv = document.getElementById('prov-proyecto');
+        if (selectProv) {
+            const currentValue = selectProv.value;
+            selectProv.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+            if (currentValue && proyectosCache.some(p => p.id == currentValue)) {
+                selectProv.value = currentValue;
+            }
+        }
+        
+        // Si hay un detalle abierto, recargarlo
         if (proyectoId && detallesAbiertos[proyectoId]) {
-            setTimeout(async () => {
-                await renderizarDetalle(proyectoId);
-            }, 150);
+            await renderizarDetalle(proyectoId);
         }
         
     } catch (e) {
         console.error('Error recargando datos:', e);
+        showToast('Error al recargar datos', 'error');
     }
 }
 
 // ============================================
-// TOGGLE DETALLE
+// CARGAR DASHBOARD
 // ============================================
-let detallesAbiertos = {};
-let ordenFechaActivo = {};
+async function cargarDashboard() {
+    try {
+        const [proyectos, tareas, usuarios] = await Promise.all([
+            supabaseFetch('proyectos?order=id.desc'),
+            supabaseFetch('tareas?select=*'),
+            supabaseFetch('usuarios?select=*')
+        ]);
+        
+        proyectosCache = proyectos;
+        tareasCache = tareas;
+        usuariosCache = usuarios;
 
+        const proyectosConProgreso = proyectosCache.map(p => {
+            const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
+            const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
+            const total = tareasProyecto.length;
+            const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
+        });
+
+        const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
+        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
+        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
+
+        document.getElementById('kpi-proyectos').textContent = activos;
+        document.getElementById('kpi-tareas-totales').textContent = tareasCache.length;
+        document.getElementById('kpi-tareas').textContent = pendientes;
+        document.getElementById('kpi-vencidas').textContent = vencidas;
+        document.getElementById('kpi-completadas').textContent = completadasTotal;
+
+        const selectProyecto = document.getElementById('tar-proyecto');
+        selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+
+        renderizarProyectos(proyectosConProgreso);
+
+    } catch (e) {
+        console.error('Error cargando dashboard:', e);
+        document.getElementById('lista-proyectos').innerHTML = `
+            <div class="text-center py-6 text-red-500 text-sm">
+                <i class="fas fa-exclamation-circle text-2xl mb-2 block"></i>
+                Error cargando datos: ${e.message}
+            </div>
+        `;
+        showToast('Error al cargar el dashboard', 'error');
+    }
+}
+
+// ============================================
+// FILTRAR Y BUSCAR PROYECTOS
+// ============================================
+function filtrarProyectos(filtro) {
+    filtroActual = filtro;
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('filtro-' + filtro);
+    if (btn) btn.classList.add('active');
+    cargarDashboard();
+}
+
+function buscarProyectos() {
+    const termino = document.getElementById('buscar-proyectos').value.toLowerCase().trim();
+    const proyectos = document.querySelectorAll('.proyecto-card');
+    let visibleCount = 0;
+    
+    proyectos.forEach(p => {
+        const nombre = p.querySelector('.proyecto-nombre')?.textContent?.toLowerCase() || '';
+        const empresa = p.querySelector('.proyecto-empresa')?.textContent?.toLowerCase() || '';
+        const area = p.querySelector('.proyecto-area')?.textContent?.toLowerCase() || '';
+        const match = nombre.includes(termino) || empresa.includes(termino) || area.includes(termino);
+        p.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+    });
+    
+    // Mostrar mensaje si no hay resultados
+    const lista = document.getElementById('lista-proyectos');
+    const noResults = lista.querySelector('.no-results');
+    if (visibleCount === 0 && termino.length > 0) {
+        if (!noResults) {
+            const msg = document.createElement('div');
+            msg.className = 'no-results text-center py-4 text-gray-500 text-sm';
+            msg.textContent = 'No se encontraron proyectos que coincidan con la búsqueda.';
+            lista.appendChild(msg);
+        }
+    } else if (noResults) {
+        noResults.remove();
+    }
+}
+
+// ============================================
+// RENDERIZAR PROYECTOS MEJORADO
+// ============================================
+function renderizarProyectos(proyectos) {
+    const lista = document.getElementById('lista-proyectos');
+    if (proyectos.length === 0) {
+        lista.innerHTML = `<div class="text-center py-6 text-gray-500 text-sm">No hay proyectos aún. Crea uno nuevo.</div>`;
+        return;
+    }
+
+    let filtrados = proyectos;
+    if (filtroActual !== 'todos') {
+        filtrados = proyectos.filter(p => p.estado === filtroActual);
+    }
+
+    if (filtrados.length === 0) {
+        lista.innerHTML = `<div class="text-center py-6 text-gray-500 text-sm">No hay proyectos con el filtro "${filtroActual}"</div>`;
+        return;
+    }
+
+    lista.innerHTML = filtrados.map(p => {
+        const duracion = FASES_POR_METODOLOGIA[p.metodologia]?.duracion_total || DURACION_DEFAULT;
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
+        const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+        const fasesMetodologia = FASES_POR_METODOLOGIA[p.metodologia]?.fases || [];
+        let fasesInfo = '';
+        if (fasesMetodologia.length > 0) {
+            let completas = 0;
+            let totalConTareas = 0;
+            fasesMetodologia.forEach(fase => {
+                const tareasFase = tareasProyecto.filter(t => t.fase === fase);
+                if (tareasFase.length > 0) {
+                    totalConTareas++;
+                    if (tareasFase.every(t => t.estado === 'Completado')) {
+                        completas++;
+                    }
+                }
+            });
+            if (totalConTareas > 0) {
+                fasesInfo = ` • ${completas}/${totalConTareas} fases`;
+            }
+        }
+        
+        const estadoClase = p.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : 
+                            p.estado === 'Crítico' ? 'bg-red-100 text-red-700' : 
+                            p.estado === 'Monitoreo' ? 'bg-yellow-100 text-yellow-700' : 
+                            'bg-gray-100 text-gray-700';
+
+        return `
+        <div class="proyecto-card border rounded-lg p-3 hover:shadow-md transition ${p.estado === 'Crítico' ? 'border-l-4 border-l-red-500' : ''}">
+            <div class="flex flex-wrap justify-between items-start gap-3">
+                <div class="flex-1 min-w-[200px]">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="proyecto-nombre font-semibold text-gray-800 text-sm">${p.nombre}</h3>
+                        <span class="status-badge ${estadoClase}">${p.estado || 'Activo'}</span>
+                        ${p.metodologia ? `<span class="metodologia-badge">${p.metodologia}</span>` : ''}
+                    </div>
+                    <div class="proyecto-empresa text-xs text-gray-500 mt-0.5">${p.empresa || 'Sin empresa'}</div>
+                    <div class="proyecto-area text-xs text-gray-500">${p.area || 'Sin área'}</div>
+                    <div class="flex flex-wrap items-center gap-3 mt-1 text-xs">
+                        <span><i class="fas fa-calendar-plus text-gray-400"></i> ${p.fecha_inicio || 'No definida'}</span>
+                        <span><i class="fas fa-calendar text-gray-400"></i> ${p.fecha_fin || 'No definida'}</span>
+                        <span><i class="fas fa-clock text-gray-400"></i> ${duracion} días</span>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-0.5">
+                        <i class="fas fa-tasks mr-1"></i>
+                        ${p.total_tareas} tareas • ${completadas} completadas${fasesInfo}
+                    </div>
+                </div>
+                <div class="w-40 flex-shrink-0">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span>Progreso</span>
+                        <span class="font-semibold">${p.progreso_calculado}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${p.progreso_calculado < 30 ? 'bg-red-500' : p.progreso_calculado < 60 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${p.progreso_calculado}%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mt-2 pt-2 border-t">
+                <button onclick="toggleDetalle(${p.id})" class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded hover:bg-blue-100 transition" id="btn-detalle-${p.id}">
+                    <i class="fas fa-chevron-down"></i> Detalle
+                </button>
+                <button onclick="editarProyecto(${p.id})" class="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded hover:bg-yellow-100 transition">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="eliminarProyecto(${p.id})" class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded hover:bg-red-100 transition">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded ml-auto">
+                    <i class="fas fa-tasks"></i> ${p.total_tareas}
+                </span>
+            </div>
+            <div id="detalle-${p.id}" class="proyecto-detalle">
+                <div class="text-center py-3 text-gray-400 text-sm">Cargando...</div>
+            </div>
+        </div>
+    `}).join('');
+    
+    // Eliminar mensaje de "no resultados" si existe
+    const noResults = lista.querySelector('.no-results');
+    if (noResults) noResults.remove();
+}
+
+// ============================================
+// TOGGLE DETALLE MEJORADO
+// ============================================
 async function toggleDetalle(id) {
     const detalleDiv = document.getElementById(`detalle-${id}`);
     const btn = document.getElementById(`btn-detalle-${id}`);
+
+    if (!detalleDiv || !btn) return;
 
     if (detallesAbiertos[id]) {
         detalleDiv.classList.remove('active');
@@ -1276,11 +1772,11 @@ async function toggleDetalle(id) {
 }
 
 // ============================================
-// RENDERIZAR DETALLE
+// RENDERIZAR DETALLE MEJORADO
 // ============================================
 async function renderizarDetalle(id) {
     const detalleDiv = document.getElementById(`detalle-${id}`);
-    if (!detalleDiv) {
+    if (!detalleDiv || !detalleDiv.classList.contains('active')) {
         return;
     }
     
@@ -1299,36 +1795,59 @@ async function renderizarDetalle(id) {
         const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
         let fasesStatus = [];
         let completasFases = 0;
-        let totalFases = fasesMetodologia.length;
+        let totalFasesConTareas = 0;
         
         if (fasesMetodologia.length > 0) {
             fasesMetodologia.forEach(fase => {
                 const tareasFase = tareas.filter(t => t.fase === fase);
-                const todasCompletas = tareasFase.length > 0 && tareasFase.every(t => t.estado === 'Completado');
-                if (todasCompletas) completasFases++;
-                fasesStatus.push({
-                    nombre: fase,
-                    completada: todasCompletas,
-                    total: tareasFase.length,
-                    completadas: tareasFase.filter(t => t.estado === 'Completado').length
-                });
+                const tieneTareas = tareasFase.length > 0;
+                if (tieneTareas) {
+                    totalFasesConTareas++;
+                    const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
+                    if (todasCompletas) completasFases++;
+                    fasesStatus.push({
+                        nombre: fase,
+                        completada: todasCompletas,
+                        total: tareasFase.length,
+                        completadas: tareasFase.filter(t => t.estado === 'Completado').length
+                    });
+                } else {
+                    fasesStatus.push({
+                        nombre: fase,
+                        completada: false,
+                        total: 0,
+                        completadas: 0,
+                        sinTareas: true
+                    });
+                }
             });
         }
 
+        // Construir HTML de fases compactas
         let fasesCompactasHTML = '';
         if (fasesStatus.length > 0) {
             fasesCompactasHTML = `
                 <div class="flex items-center gap-2 flex-wrap bg-gray-50 p-1.5 rounded border border-gray-200">
-                    <span class="text-xs font-semibold text-gray-600">${completasFases}/${totalFases} fases</span>
+                    <span class="text-xs font-semibold text-gray-600">${completasFases}/${totalFasesConTareas} fases</span>
                     <span class="text-xs text-gray-400">|</span>
                     <div class="fases-compactas">
                         ${fasesStatus.map(f => {
                             let clase = 'sin-tareas';
                             let icono = '⚪';
                             let detalle = '';
-                            if (f.total === 0) { clase = 'sin-tareas'; icono = '⚪'; detalle = ''; }
-                            else if (f.completada) { clase = 'completa'; icono = '✅'; detalle = `${f.completadas}/${f.total}`; }
-                            else { clase = 'incompleta'; icono = '⏳'; detalle = `${f.completadas}/${f.total}`; }
+                            if (f.sinTareas) { 
+                                clase = 'sin-tareas'; 
+                                icono = '○'; 
+                                detalle = 'sin tareas';
+                            } else if (f.completada) { 
+                                clase = 'completa'; 
+                                icono = '✅'; 
+                                detalle = `${f.completadas}/${f.total}`; 
+                            } else { 
+                                clase = 'incompleta'; 
+                                icono = '⏳'; 
+                                detalle = `${f.completadas}/${f.total}`; 
+                            }
                             return `<span class="fase-item ${clase}"><span class="fase-check">${icono}</span>${f.nombre} <span class="fase-detalle">${detalle}</span></span>`;
                         }).join('')}
                     </div>
@@ -1336,21 +1855,26 @@ async function renderizarDetalle(id) {
             `;
         }
 
-        let ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
+        const ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
+        
+        const estadoClase = proyecto.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : 
+                            proyecto.estado === 'Crítico' ? 'bg-red-100 text-red-700' : 
+                            proyecto.estado === 'Monitoreo' ? 'bg-yellow-100 text-yellow-700' : 
+                            'bg-gray-100 text-gray-700';
 
         detalleDiv.innerHTML = `
             <div class="bg-gray-50 p-2 rounded-lg mt-2">
                 <div class="flex flex-wrap justify-between items-start gap-2">
                     <div class="flex-1 min-w-[120px]">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <span class="status-badge ${proyecto.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : proyecto.estado === 'Crítico' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">${proyecto.estado || 'Activo'}</span>
+                            <span class="status-badge ${estadoClase}">${proyecto.estado || 'Activo'}</span>
                             ${proyecto.metodologia ? `<span class="metodologia-badge">${proyecto.metodologia}</span>` : ''}
                         </div>
                         <div class="flex flex-wrap gap-2 mt-1 text-xs text-gray-500">
                             <span>${proyecto.empresa || 'Sin empresa'}</span>
                             <span>${proyecto.area || 'Sin área'}</span>
-                            <span>${proyecto.fecha_inicio || 'No inicio'}</span>
-                            <span>${proyecto.fecha_fin || 'No fin'}</span>
+                            <span>${formatDate(proyecto.fecha_inicio)}</span>
+                            <span>${formatDate(proyecto.fecha_fin)}</span>
                         </div>
                         <div class="mt-1 max-w-xs">
                             <div class="flex justify-between text-xs">
@@ -1387,6 +1911,7 @@ async function renderizarDetalle(id) {
             </div>
         `;
 
+        // Inicializar el estado de las fases: primera expandida, el resto colapsadas
         const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
         if (fasesRows.length > 0) {
             fasesRows.forEach((row, index) => {
@@ -1403,13 +1928,50 @@ async function renderizarDetalle(id) {
         }
 
     } catch (e) {
-        console.error('Error:', e);
-        detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Error cargando detalle</div>';
+        console.error('Error en renderizarDetalle:', e);
+        detalleDiv.innerHTML = `<div class="text-red-500 text-sm">Error cargando detalle: ${e.message}</div>`;
     }
 }
 
 // ============================================
-// GENERAR REPORTE DEL PROYECTO
+// ORDENAR POR FECHA MEJORADO
+// ============================================
+function ordenarPorFecha(proyectoId) {
+    const btn = document.getElementById(`orden-btn-${proyectoId}`);
+    const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
+    
+    if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
+    
+    let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
+    
+    ordenFechaActivo[proyectoId] = !ordenFechaActivo[proyectoId];
+    const ascendente = ordenFechaActivo[proyectoId];
+    btn.innerHTML = ascendente ? '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
+    
+    tareas.sort((a, b) => {
+        const fechaA = a.fecha_vencimiento ? new Date(a.fecha_vencimiento) : new Date('2099-12-31');
+        const fechaB = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : new Date('2099-12-31');
+        return ascendente ? fechaA - fechaB : fechaB - fechaA;
+    });
+    
+    // Reconstruir el Gantt con el nuevo orden
+    const proyecto = proyectosCache.find(p => p.id === proyectoId);
+    const ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
+    
+    // Reemplazar solo la parte del Gantt
+    const ganttContainer = detalleDiv.querySelector('.gantt-container');
+    if (ganttContainer) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = ganttHTML;
+        const newGantt = tempDiv.querySelector('.gantt-container');
+        if (newGantt) {
+            ganttContainer.parentNode.replaceChild(newGantt, ganttContainer);
+        }
+    }
+}
+
+// ============================================
+// GENERAR REPORTE DEL PROYECTO MEJORADO
 // ============================================
 async function generarReporteProyecto(proyectoId) {
     try {
@@ -1430,16 +1992,20 @@ async function generarReporteProyecto(proyectoId) {
         const progreso = totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0;
         
         let fasesCompletas = 0;
-        let totalFases = fasesMetodologia.length;
+        let totalFases = 0;
         fasesMetodologia.forEach(fase => {
             const tareasFase = tareas.filter(t => t.fase === fase);
-            if (tareasFase.length > 0 && tareasFase.every(t => t.estado === 'Completado')) {
-                fasesCompletas++;
+            if (tareasFase.length > 0) {
+                totalFases++;
+                if (tareasFase.every(t => t.estado === 'Completado')) {
+                    fasesCompletas++;
+                }
             }
         });
         
         const tareasConEvidencia = tareas.filter(t => t.evidencia_url);
         
+        // Construir HTML de tareas por fase
         let tareasHTML = '';
         if (tareas.length === 0) {
             tareasHTML = '<p class="text-sm text-gray-500">No hay tareas registradas.</p>';
@@ -1453,7 +2019,13 @@ async function generarReporteProyecto(proyectoId) {
             
             let fasesOrdenadas = Object.keys(fasesTareas);
             if (fasesMetodologia.length > 0) {
-                fasesOrdenadas = fasesMetodologia.filter(f => fasesTareas[f]);
+                fasesOrdenadas = fasesMetodologia.filter(f => fasesTareas[f] && fasesTareas[f].length > 0);
+                // Añadir fases que no están en la metodología
+                Object.keys(fasesTareas).forEach(f => {
+                    if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
+                });
+            } else {
+                fasesOrdenadas.sort();
             }
             
             fasesOrdenadas.forEach(fase => {
@@ -1478,11 +2050,12 @@ async function generarReporteProyecto(proyectoId) {
             });
         }
         
+        // Proveedores HTML
         let proveedoresHTML = '';
         if (proveedores.length > 0) {
             proveedoresHTML = `
                 <div style="margin-top: 16px; border-top: 2px solid #e5e7eb; padding-top: 12px;">
-                    <h3 style="font-weight: 600; font-size: 15px; color: #1f2937;">🏢 Proveedores Evaluados</h3>
+                    <h3 style="font-weight: 600; font-size: 15px; color: #1f2937;">🏢 Proveedores</h3>
                     ${proveedores.map(p => `
                         <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">
                             <span>${p.nombre}</span>
@@ -1493,6 +2066,7 @@ async function generarReporteProyecto(proyectoId) {
             `;
         }
         
+        // Evidencia HTML
         let evidenciaHTML = '';
         if (tareasConEvidencia.length > 0) {
             evidenciaHTML = `
@@ -1515,10 +2089,10 @@ async function generarReporteProyecto(proyectoId) {
                 <meta charset="UTF-8">
                 <title>Reporte - ${proyecto.nombre}</title>
                 <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 900px; margin: 0 auto; color: #1f2937; }
+                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 900px; margin: 0 auto; color: #1f2937; background: #fafafa; }
                     .header { border-bottom: 3px solid #3b82f6; padding-bottom: 12px; margin-bottom: 20px; }
                     .header h1 { font-size: 24px; font-weight: 700; color: #1f2937; margin: 0; }
-                    .header .sub { font-size: 14px; color: #6b7280; }
+                    .header .sub { font-size: 14px; color: #6b7280; margin-top: 4px; }
                     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
                     .info-grid .label { color: #6b7280; }
                     .info-grid .value { font-weight: 500; }
@@ -1533,6 +2107,7 @@ async function generarReporteProyecto(proyectoId) {
                     .section { margin: 16px 0; }
                     .section h3 { font-weight: 600; font-size: 15px; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
                     .footer { margin-top: 24px; padding-top: 12px; border-top: 2px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center; }
+                    @media print { body { background: white; padding: 20px; } .no-print { display: none; } }
                 </style>
             </head>
             <body>
@@ -1546,9 +2121,9 @@ async function generarReporteProyecto(proyectoId) {
                     <div><span class="label">Área:</span> <span class="value">${proyecto.area || 'No especificada'}</span></div>
                     <div><span class="label">Metodología:</span> <span class="value">${proyecto.metodologia || 'No definida'}</span></div>
                     <div><span class="label">Estado:</span> <span class="value">${proyecto.estado || 'Activo'}</span></div>
-                    <div><span class="label">Fecha Inicio:</span> <span class="value">${proyecto.fecha_inicio || 'No definida'}</span></div>
-                    <div><span class="label">Fecha Fin:</span> <span class="value">${proyecto.fecha_fin || 'No definida'}</span></div>
-                    <div><span class="label">Fases:</span> <span class="value">${fasesCompletas}/${totalFases} completas</span></div>
+                    <div><span class="label">Fecha Inicio:</span> <span class="value">${formatDate(proyecto.fecha_inicio)}</span></div>
+                    <div><span class="label">Fecha Fin:</span> <span class="value">${formatDate(proyecto.fecha_fin)}</span></div>
+                    <div><span class="label">Fases:</span> <span class="value">${fasesCompletas}/${totalFases || 1} completas</span></div>
                     <div><span class="label">Progreso:</span> <span class="value">${progreso}%</span></div>
                 </div>
                 
@@ -1568,7 +2143,12 @@ async function generarReporteProyecto(proyectoId) {
                 ${evidenciaHTML}
                 
                 <div class="footer">
-                    Reporte generado el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}
+                    Reporte generado el ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}
+                </div>
+                <div style="text-align: center; margin-top: 16px;" class="no-print">
+                    <button onclick="window.print()" style="padding: 8px 24px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                        🖨️ Imprimir / Guardar PDF
+                    </button>
                 </div>
             </body>
             </html>
@@ -1577,103 +2157,122 @@ async function generarReporteProyecto(proyectoId) {
         const ventana = window.open('', '_blank', 'width=900,height=800');
         ventana.document.write(reporteHTML);
         ventana.document.close();
-        ventana.print();
         
     } catch (e) {
-        console.error('Error:', e);
+        console.error('Error generando reporte:', e);
         showToast('Error al generar reporte: ' + e.message, 'error');
     }
 }
 
 // ============================================
-// ORDENAR POR FECHA
+// VER EVIDENCIA MEJORADO
 // ============================================
-function ordenarPorFecha(proyectoId) {
-    const btn = document.getElementById(`orden-btn-${proyectoId}`);
-    const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
+function verEvidencia(url, nombre) {
+    const contenido = document.getElementById('ver-evidencia-contenido');
     
-    if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
+    const extensionesImagen = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
+    const extension = url.split('.').pop().toLowerCase();
+    const esImagen = extensionesImagen.includes(extension);
     
-    let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
-    
-    ordenFechaActivo[proyectoId] = !ordenFechaActivo[proyectoId];
-    const ascendente = ordenFechaActivo[proyectoId];
-    btn.innerHTML = ascendente ? '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
-    
-    tareas.sort((a, b) => {
-        const fechaA = a.fecha_vencimiento ? new Date(a.fecha_vencimiento) : new Date('2099-12-31');
-        const fechaB = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : new Date('2099-12-31');
-        return ascendente ? fechaA - fechaB : fechaB - fechaA;
-    });
-    
-    const fasesContainer = detalleDiv.querySelector('.gantt-container table tbody');
-    if (!fasesContainer) return;
-    
-    const fases = {};
-    tareas.forEach(t => {
-        const fase = t.fase || 'Sin fase';
-        if (!fases[fase]) fases[fase] = [];
-        fases[fase].push(t);
-    });
-    
-    const proyecto = proyectosCache.find(p => p.id === proyectoId);
-    const nuevasFases = FASES_POR_METODOLOGIA[proyecto?.metodologia]?.fases || [];
-    let fasesOrdenadas = Object.keys(fases);
-    if (nuevasFases.length > 0) {
-        fasesOrdenadas = nuevasFases.filter(f => fases[f]);
-        Object.keys(fases).forEach(f => {
-            if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
-        });
+    if (esImagen) {
+        contenido.innerHTML = `
+            <div class="text-center">
+                <img src="${url}" alt="${nombre}" class="evidencia-preview" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'text-center py-4\\'><div class=\\'text-4xl mb-3\\'>📄</div><div class=\\'font-medium text-sm\\'>${nombre}</div><div class=\\'text-xs text-red-500 mt-1\\'>Error al cargar la imagen</div><a href=\\'${url}\\' target=\\'_blank\\' class=\\'inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition\\'>📥 Descargar archivo</a></div>'">
+                <div class="text-xs text-gray-500 mt-2">${nombre}</div>
+                <a href="${url}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-block">📥 Descargar</a>
+            </div>
+        `;
     } else {
-        fasesOrdenadas.sort();
+        contenido.innerHTML = `
+            <div class="text-center py-4">
+                <div class="text-4xl mb-3">📄</div>
+                <div class="font-medium text-sm">${nombre}</div>
+                <div class="text-xs text-gray-500 mt-1">Archivo no visualizable directamente</div>
+                <a href="${url}" target="_blank" class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                    📥 Descargar archivo
+                </a>
+            </div>
+        `;
     }
     
-    let html = '';
-    fasesOrdenadas.forEach(fase => {
-        const tareasFase = fases[fase] || [];
-        const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
-        const totalTareasFase = tareasFase.length;
-        const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
+    abrirModal('modal-ver-evidencia');
+}
+
+// ============================================
+// SUBIR EVIDENCIA MEJORADO
+// ============================================
+function abrirModalEvidencia(tareaId) {
+    const tarea = tareasCache.find(t => t.id === tareaId);
+    if (!tarea) {
+        showToast('Tarea no encontrada', 'error');
+        return;
+    }
+    tareaEnEvidencia = tarea;
+    document.getElementById('evidencia-tarea-titulo').textContent = tarea.titulo;
+    document.getElementById('evidencia-archivo').value = '';
+    document.getElementById('evidencia-comentario').value = '';
+    abrirModal('modal-evidencia');
+}
+
+async function subirEvidencia() {
+    const archivoInput = document.getElementById('evidencia-archivo');
+    const comentario = document.getElementById('evidencia-comentario').value;
+    
+    if (!archivoInput.files || archivoInput.files.length === 0) {
+        showToast('Selecciona un archivo', 'error');
+        return;
+    }
+    
+    const archivo = archivoInput.files[0];
+    const tareaId = tareaEnEvidencia.id;
+    const extension = archivo.name.split('.').pop();
+    const nombreArchivo = `tarea_${tareaId}_${Date.now()}.${extension}`;
+    
+    try {
+        showToast('Subiendo archivo...', 'info');
         
-        html += `
-            <tr class="gantt-fila-fase" onclick="toggleFase(this)">
-                <td colspan="6">
-                    <span class="fase-toggle">▼</span>
-                    <span class="fase-icon"><i class="fas fa-flag"></i></span>
-                    ${fase}
-                    <span class="fase-estado ${todasCompletas ? 'fase-completa' : 'fase-incompleta'}">
-                        ${todasCompletas ? '✅' : `⏳ ${completadasFase}/${totalTareasFase}`}
-                    </span>
-                    <span class="fase-tareas-count">(${totalTareasFase} tareas)</span>
-                </td>
-            </tr>
-            <tr class="tarea-row hidden">
-                <td colspan="6">
-                    <div class="gantt-container">
-                        <table class="gantt-table">
-                            <tbody>
-                                ${tareasFase.map(t => renderTareaFilaGantt(t)).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </td>
-            </tr>
-        `;
-    });
-    
-    fasesContainer.innerHTML = html;
-    
-    const primerasFilas = fasesContainer.querySelectorAll('.gantt-fila-fase');
-    if (primerasFilas.length > 0) {
-        const toggle = primerasFilas[0].querySelector('.fase-toggle');
-        const tareasFila = primerasFilas[0].nextElementSibling;
-        if (toggle) toggle.classList.remove('collapsed');
-        if (tareasFila) tareasFila.classList.remove('hidden');
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/evidencias/${nombreArchivo}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'apikey': SUPABASE_KEY,
+                'Content-Type': archivo.type || 'application/octet-stream'
+            },
+            body: archivo
+        });
+        
+        if (!uploadRes.ok) {
+            const errorText = await uploadRes.text();
+            throw new Error(`Error al subir archivo (${uploadRes.status}): ${errorText}`);
+        }
+        
+        const urlPublica = `${SUPABASE_URL}/storage/v1/object/public/evidencias/${nombreArchivo}`;
+        
+        await supabaseUpdate('tareas', tareaId, {
+            evidencia_url: urlPublica,
+            evidencia_nombre: archivo.name,
+            evidencia_tipo: archivo.type,
+            estado: 'Completado'
+        });
+        
+        cerrarModal('modal-evidencia');
+        
+        document.getElementById('exito-archivo').textContent = archivo.name;
+        document.getElementById('exito-tarea').textContent = tareaEnEvidencia.titulo;
+        abrirModal('modal-evidencia-exito');
+        
+        showToast('✅ Evidencia subida correctamente', 'success');
+        
+        await recargarDatos(tareaEnEvidencia.proyecto_id);
+        
+    } catch (e) {
+        console.error('Error subiendo evidencia:', e);
+        showToast('Error al subir evidencia: ' + e.message, 'error');
     }
 }
 
 // ============================================
-// ELIMINAR PROYECTO (CON RESPALDO Y CONFIRMACIÓN)
+// ELIMINAR PROYECTO CON RESPALDO MEJORADO
 // ============================================
 async function eliminarProyecto(id) {
     const proyecto = proyectosCache.find(p => p.id === id);
@@ -1740,7 +2339,9 @@ async function eliminarProyecto(id) {
         
         showToast(`🗑️ Proyecto "${proyecto.nombre}" eliminado. Respaldo guardado.`, 'success');
 
-        cargarDashboard();
+        // Recargar datos y limpiar detalles abiertos
+        detallesAbiertos = {};
+        await cargarDashboard();
 
         const recuperar = confirm(
             `✅ Proyecto eliminado con respaldo.\n\n` +
@@ -1752,13 +2353,13 @@ async function eliminarProyecto(id) {
         }
 
     } catch (e) {
-        console.error('Error:', e);
+        console.error('Error eliminando proyecto:', e);
         showToast('❌ Error al eliminar: ' + e.message, 'error');
     }
 }
 
 // ============================================
-// RECUPERAR PROYECTO DESDE RESPALDO
+// RECUPERAR PROYECTO MEJORADO
 // ============================================
 async function recuperarProyecto(respaldoId) {
     try {
@@ -1813,16 +2414,16 @@ async function recuperarProyecto(respaldoId) {
             fecha_recuperado: new Date().toISOString()
         });
 
-        cargarDashboard();
+        await cargarDashboard();
 
     } catch (e) {
-        console.error('Error:', e);
+        console.error('Error recuperando proyecto:', e);
         showToast('❌ Error al recuperar: ' + e.message, 'error');
     }
 }
 
 // ============================================
-// VER RESPALDOS
+// VER RESPALDOS MEJORADO
 // ============================================
 async function verRespaldos() {
     try {
@@ -1842,7 +2443,7 @@ async function verRespaldos() {
             mensaje += `${index + 1}. ${r.nombre} ${recuperado}\n`;
             mensaje += `   🏢 ${r.empresa || 'Sin empresa'}\n`;
             mensaje += `   📊 ${tareas.length} tareas\n`;
-            mensaje += `   📅 Eliminado: ${new Date(r.fecha_eliminacion).toLocaleDateString()}\n`;
+            mensaje += `   📅 Eliminado: ${new Date(r.fecha_eliminacion).toLocaleDateString('es-ES')}\n`;
             mensaje += `   🆔 Respaldo ID: ${r.id}\n\n`;
         });
 
@@ -1873,13 +2474,13 @@ async function verRespaldos() {
         }
         
     } catch (e) {
-        console.error('Error:', e);
-        showToast('Error al cargar respaldos', 'error');
+        console.error('Error cargando respaldos:', e);
+        showToast('Error al cargar respaldos: ' + e.message, 'error');
     }
 }
 
 // ============================================
-// CARGAR RESPALDOS EN TAB
+// CARGAR RESPALDOS EN TAB MEJORADO
 // ============================================
 async function cargarRespaldos() {
     try {
@@ -1896,13 +2497,13 @@ async function cargarRespaldos() {
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-3 py-2 text-left text-xs">#</th>
-                            <th class="px-3 py-2 text-left text-xs">Proyecto</th>
-                            <th class="px-3 py-2 text-left text-xs">Empresa</th>
-                            <th class="px-3 py-2 text-left text-xs">Tareas</th>
-                            <th class="px-3 py-2 text-left text-xs">Eliminado</th>
-                            <th class="px-3 py-2 text-left text-xs">Estado</th>
-                            <th class="px-3 py-2 text-left text-xs">Acciones</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Proyecto</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Empresa</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tareas</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Eliminado</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1915,12 +2516,12 @@ async function cargarRespaldos() {
                                 <td class="px-3 py-2 text-xs font-medium">${r.nombre}</td>
                                 <td class="px-3 py-2 text-xs text-gray-500">${r.empresa || '-'}</td>
                                 <td class="px-3 py-2 text-xs text-center">${tareas.length}</td>
-                                <td class="px-3 py-2 text-xs text-gray-500">${new Date(r.fecha_eliminacion).toLocaleDateString()}</td>
+                                <td class="px-3 py-2 text-xs text-gray-500">${new Date(r.fecha_eliminacion).toLocaleDateString('es-ES')}</td>
                                 <td class="px-3 py-2 text-xs">
-                                    ${recuperado ? '<span class="text-green-600">✅ Recuperado</span>' : '<span class="text-red-600">❌ No recuperado</span>'}
+                                    ${recuperado ? '<span class="text-green-600 font-medium">✅ Recuperado</span>' : '<span class="text-red-600 font-medium">❌ No recuperado</span>'}
                                 </td>
                                 <td class="px-3 py-2 text-xs">
-                                    ${!recuperado ? `<button onclick="recuperarProyecto(${r.id})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">🔄 Recuperar</button>` : ''}
+                                    ${!recuperado ? `<button onclick="recuperarProyecto(${r.id})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700 transition">🔄 Recuperar</button>` : ''}
                                 </td>
                             </tr>
                         `}).join('')}
@@ -1933,13 +2534,44 @@ async function cargarRespaldos() {
             </div>
         `;
     } catch (e) {
-        console.error('Error:', e);
-        document.getElementById('lista-respaldos').innerHTML = '<div class="text-red-500 text-sm">Error cargando respaldos</div>';
+        console.error('Error cargando respaldos:', e);
+        document.getElementById('lista-respaldos').innerHTML = '<div class="text-red-500 text-sm">Error cargando respaldos: ' + e.message + '</div>';
     }
 }
 
 // ============================================
-// CAMBIAR ESTADO DE TAREA
+// CARGAR TODOS LOS PROYECTOS
+// ============================================
+function cargarTodosLosProyectos() {
+    const container = document.getElementById('lista-proyectos-completa');
+    if (proyectosCache.length === 0) {
+        container.innerHTML = '<div class="text-center py-6 text-gray-500 text-sm">No hay proyectos</div>';
+        return;
+    }
+    
+    container.innerHTML = proyectosCache.map(p => {
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
+        const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+        const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
+        return `
+            <div class="border-b py-2 flex justify-between items-center hover:bg-gray-50 px-2 rounded transition">
+                <div>
+                    <span class="font-medium text-sm">${p.nombre}</span>
+                    <span class="text-xs text-gray-500 ml-2">${p.empresa || ''}</span>
+                    <span class="text-xs text-gray-400 ml-2">${p.metodologia || ''}</span>
+                </div>
+                <div class="flex items-center gap-3 text-xs">
+                    <span>${completadas}/${tareasProyecto.length} tareas</span>
+                    <span class="font-semibold">${progreso}%</span>
+                    <span class="status-badge ${p.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">${p.estado || 'Activo'}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ============================================
+// CAMBIAR ESTADO DE TAREA MEJORADO
 // ============================================
 async function cambiarEstadoTarea(id, nuevoEstado) {
     try {
@@ -1963,33 +2595,33 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
                 return;
             } else {
                 await supabaseUpdate('tareas', id, { estado: nuevoEstado });
-                showToast('✅ Tarea completada');
+                showToast('✅ Tarea completada sin evidencia');
                 await recargarDatos(tarea.proyecto_id);
                 return;
             }
         }
         
         await supabaseUpdate('tareas', id, { estado: nuevoEstado });
-        showToast('Estado actualizado');
+        showToast(`Estado cambiado a "${nuevoEstado}"`);
         await recargarDatos(tarea.proyecto_id);
         
     } catch (e) {
-        console.error('Error:', e);
+        console.error('Error al cambiar estado:', e);
         showToast('Error al actualizar estado: ' + e.message, 'error');
     }
 }
 
 // ============================================
-// GUARDAR PROYECTO
+// GUARDAR PROYECTO MEJORADO
 // ============================================
 async function guardarProyecto(e) {
     e.preventDefault();
     const id = document.getElementById('proy-id').value;
-    const nombre = document.getElementById('proy-nombre').value;
+    const nombre = document.getElementById('proy-nombre').value.trim();
     const categoria = document.getElementById('proy-categoria').value;
     const metodologia = document.getElementById('proy-metodologia').value;
-    const empresa = document.getElementById('proy-empresa').value;
-    const area = document.getElementById('proy-area').value;
+    const empresa = document.getElementById('proy-empresa').value.trim();
+    const area = document.getElementById('proy-area').value.trim();
     const fecha_inicio = document.getElementById('proy-inicio').value;
     const fecha_fin = document.getElementById('proy-fecha').value;
 
@@ -1998,7 +2630,16 @@ async function guardarProyecto(e) {
         return;
     }
 
-    const data = { nombre, categoria, metodologia, empresa: empresa || 'Sin empresa', area: area || 'Sin área', fecha_inicio, fecha_fin, fecha_actualizacion: new Date().toISOString() };
+    const data = { 
+        nombre, 
+        categoria, 
+        metodologia, 
+        empresa: empresa || 'Sin empresa', 
+        area: area || 'Sin área', 
+        fecha_inicio, 
+        fecha_fin, 
+        fecha_actualizacion: new Date().toISOString() 
+    };
 
     try {
         if (id) {
@@ -2006,7 +2647,9 @@ async function guardarProyecto(e) {
             showToast('✅ Proyecto actualizado');
         } else {
             const nuevoProyecto = await supabaseInsert('proyectos', { ...data, estado: 'Activo' });
-            await crearCriteriosPorDefecto(nuevoProyecto[0].id);
+            if (nuevoProyecto && nuevoProyecto.length > 0) {
+                await crearCriteriosPorDefecto(nuevoProyecto[0].id);
+            }
             showToast('✅ Proyecto creado');
         }
         cerrarModal('modal-proyecto');
@@ -2014,8 +2657,9 @@ async function guardarProyecto(e) {
         document.getElementById('proy-id').value = '';
         document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
         document.getElementById('metodologia-desc').classList.remove('show');
-        cargarDashboard();
+        await cargarDashboard();
     } catch (e) {
+        console.error('Error guardando proyecto:', e);
         showToast('Error: ' + e.message, 'error');
     }
 }
@@ -2033,23 +2677,27 @@ async function crearCriteriosPorDefecto(proyectoId) {
     ];
 
     for (const c of criteriosDefecto) {
-        await supabaseInsert('criterios', { ...c, proyecto_id: proyectoId });
+        try {
+            await supabaseInsert('criterios', { ...c, proyecto_id: proyectoId });
+        } catch (e) {
+            console.warn('Error creando criterio:', c.nombre, e);
+        }
     }
 }
 
 // ============================================
-// GUARDAR TAREA
+// GUARDAR TAREA MEJORADO
 // ============================================
 async function guardarTarea(e) {
     e.preventDefault();
     const id = document.getElementById('tar-id').value;
-    const titulo = document.getElementById('tar-titulo').value;
+    const titulo = document.getElementById('tar-titulo').value.trim();
     const proyecto_id = parseInt(document.getElementById('tar-proyecto').value);
     const responsable_texto = document.getElementById('tar-responsable').value.trim();
     const prioridad = document.getElementById('tar-prioridad').value;
     const fase = document.getElementById('tar-fase').value;
     const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
-    const descripcion = document.getElementById('tar-descripcion').value;
+    const descripcion = document.getElementById('tar-descripcion').value.trim();
 
     if (!titulo || !proyecto_id) {
         showToast('Título y proyecto son obligatorios', 'error');
@@ -2063,7 +2711,7 @@ async function guardarTarea(e) {
         prioridad,
         fase: fase || null,
         fecha_vencimiento,
-        descripcion,
+        descripcion: descripcion || null,
         fecha_actualizacion: new Date().toISOString()
     };
 
@@ -2084,19 +2732,20 @@ async function guardarTarea(e) {
         await recargarDatos(proyecto_id);
         
     } catch (e) {
+        console.error('Error guardando tarea:', e);
         showToast('Error: ' + e.message, 'error');
     }
 }
 
 // ============================================
-// GUARDAR USUARIO
+// GUARDAR USUARIO MEJORADO
 // ============================================
 async function guardarUsuario(e) {
     e.preventDefault();
-    const nombre = document.getElementById('usr-nombre').value;
-    const email = document.getElementById('usr-email').value;
+    const nombre = document.getElementById('usr-nombre').value.trim();
+    const email = document.getElementById('usr-email').value.trim();
     const rol = document.getElementById('usr-rol').value;
-    const area = document.getElementById('usr-area').value;
+    const area = document.getElementById('usr-area').value.trim();
 
     if (!nombre) {
         showToast('El nombre es obligatorio', 'error');
@@ -2104,28 +2753,40 @@ async function guardarUsuario(e) {
     }
 
     try {
-        await supabaseInsert('usuarios', { nombre, email: email || null, rol, area: area || null });
+        await supabaseInsert('usuarios', { 
+            nombre, 
+            email: email || null, 
+            rol, 
+            area: area || null 
+        });
         showToast('✅ Recurso agregado');
         cerrarModal('modal-usuario');
         document.getElementById('form-usuario').reset();
-        cargarDashboard();
-        cargarRecursos();
+        await cargarDashboard();
+        await cargarRecursos();
     } catch (e) {
+        console.error('Error guardando usuario:', e);
         showToast('Error: ' + e.message, 'error');
     }
 }
 
 // ============================================
-// ELIMINAR TAREA
+// ELIMINAR TAREA MEJORADO
 // ============================================
 async function eliminarTarea(id) {
     if (!confirm('¿Eliminar esta tarea?')) return;
     try {
+        const tarea = tareasCache.find(t => t.id === id);
         await supabaseDelete('tareas', id);
         showToast('Tarea eliminada');
-        cargarDashboard();
+        if (tarea) {
+            await recargarDatos(tarea.proyecto_id);
+        } else {
+            await cargarDashboard();
+        }
     } catch (e) {
-        showToast('Error al eliminar tarea', 'error');
+        console.error('Error eliminando tarea:', e);
+        showToast('Error al eliminar tarea: ' + e.message, 'error');
     }
 }
 
@@ -2151,7 +2812,14 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
     if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
         fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
     } else {
-        fasesDisponibles = ['Sin fase'];
+        // Usar fases existentes en el proyecto
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === proyectoId);
+        const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
+        if (fasesExistentes.length > 0) {
+            fasesDisponibles = fasesExistentes;
+        } else {
+            fasesDisponibles = ['Sin fase'];
+        }
     }
     
     fasesSelect.innerHTML = fasesDisponibles.map(f => 
@@ -2166,13 +2834,15 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
 }
 
 // ============================================
-// PROVEEDORES
+// PROVEEDORES MEJORADO
 // ============================================
 async function cargarProveedores() {
     try {
-        const proveedores = await supabaseFetch('proveedores?select=*,proyectos(nombre)');
-        const criterios = await supabaseFetch('criterios?select=*');
-        const calificaciones = await supabaseFetch('calificaciones?select=*');
+        const [proveedores, criterios, calificaciones] = await Promise.all([
+            supabaseFetch('proveedores?select=*,proyectos(nombre)'),
+            supabaseFetch('criterios?select=*'),
+            supabaseFetch('calificaciones?select=*')
+        ]);
         
         const lista = document.getElementById('lista-proveedores');
         if (proveedores.length === 0) {
@@ -2222,14 +2892,14 @@ async function cargarProveedores() {
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-3 py-1.5 text-left text-xs">#</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Proveedor</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Proyecto</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Contacto</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Criterios</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Puntaje</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Nivel</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Acciones</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Proveedor</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Proyecto</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Contacto</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Criterios</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Puntaje</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Nivel</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2243,13 +2913,13 @@ async function cargarProveedores() {
                                 <td class="px-3 py-1.5 text-xs font-bold">${prov.puntaje}/10</td>
                                 <td class="px-3 py-1.5 text-xs"><span class="font-semibold ${prov.color}">${prov.nivel} (${prov.porcentaje}%)</span></td>
                                 <td class="px-3 py-1.5 text-xs">
-                                    <button onclick="verDetalleProveedor(${prov.id})" class="text-blue-500 hover:text-blue-700" title="Ver detalle">
+                                    <button onclick="verDetalleProveedor(${prov.id})" class="text-blue-500 hover:text-blue-700 transition" title="Ver detalle">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button onclick="calificarProveedor(${prov.id})" class="text-green-500 hover:text-green-700 ml-1" title="Calificar">
+                                    <button onclick="calificarProveedor(${prov.id})" class="text-green-500 hover:text-green-700 ml-1 transition" title="Calificar">
                                         <i class="fas fa-star"></i>
                                     </button>
-                                    <button onclick="eliminarProveedor(${prov.id})" class="text-red-500 hover:text-red-700 ml-1" title="Eliminar">
+                                    <button onclick="eliminarProveedor(${prov.id})" class="text-red-500 hover:text-red-700 ml-1 transition" title="Eliminar">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -2265,20 +2935,26 @@ async function cargarProveedores() {
         `;
 
         const selectProyecto = document.getElementById('prov-proyecto');
-        selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+        if (selectProyecto) {
+            const currentValue = selectProyecto.value;
+            selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+            if (currentValue && proyectosCache.some(p => p.id == currentValue)) {
+                selectProyecto.value = currentValue;
+            }
+        }
 
     } catch (e) {
-        console.error('Error:', e);
-        document.getElementById('lista-proveedores').innerHTML = '<div class="text-red-500 text-sm">Error cargando proveedores</div>';
+        console.error('Error cargando proveedores:', e);
+        document.getElementById('lista-proveedores').innerHTML = `<div class="text-red-500 text-sm">Error cargando proveedores: ${e.message}</div>`;
     }
 }
 
 async function guardarProveedor(e) {
     e.preventDefault();
-    const nombre = document.getElementById('prov-nombre').value;
-    const contacto = document.getElementById('prov-contacto').value;
-    const telefono = document.getElementById('prov-telefono').value;
-    const email = document.getElementById('prov-email').value;
+    const nombre = document.getElementById('prov-nombre').value.trim();
+    const contacto = document.getElementById('prov-contacto').value.trim();
+    const telefono = document.getElementById('prov-telefono').value.trim();
+    const email = document.getElementById('prov-email').value.trim();
     const proyecto_id = parseInt(document.getElementById('prov-proyecto').value);
 
     if (!nombre || !proyecto_id) {
@@ -2297,8 +2973,9 @@ async function guardarProveedor(e) {
         showToast('✅ Proveedor agregado');
         cerrarModal('modal-proveedor');
         document.getElementById('form-proveedor').reset();
-        cargarProveedores();
+        await cargarProveedores();
     } catch (e) {
+        console.error('Error guardando proveedor:', e);
         showToast('Error: ' + e.message, 'error');
     }
 }
@@ -2308,120 +2985,19 @@ async function eliminarProveedor(id) {
     try {
         await supabaseDelete('proveedores', id);
         showToast('Proveedor eliminado');
-        cargarProveedores();
+        await cargarProveedores();
     } catch (e) {
-        showToast('Error al eliminar', 'error');
+        console.error('Error eliminando proveedor:', e);
+        showToast('Error al eliminar: ' + e.message, 'error');
     }
 }
 
+// ============================================
+// CALIFICAR PROVEEDOR MEJORADO
+// ============================================
 async function calificarProveedor(proveedorId) {
-    const proveedores = await supabaseFetch(`proveedores?select=*,proyecto_id&id=eq.${proveedorId}`);
-    const proveedor = proveedores[0];
-    
-    if (!proveedor) {
-        showToast('Proveedor no encontrado', 'error');
-        return;
-    }
-
-    const criterios = await supabaseFetch(`criterios?proyecto_id=eq.${proveedor.proyecto_id}&select=*`);
-    
-    if (criterios.length === 0) {
-        showToast('No hay criterios definidos para este proyecto.', 'error');
-        return;
-    }
-
-    let html = `
-        <div class="modal-box" style="max-width: 450px;">
-            <div class="flex justify-between items-start mb-3">
-                <h3 class="text-lg font-bold">⭐ Calificar: ${proveedor.nombre}</h3>
-                <button onclick="cerrarModal('modal-calificacion')" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="form-calificacion" onsubmit="guardarCalificacion(event, ${proveedorId})">
-                <input type="hidden" id="cal-proveedor" value="${proveedorId}">
-                <div class="space-y-2">
-    `;
-
-    criterios.forEach(c => {
-        html += `
-            <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">
-                    ${c.nombre} (peso: ${c.peso})
-                </label>
-                <div class="flex items-center gap-2">
-                    <input type="range" id="cal-${c.id}" min="1" max="10" value="5" 
-                           class="w-full" oninput="document.getElementById('val-${c.id}').textContent = this.value">
-                    <span id="val-${c.id}" class="font-bold text-blue-600 w-6 text-center text-sm">5</span>
-                </div>
-                <input type="hidden" id="cal-criterio-${c.id}" value="${c.id}">
-            </div>
-        `;
-    });
-
-    html += `
-                </div>
-                <div class="flex gap-2 pt-3 mt-2 border-t">
-                    <button type="submit" class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
-                        <i class="fas fa-save mr-1"></i> Guardar
-                    </button>
-                    <button type="button" onclick="cerrarModal('modal-calificacion')" class="flex-1 bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-300 transition">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
-
-    const modal = document.createElement('div');
-    modal.id = 'modal-calificacion';
-    modal.className = 'modal show';
-    modal.innerHTML = html;
-    document.body.appendChild(modal);
-
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
-}
-
-async function guardarCalificacion(e, proveedorId) {
-    e.preventDefault();
-    
     try {
-        const inputs = document.querySelectorAll('#form-calificacion input[type="range"]');
-        
-        for (const input of inputs) {
-            const criterioId = parseInt(input.id.replace('cal-', ''));
-            const puntaje = parseInt(input.value);
-            
-            const existentes = await supabaseFetch(
-                `calificaciones?proveedor_id=eq.${proveedorId}&criterio_id=eq.${criterioId}&select=id`
-            );
-            
-            if (existentes.length > 0) {
-                await supabaseUpdate('calificaciones', existentes[0].id, { puntaje });
-            } else {
-                await supabaseInsert('calificaciones', {
-                    proveedor_id: proveedorId,
-                    criterio_id: criterioId,
-                    puntaje
-                });
-            }
-        }
-        
-        showToast('✅ Calificaciones guardadas');
-        document.getElementById('modal-calificacion')?.remove();
-        cargarProveedores();
-    } catch (e) {
-        showToast('Error: ' + e.message, 'error');
-    }
-}
-
-async function verDetalleProveedor(proveedorId) {
-    try {
-        const proveedores = await supabaseFetch(`proveedores?select=*,proyectos(nombre)&id=eq.${proveedorId}`);
+        const proveedores = await supabaseFetch(`proveedores?select=*,proyecto_id&id=eq.${proveedorId}`);
         const proveedor = proveedores[0];
         
         if (!proveedor) {
@@ -2429,8 +3005,145 @@ async function verDetalleProveedor(proveedorId) {
             return;
         }
 
-        const calificaciones = await supabaseFetch(`calificaciones?proveedor_id=eq.${proveedorId}&select=*,criterios(*)`);
         const criterios = await supabaseFetch(`criterios?proyecto_id=eq.${proveedor.proyecto_id}&select=*`);
+        
+        if (criterios.length === 0) {
+            showToast('No hay criterios definidos para este proyecto.', 'error');
+            return;
+        }
+
+        // Obtener calificaciones existentes
+        const calificacionesExistentes = await supabaseFetch(`calificaciones?proveedor_id=eq.${proveedorId}&select=*`);
+
+        // Crear el modal dinámicamente
+        const modalContainer = document.createElement('div');
+        modalContainer.id = 'modal-calificacion';
+        modalContainer.className = 'modal show';
+        
+        let criteriosHTML = criterios.map(c => {
+            const existing = calificacionesExistentes.find(cal => cal.criterio_id === c.id);
+            const valor = existing ? existing.puntaje : 5;
+            return `
+                <div class="mb-2">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">
+                        ${c.nombre} (peso: ${c.peso})
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <input type="range" id="cal-${c.id}" min="1" max="10" value="${valor}" 
+                               class="w-full accent-blue-600" 
+                               oninput="document.getElementById('val-${c.id}').textContent = this.value">
+                        <span id="val-${c.id}" class="font-bold text-blue-600 w-6 text-center text-sm">${valor}</span>
+                    </div>
+                    <input type="hidden" id="cal-criterio-${c.id}" value="${c.id}">
+                </div>
+            `;
+        }).join('');
+
+        modalContainer.innerHTML = `
+            <div class="modal-box" style="max-width: 450px;">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="text-lg font-bold">⭐ Calificar: ${proveedor.nombre}</h3>
+                    <button onclick="cerrarModalCalificacion()" class="text-gray-400 hover:text-gray-600 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="form-calificacion" onsubmit="guardarCalificacion(event, ${proveedorId})">
+                    <input type="hidden" id="cal-proveedor" value="${proveedorId}">
+                    <div class="space-y-2">
+                        ${criteriosHTML}
+                    </div>
+                    <div class="flex gap-2 pt-3 mt-2 border-t">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
+                            <i class="fas fa-save mr-1"></i> Guardar
+                        </button>
+                        <button type="button" onclick="cerrarModalCalificacion()" class="flex-1 bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-300 transition">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(modalContainer);
+
+        // Cerrar al hacer clic fuera
+        modalContainer.addEventListener('click', (e) => {
+            if (e.target === modalContainer) {
+                cerrarModalCalificacion();
+            }
+        });
+
+        // Función global para cerrar
+        window.cerrarModalCalificacion = function() {
+            const modal = document.getElementById('modal-calificacion');
+            if (modal) modal.remove();
+        };
+
+    } catch (e) {
+        console.error('Error al calificar proveedor:', e);
+        showToast('Error: ' + e.message, 'error');
+    }
+}
+
+async function guardarCalificacion(e, proveedorId) {
+    e.preventDefault();
+    
+    try {
+        const inputs = document.querySelectorAll('#form-calificacion input[type="range"]');
+        const promises = [];
+        
+        for (const input of inputs) {
+            const criterioId = parseInt(input.id.replace('cal-', ''));
+            const puntaje = parseInt(input.value);
+            
+            // Verificar si ya existe calificación
+            const existentes = await supabaseFetch(
+                `calificaciones?proveedor_id=eq.${proveedorId}&criterio_id=eq.${criterioId}&select=id`
+            );
+            
+            if (existentes.length > 0) {
+                promises.push(supabaseUpdate('calificaciones', existentes[0].id, { puntaje }));
+            } else {
+                promises.push(supabaseInsert('calificaciones', {
+                    proveedor_id: proveedorId,
+                    criterio_id: criterioId,
+                    puntaje
+                }));
+            }
+        }
+        
+        await Promise.all(promises);
+        
+        showToast('✅ Calificaciones guardadas');
+        cerrarModalCalificacion();
+        await cargarProveedores();
+    } catch (e) {
+        console.error('Error guardando calificaciones:', e);
+        showToast('Error: ' + e.message, 'error');
+    }
+}
+
+function cerrarModalCalificacion() {
+    const modal = document.getElementById('modal-calificacion');
+    if (modal) modal.remove();
+}
+
+// ============================================
+// VER DETALLE PROVEEDOR MEJORADO
+// ============================================
+async function verDetalleProveedor(proveedorId) {
+    try {
+        const [proveedores, calificaciones, criterios] = await Promise.all([
+            supabaseFetch(`proveedores?select=*,proyectos(nombre)&id=eq.${proveedorId}`),
+            supabaseFetch(`calificaciones?proveedor_id=eq.${proveedorId}&select=*,criterios(*)`),
+            supabaseFetch(`criterios?select=*`)
+        ]);
+        
+        const proveedor = proveedores[0];
+        if (!proveedor) {
+            showToast('Proveedor no encontrado', 'error');
+            return;
+        }
 
         let puntajeTotal = 0;
         let pesoTotal = 0;
@@ -2462,7 +3175,7 @@ async function verDetalleProveedor(proveedorId) {
         else if (porcentaje >= 40) { nivel = 'Regular'; color = 'text-yellow-600'; }
         else { nivel = 'Bajo'; color = 'text-red-600'; }
 
-        let detallesHTML = detalles.map(d => `
+        let detallesHTML = detalles.length > 0 ? detalles.map(d => `
             <div class="flex justify-between items-center p-1.5 border-b text-sm">
                 <span>${d.criterio}</span>
                 <div class="flex items-center gap-3">
@@ -2470,7 +3183,7 @@ async function verDetalleProveedor(proveedorId) {
                     <span class="font-bold">${d.puntaje}/10</span>
                 </div>
             </div>
-        `).join('');
+        `).join('') : '<div class="p-2 text-gray-400 text-sm">No hay calificaciones</div>';
 
         const contenido = document.getElementById('detalle-proveedor-contenido');
         contenido.innerHTML = `
@@ -2481,6 +3194,8 @@ async function verDetalleProveedor(proveedorId) {
                             <h3 class="text-lg font-bold">${proveedor.nombre}</h3>
                             <p class="text-xs text-gray-500">${proveedor.proyectos?.nombre || 'Sin proyecto'}</p>
                             <p class="text-xs text-gray-500">${proveedor.contacto || 'No especificado'}</p>
+                            ${proveedor.telefono ? `<p class="text-xs text-gray-500">📞 ${proveedor.telefono}</p>` : ''}
+                            ${proveedor.email ? `<p class="text-xs text-gray-500">✉️ ${proveedor.email}</p>` : ''}
                         </div>
                         <div class="text-right">
                             <div class="text-2xl font-bold ${color}">${promedio}</div>
@@ -2492,7 +3207,7 @@ async function verDetalleProveedor(proveedorId) {
                 <div class="border-t pt-2">
                     <h4 class="font-semibold text-sm mb-2">📋 Calificaciones</h4>
                     <div class="border rounded-lg overflow-hidden">
-                        ${detallesHTML || '<div class="p-2 text-gray-400 text-sm">No hay calificaciones</div>'}
+                        ${detallesHTML}
                     </div>
                 </div>
             </div>
@@ -2501,13 +3216,13 @@ async function verDetalleProveedor(proveedorId) {
         abrirModal('modal-detalle-proveedor');
 
     } catch (e) {
-        console.error('Error:', e);
-        showToast('Error cargando detalle', 'error');
+        console.error('Error cargando detalle:', e);
+        showToast('Error cargando detalle: ' + e.message, 'error');
     }
 }
 
 // ============================================
-// RECURSOS
+// RECURSOS MEJORADO
 // ============================================
 async function cargarRecursos() {
     try {
@@ -2522,23 +3237,23 @@ async function cargarRecursos() {
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-3 py-1.5 text-left text-xs">Nombre</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Email</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Rol</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Área</th>
-                            <th class="px-3 py-1.5 text-left text-xs">Tareas</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Área</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Tareas</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${usuarios.map(u => {
                             const tareasAsignadas = tareasCache.filter(t => t.responsable_texto === u.nombre).length;
                             return `
-                            <tr class="border-t">
+                            <tr class="border-t hover:bg-gray-50 transition">
                                 <td class="px-3 py-1.5 text-xs font-medium">${u.nombre}</td>
                                 <td class="px-3 py-1.5 text-xs text-gray-500">${u.email || '-'}</td>
                                 <td class="px-3 py-1.5 text-xs"><span class="status-badge bg-blue-100 text-blue-700">${u.rol || 'Colaborador'}</span></td>
                                 <td class="px-3 py-1.5 text-xs">${u.area ? `<span class="area-badge">${u.area}</span>` : '-'}</td>
-                                <td class="px-3 py-1.5 text-xs">${tareasAsignadas}</td>
+                                <td class="px-3 py-1.5 text-xs text-center">${tareasAsignadas}</td>
                             </tr>
                         `}).join('')}
                     </tbody>
@@ -2546,13 +3261,13 @@ async function cargarRecursos() {
             </div>
         `;
     } catch (e) {
-        console.error('Error:', e);
-        document.getElementById('lista-recursos').innerHTML = '<div class="text-red-500 text-sm">Error cargando recursos</div>';
+        console.error('Error cargando recursos:', e);
+        document.getElementById('lista-recursos').innerHTML = `<div class="text-red-500 text-sm">Error cargando recursos: ${e.message}</div>`;
     }
 }
 
 // ============================================
-// REPORTES
+// REPORTES MEJORADO
 // ============================================
 function generarReportes() {
     const container = document.getElementById('contenido-reportes');
@@ -2573,37 +3288,49 @@ function generarReportes() {
     container.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-gray-50 p-3 rounded-lg">
-                <h3 class="font-semibold text-sm mb-2">📊 Resumen</h3>
+                <h3 class="font-semibold text-sm mb-2">📊 Resumen General</h3>
                 <div class="space-y-1 text-sm">
                     <div class="flex justify-between"><span>Proyectos:</span><span class="font-semibold">${totalProyectos}</span></div>
                     <div class="flex justify-between"><span>Tareas:</span><span class="font-semibold">${totalTareas}</span></div>
                     <div class="flex justify-between"><span>Completadas:</span><span class="font-semibold text-green-600">${completadas}</span></div>
                     <div class="flex justify-between"><span>Pendientes:</span><span class="font-semibold text-yellow-600">${pendientes}</span></div>
                     <div class="flex justify-between"><span>Vencidas:</span><span class="font-semibold text-red-600">${vencidas}</span></div>
+                    <div class="flex justify-between"><span>Eficiencia:</span><span class="font-semibold text-blue-600">${totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0}%</span></div>
                 </div>
             </div>
             <div class="bg-gray-50 p-3 rounded-lg">
                 <h3 class="font-semibold text-sm mb-2">📋 Tareas por Proyecto</h3>
                 <div class="space-y-1 text-sm">
-                    ${tareasPorProyecto.map(p => `
-                        <div>
-                            <div class="flex justify-between text-xs">
-                                <span>${p.nombre}</span>
-                                <span>${p.completadas}/${p.total}</span>
+                    ${tareasPorProyecto.length > 0 ? tareasPorProyecto.map(p => {
+                        const progreso = p.total > 0 ? Math.round((p.completadas / p.total) * 100) : 0;
+                        return `
+                            <div>
+                                <div class="flex justify-between text-xs">
+                                    <span>${p.nombre}</span>
+                                    <span>${p.completadas}/${p.total}</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill ${progreso < 30 ? 'bg-red-500' : progreso < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progreso}%"></div>
+                                </div>
                             </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill bg-blue-600" style="width:${p.total > 0 ? (p.completadas/p.total)*100 : 0}%"></div>
-                            </div>
-                        </div>
-                    `).join('')}
+                        `;
+                    }).join('') : '<div class="text-gray-400 text-xs">No hay proyectos</div>'}
                 </div>
             </div>
+        </div>
+        <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <h3 class="font-semibold text-sm text-blue-700 mb-1">💡 Resumen Ejecutivo</h3>
+            <p class="text-xs text-blue-600">
+                Total de ${totalProyectos} proyectos con ${totalTareas} tareas. 
+                ${completadas} completadas (${totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0}% de avance).
+                ${vencidas > 0 ? `⚠️ ${vencidas} tareas vencidas requieren atención.` : '✅ Todas las tareas están a tiempo.'}
+            </p>
         </div>
     `;
 }
 
 // ============================================
-// EDITAR PROYECTO
+// EDITAR PROYECTO MEJORADO
 // ============================================
 function editarProyecto(id) {
     const proyecto = proyectosCache.find(p => p.id === id);
@@ -2635,7 +3362,7 @@ function editarProyecto(id) {
 }
 
 // ============================================
-// EDITAR TAREA
+// EDITAR TAREA MEJORADO
 // ============================================
 function editarTarea(id) {
     const tarea = tareasCache.find(t => t.id === id);
@@ -2699,29 +3426,48 @@ function editarTarea(id) {
 document.addEventListener('DOMContentLoaded', () => {
     cargarDashboard();
 
+    // Cerrar modales al hacer clic fuera
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.classList.remove('show');
-                document.getElementById('tar-proyecto').disabled = false;
-                document.getElementById('proy-id').value = '';
-                document.getElementById('tar-id').value = '';
-                document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
-                document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
-                document.getElementById('metodologia-desc').classList.remove('show');
+                const id = modal.id;
+                cerrarModal(id);
+                if (id === 'modal-calificacion') {
+                    modal.remove();
+                }
             }
         });
     });
 
+    // Cerrar con tecla ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.show').forEach(modal => {
+                const id = modal.id;
+                cerrarModal(id);
+                if (id === 'modal-calificacion') {
+                    modal.remove();
+                }
+            });
+        }
+    });
+
+    // Actualizar tab contenido cuando se cambia de pestaña
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            if (btn.textContent.includes('Recursos')) cargarRecursos();
-            if (btn.textContent.includes('Reportes')) generarReportes();
-            if (btn.textContent.includes('Proveedores')) cargarProveedores();
-            if (btn.textContent.includes('Respaldos')) cargarRespaldos();
+            const tab = btn.id.replace('tab-', '');
+            switch(tab) {
+                case 'recursos': cargarRecursos(); break;
+                case 'reportes': generarReportes(); break;
+                case 'proveedores': cargarProveedores(); break;
+                case 'respaldos': cargarRespaldos(); break;
+                case 'proyectos': cargarTodosLosProyectos(); break;
+            }
         });
     });
 });
+
+console.log('✅ PM System v3.10 cargado correctamente');
 </script>
 
 </body>
