@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>PM System v4.7 - Gantt con Días</title>
+    <title>PM System v5.1 - Control de Acceso</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
@@ -40,6 +40,90 @@
             from { transform: translateX(100px); opacity: 0; }
             to   { transform: translateX(0); opacity: 1; }
         }
+
+        /* ===== LOGIN ===== */
+        .login-container {
+            max-width: 400px;
+            margin: 80px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .login-container h1 {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .login-container .subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .login-container .form-group {
+            margin-bottom: 16px;
+        }
+        .login-container label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .login-container input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        .login-container .btn-login {
+            width: 100%;
+            padding: 10px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .login-container .btn-login:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+        }
+        .login-container .usuario-info {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #166534;
+        }
+
+        .user-role-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .badge-admin { background: #dbeafe; color: #1d4ed8; }
+        .badge-project_manager { background: #d1fae5; color: #065f46; }
+        .badge-colaborador { background: #fef3c7; color: #d97706; }
+        .badge-invitado { background: #e5e7eb; color: #6b7280; }
 
         /* ===== KPI CARDS ===== */
         .kpi-grid {
@@ -115,7 +199,7 @@
         .kpi-proyectos .kpi-number { color: #0891b2; }
 
         /* ============================================ */
-        /* GANTT - CON DÍAS EN LAS BARRAS              */
+        /* GANTT                                       */
         /* ============================================ */
         .gantt-container {
             overflow-x: auto;
@@ -158,7 +242,6 @@
             background: #f8fafc;
         }
 
-        /* === CONTENEDOR DE LA BARRA === */
         .gantt-barra-wrapper {
             position: relative;
             width: 100%;
@@ -170,7 +253,6 @@
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
         }
 
-        /* === LA BARRA - CON DÍAS === */
         .gantt-barra {
             position: absolute;
             left: 0;
@@ -199,22 +281,17 @@
             z-index: 2;
         }
 
-        /* === ESTADOS === */
         .gantt-barra.pendiente {
             background: linear-gradient(135deg, #f97316, #ea580c);
             border-color: #c2410c;
         }
-        .gantt-barra.pendiente .barra-dias {
-            color: #fff;
-        }
+        .gantt-barra.pendiente .barra-dias { color: #fff; }
 
         .gantt-barra.progreso {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             border-color: #1e40af;
         }
-        .gantt-barra.progreso .barra-dias {
-            color: #fff;
-        }
+        .gantt-barra.progreso .barra-dias { color: #fff; }
 
         .gantt-barra.completado {
             background: linear-gradient(135deg, #34d399, #059669);
@@ -229,19 +306,14 @@
             background: linear-gradient(135deg, #f87171, #dc2626);
             border-color: #b91c1c;
         }
-        .gantt-barra.bloqueada .barra-dias {
-            color: #fff;
-        }
+        .gantt-barra.bloqueada .barra-dias { color: #fff; }
 
         .gantt-barra.hold {
             background: linear-gradient(135deg, #9ca3af, #4b5563);
             border-color: #374151;
         }
-        .gantt-barra.hold .barra-dias {
-            color: #fff;
-        }
+        .gantt-barra.hold .barra-dias { color: #fff; }
 
-        /* === TEXTO DE DÍAS DENTRO DE LA BARRA === */
         .barra-dias {
             font-size: 12px;
             font-weight: 700;
@@ -249,9 +321,6 @@
             display: flex;
             align-items: center;
             gap: 3px;
-        }
-        .barra-dias .icono {
-            font-size: 14px;
         }
 
         /* === FILAS DE FASE === */
@@ -506,6 +575,22 @@
             color: #4338ca;
         }
 
+        .btn-logout {
+            background: #ef4444;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 12px;
+            font-size: 11px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-logout:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(239,68,68,0.3);
+        }
+
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb { background: #c1c7cd; border-radius: 3px; }
@@ -523,6 +608,42 @@
 <script>
 const SUPABASE_URL = 'https://ryjbmqmbxeuigojztwym.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5amJtcW1ieGV1aWdvanp0d3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NTYwNzMsImV4cCI6MjEwMTQzMjA3M30.QtdcGM6GegPlHmW9MEdHlsIwXEKsTQKrpUa1Y_B2ORc';
+
+// ============================================
+// CONFIGURACIÓN DE ROLES Y PERMISOS
+// ============================================
+const ROLES = {
+    ADMIN: 'admin',
+    PROJECT_MANAGER: 'project_manager',
+    COLABORADOR: 'colaborador',
+    INVITADO: 'invitado'
+};
+
+const ROLE_LABELS = {
+    'admin': 'Administrador',
+    'project_manager': 'Project Manager',
+    'colaborador': 'Colaborador',
+    'invitado': 'Invitado'
+};
+
+const ROLE_BADGE_CLASSES = {
+    'admin': 'badge-admin',
+    'project_manager': 'badge-project_manager',
+    'colaborador': 'badge-colaborador',
+    'invitado': 'badge-invitado'
+};
+
+// ============================================
+// VARIABLES GLOBALES
+// ============================================
+let proyectosCache = [];
+let tareasCache = [];
+let usuariosCache = [];
+let detallesAbiertosGlobal = {};
+let ordenFechaActivoGlobal = {};
+let filtroActual = 'todos';
+let tareaEnEvidencia = null;
+let usuarioActual = null;
 
 const METODOLOGIAS = {
     'Proyectos de Inversión': { nombre: 'PMI', desc: 'Metodología tradicional basada en fases secuenciales.' },
@@ -555,193 +676,253 @@ const PRIORIDAD_COLORS = {
     'Alta': 'prioridad-alta',
     'Crítica': 'prioridad-critica'
 };
-
-let proyectosCache = [];
-let tareasCache = [];
-let usuariosCache = [];
-let detallesAbiertosGlobal = {};
-let ordenFechaActivoGlobal = {};
-let filtroActual = 'todos';
-let tareaEnEvidencia = null;
 </script>
 
-<!-- ===== NAV ===== -->
-<nav class="bg-white shadow-md border-b sticky top-0 z-10">
-    <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
-            <span class="text-lg font-bold text-gray-800">PM System v4.7</span>
-            <span class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-semibold">Días Gantt</span>
-        </div>
-        <div class="flex items-center gap-3">
-            <span class="text-xs text-gray-600"><i class="fas fa-user-circle mr-1"></i> Oscar Castillo (PM)</span>
-        </div>
+<!-- ============================================ -->
+<!-- LOGIN / PANTALLA DE ACCESO                    -->
+<!-- ============================================ -->
+<div id="login-screen" class="login-container">
+    <h1>🔐 PM System</h1>
+    <p class="subtitle">Control de Acceso v5.1</p>
+    
+    <div class="usuario-info">
+        <strong>📝 Instrucciones:</strong><br>
+        <span style="font-size: 12px; color: #6b7280;">
+            Ingresa con el email de un usuario registrado en la base de datos.
+        </span>
     </div>
-</nav>
-
-<!-- ===== CONTENIDO PRINCIPAL ===== -->
-<div class="max-w-7xl mx-auto px-4 py-4">
-
-    <!-- TABS -->
-    <div class="flex gap-1 mb-4 border-b pb-2 flex-wrap">
-        <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn active">
-            <i class="fas fa-chart-pie mr-1"></i> Dashboard
+    
+    <form id="login-form" onsubmit="login(event)">
+        <div class="form-group">
+            <label for="login-email">Email</label>
+            <input id="login-email" type="email" placeholder="tu-email@empresa.com" required>
+        </div>
+        <div class="form-group" style="display: none;">
+            <label for="login-password">Contraseña</label>
+            <input id="login-password" type="password" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn-login">
+            <i class="fas fa-sign-in-alt mr-2"></i> Ingresar
         </button>
-        <button onclick="showTab('proyectos')" id="tab-proyectos" class="tab-btn">
-            <i class="fas fa-folder-open mr-1"></i> Proyectos
-        </button>
-        <button onclick="showTab('recursos')" id="tab-recursos" class="tab-btn">
-            <i class="fas fa-users mr-1"></i> Recursos
-        </button>
-        <button onclick="showTab('reportes')" id="tab-reportes" class="tab-btn">
-            <i class="fas fa-chart-bar mr-1"></i> Reportes
-        </button>
-        <button onclick="showTab('proveedores')" id="tab-proveedores" class="tab-btn">
-            <i class="fas fa-handshake mr-1"></i> Proveedores
-        </button>
-        <button onclick="showTab('respaldos')" id="tab-respaldos" class="tab-btn">
-            <i class="fas fa-history mr-1"></i> Respaldos
-        </button>
-    </div>
-
-    <!-- DASHBOARD -->
-    <div id="content-dashboard" class="tab-content active">
-        
-        <!-- KPIS -->
-        <div class="kpi-grid">
-            <div class="kpi-card kpi-proyectos">
-                <div class="flex items-center gap-3">
-                    <div class="kpi-icon"><i class="fas fa-folder-open"></i></div>
-                    <div>
-                        <div class="kpi-number" id="kpi-proyectos">0</div>
-                        <div class="kpi-label">Total Proyectos</div>
-                    </div>
-                </div>
-            </div>
-            <div class="kpi-card kpi-total">
-                <div class="flex items-center gap-3">
-                    <div class="kpi-icon"><i class="fas fa-list"></i></div>
-                    <div>
-                        <div class="kpi-number" id="kpi-tareas-totales">0</div>
-                        <div class="kpi-label">Total Tareas</div>
-                    </div>
-                </div>
-            </div>
-            <div class="kpi-card kpi-progreso">
-                <div class="flex items-center gap-3">
-                    <div class="kpi-icon"><i class="fas fa-spinner"></i></div>
-                    <div>
-                        <div class="kpi-number" id="kpi-en-progreso">0</div>
-                        <div class="kpi-label">En Progreso</div>
-                    </div>
-                </div>
-            </div>
-            <div class="kpi-card kpi-pendientes">
-                <div class="flex items-center gap-3">
-                    <div class="kpi-icon"><i class="fas fa-tasks"></i></div>
-                    <div>
-                        <div class="kpi-number" id="kpi-tareas">0</div>
-                        <div class="kpi-label">Pendientes</div>
-                    </div>
-                </div>
-            </div>
-            <div class="kpi-card kpi-completadas">
-                <div class="flex items-center gap-3">
-                    <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
-                    <div>
-                        <div class="kpi-number" id="kpi-completadas">0</div>
-                        <div class="kpi-label">Completadas</div>
-                    </div>
-                </div>
-            </div>
-            <div class="kpi-card kpi-vencidas">
-                <div class="flex items-center gap-3">
-                    <div class="kpi-icon"><i class="fas fa-clock"></i></div>
-                    <div>
-                        <div class="kpi-number" id="kpi-vencidas">0</div>
-                        <div class="kpi-label">Vencidas</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- LISTA DE PROYECTOS -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-4 py-2 border-b flex flex-wrap justify-between items-center gap-2">
-                <h2 class="text-sm font-semibold text-gray-800">Proyectos</h2>
-                <div class="flex flex-wrap items-center gap-2">
-                    <div class="flex gap-1 flex-wrap">
-                        <button onclick="filtrarProyectos('todos')" class="filtro-btn active" id="filtro-todos">Todos</button>
-                        <button onclick="filtrarProyectos('Activo')" class="filtro-btn" id="filtro-Activo">Activos</button>
-                        <button onclick="filtrarProyectos('Ejecutando')" class="filtro-btn" id="filtro-Ejecutando">Ejecutando</button>
-                        <button onclick="filtrarProyectos('Crítico')" class="filtro-btn" id="filtro-Crítico">Críticos</button>
-                        <button onclick="filtrarProyectos('Cerrado')" class="filtro-btn" id="filtro-Cerrado">Cerrados</button>
-                    </div>
-                    <input id="buscar-proyectos" onkeyup="buscarProyectos()" class="buscar-input" placeholder="🔍 Buscar...">
-                    <button onclick="abrirModal('modal-proyecto')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 transition">
-                        <i class="fas fa-plus mr-1"></i> Nuevo
-                    </button>
-                    <button onclick="verRespaldos()" class="btn-respaldo">
-                        <i class="fas fa-history mr-1"></i> Respaldos
-                    </button>
-                </div>
-            </div>
-            <div class="p-4 space-y-3" id="lista-proyectos">
-                <div class="text-center py-6 text-gray-500 text-sm">Cargando proyectos...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- OTRAS PESTAÑAS (simplificadas) -->
-    <div id="content-proyectos" class="tab-content">
-        <div class="bg-white rounded-lg shadow p-4">
-            <h2 class="text-lg font-bold mb-3">Todos los Proyectos</h2>
-            <div id="lista-proyectos-completa"></div>
-        </div>
-    </div>
-
-    <div id="content-recursos" class="tab-content">
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="text-lg font-bold"><i class="fas fa-users mr-2"></i>Recursos</h2>
-                <button onclick="abrirModal('modal-usuario')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
-                    <i class="fas fa-plus mr-1"></i> Agregar
-                </button>
-            </div>
-            <div id="lista-recursos"></div>
-        </div>
-    </div>
-
-    <div id="content-reportes" class="tab-content">
-        <div class="bg-white rounded-lg shadow p-4">
-            <h2 class="text-lg font-bold mb-3"><i class="fas fa-chart-bar mr-2"></i>Reportes</h2>
-            <div id="contenido-reportes"></div>
-        </div>
-    </div>
-
-    <div id="content-proveedores" class="tab-content">
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="text-lg font-bold"><i class="fas fa-handshake mr-2"></i>Proveedores</h2>
-                <button onclick="abrirModal('modal-proveedor')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
-                    <i class="fas fa-plus mr-1"></i> Agregar
-                </button>
-            </div>
-            <div id="lista-proveedores"></div>
-        </div>
-    </div>
-
-    <div id="content-respaldos" class="tab-content">
-        <div class="bg-white rounded-lg shadow p-4">
-            <h2 class="text-lg font-bold mb-3"><i class="fas fa-history mr-2"></i>Proyectos Eliminados (Respaldos)</h2>
-            <div id="lista-respaldos"></div>
-        </div>
-    </div>
-
+    </form>
 </div>
 
 <!-- ============================================ -->
-<!-- MODALES                                      -->
+<!-- APP PRINCIPAL (oculta hasta login)           -->
+<!-- ============================================ -->
+<div id="app-main" style="display: none;">
+
+    <!-- ===== NAV ===== -->
+    <nav class="bg-white shadow-md border-b sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
+                <span class="text-lg font-bold text-gray-800">PM System v5.1</span>
+                <span class="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full font-semibold">🔐 Secure</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-600" id="user-info-display">
+                    <i class="fas fa-user-circle mr-1"></i> 
+                    <span id="user-name-display">Usuario</span>
+                    <span class="user-role-badge" id="user-role-display">Rol</span>
+                </span>
+                <button onclick="logout()" class="btn-logout">
+                    <i class="fas fa-sign-out-alt mr-1"></i> Salir
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== CONTENIDO PRINCIPAL ===== -->
+    <div class="max-w-7xl mx-auto px-4 py-4">
+
+        <!-- TABS -->
+        <div class="flex gap-1 mb-4 border-b pb-2 flex-wrap">
+            <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn active">
+                <i class="fas fa-chart-pie mr-1"></i> Dashboard
+            </button>
+            <button onclick="showTab('proyectos')" id="tab-proyectos" class="tab-btn">
+                <i class="fas fa-folder-open mr-1"></i> Proyectos
+            </button>
+            <button onclick="showTab('recursos')" id="tab-recursos" class="tab-btn">
+                <i class="fas fa-users mr-1"></i> Recursos
+            </button>
+            <button onclick="showTab('reportes')" id="tab-reportes" class="tab-btn">
+                <i class="fas fa-chart-bar mr-1"></i> Reportes
+            </button>
+            <button onclick="showTab('proveedores')" id="tab-proveedores" class="tab-btn">
+                <i class="fas fa-handshake mr-1"></i> Proveedores
+            </button>
+            <button onclick="showTab('respaldos')" id="tab-respaldos" class="tab-btn">
+                <i class="fas fa-history mr-1"></i> Respaldos
+            </button>
+            <!-- Solo Admin ve configuración -->
+            <button onclick="showTab('configuracion')" id="tab-configuracion" class="tab-btn" style="display: none;">
+                <i class="fas fa-cog mr-1"></i> Configuración
+            </button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="content-dashboard" class="tab-content active">
+            
+            <!-- KPIS -->
+            <div class="kpi-grid">
+                <div class="kpi-card kpi-proyectos">
+                    <div class="flex items-center gap-3">
+                        <div class="kpi-icon"><i class="fas fa-folder-open"></i></div>
+                        <div>
+                            <div class="kpi-number" id="kpi-proyectos">0</div>
+                            <div class="kpi-label">Mis Proyectos</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-total">
+                    <div class="flex items-center gap-3">
+                        <div class="kpi-icon"><i class="fas fa-list"></i></div>
+                        <div>
+                            <div class="kpi-number" id="kpi-tareas-totales">0</div>
+                            <div class="kpi-label">Total Tareas</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-progreso">
+                    <div class="flex items-center gap-3">
+                        <div class="kpi-icon"><i class="fas fa-spinner"></i></div>
+                        <div>
+                            <div class="kpi-number" id="kpi-en-progreso">0</div>
+                            <div class="kpi-label">En Progreso</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-pendientes">
+                    <div class="flex items-center gap-3">
+                        <div class="kpi-icon"><i class="fas fa-tasks"></i></div>
+                        <div>
+                            <div class="kpi-number" id="kpi-tareas">0</div>
+                            <div class="kpi-label">Pendientes</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-completadas">
+                    <div class="flex items-center gap-3">
+                        <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
+                        <div>
+                            <div class="kpi-number" id="kpi-completadas">0</div>
+                            <div class="kpi-label">Completadas</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-vencidas">
+                    <div class="flex items-center gap-3">
+                        <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+                        <div>
+                            <div class="kpi-number" id="kpi-vencidas">0</div>
+                            <div class="kpi-label">Vencidas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LISTA DE PROYECTOS -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-4 py-2 border-b flex flex-wrap justify-between items-center gap-2">
+                    <h2 class="text-sm font-semibold text-gray-800">
+                        <i class="fas fa-lock text-green-500 mr-1"></i> 
+                        Mis Proyectos 
+                        <span class="text-xs text-gray-400 font-normal ml-2" id="proyectos-count-label">(0)</span>
+                    </h2>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex gap-1 flex-wrap">
+                            <button onclick="filtrarProyectos('todos')" class="filtro-btn active" id="filtro-todos">Todos</button>
+                            <button onclick="filtrarProyectos('Activo')" class="filtro-btn" id="filtro-Activo">Activos</button>
+                            <button onclick="filtrarProyectos('Ejecutando')" class="filtro-btn" id="filtro-Ejecutando">Ejecutando</button>
+                            <button onclick="filtrarProyectos('Crítico')" class="filtro-btn" id="filtro-Crítico">Críticos</button>
+                            <button onclick="filtrarProyectos('Cerrado')" class="filtro-btn" id="filtro-Cerrado">Cerrados</button>
+                        </div>
+                        <input id="buscar-proyectos" onkeyup="buscarProyectos()" class="buscar-input" placeholder="🔍 Buscar...">
+                        <!-- Solo Admin y PM pueden crear proyectos -->
+                        <button onclick="abrirModal('modal-proyecto')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 transition" id="btn-nuevo-proyecto">
+                            <i class="fas fa-plus mr-1"></i> Nuevo
+                        </button>
+                        <button onclick="verRespaldos()" class="btn-respaldo">
+                            <i class="fas fa-history mr-1"></i> Respaldos
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4 space-y-3" id="lista-proyectos">
+                    <div class="text-center py-6 text-gray-500 text-sm">Cargando proyectos...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OTRAS PESTAÑAS -->
+        <div id="content-proyectos" class="tab-content">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h2 class="text-lg font-bold mb-3">Todos los Proyectos</h2>
+                <div id="lista-proyectos-completa"></div>
+            </div>
+        </div>
+
+        <div id="content-recursos" class="tab-content">
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-lg font-bold"><i class="fas fa-users mr-2"></i>Recursos</h2>
+                    <!-- Solo Admin puede agregar recursos -->
+                    <button onclick="abrirModal('modal-usuario')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition" id="btn-agregar-recurso">
+                        <i class="fas fa-plus mr-1"></i> Agregar
+                    </button>
+                </div>
+                <div id="lista-recursos"></div>
+            </div>
+        </div>
+
+        <div id="content-reportes" class="tab-content">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h2 class="text-lg font-bold mb-3"><i class="fas fa-chart-bar mr-2"></i>Reportes</h2>
+                <div id="contenido-reportes"></div>
+            </div>
+        </div>
+
+        <div id="content-proveedores" class="tab-content">
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-lg font-bold"><i class="fas fa-handshake mr-2"></i>Proveedores</h2>
+                    <button onclick="abrirModal('modal-proveedor')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition" id="btn-agregar-proveedor">
+                        <i class="fas fa-plus mr-1"></i> Agregar
+                    </button>
+                </div>
+                <div id="lista-proveedores"></div>
+            </div>
+        </div>
+
+        <div id="content-respaldos" class="tab-content">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h2 class="text-lg font-bold mb-3"><i class="fas fa-history mr-2"></i>Proyectos Eliminados (Respaldos)</h2>
+                <div id="lista-respaldos"></div>
+            </div>
+        </div>
+
+        <!-- CONFIGURACIÓN (solo Admin) -->
+        <div id="content-configuracion" class="tab-content">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h2 class="text-lg font-bold mb-3"><i class="fas fa-cog mr-2"></i>Configuración de Acceso</h2>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>Panel de Administración</strong> - Aquí puedes gestionar usuarios y permisos.
+                    </p>
+                </div>
+                <div id="configuracion-contenido">
+                    <div class="text-center py-4 text-gray-500 text-sm">Cargando configuración...</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- MODALES (simplificados)                     -->
 <!-- ============================================ -->
 
 <div id="modal-proyecto" class="modal">
@@ -784,8 +965,8 @@ let tareaEnEvidencia = null;
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Empresa</label>
-                        <input id="proy-empresa" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Empresa">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Empresa *</label>
+                        <input id="proy-empresa" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Empresa">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
@@ -943,25 +1124,27 @@ let tareaEnEvidencia = null;
                     <input id="usr-nombre" type="text" required class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Nombre completo">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                    <input id="usr-email" type="email" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="correo@ejemplo.com">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Email *</label>
+                    <input id="usr-email" type="email" required class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="correo@ejemplo.com">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
-                        <select id="usr-rol" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                            <option value="Project Manager">Project Manager</option>
-                            <option value="Desarrollador">Desarrollador</option>
-                            <option value="Diseñador">Diseñador</option>
-                            <option value="QA">QA</option>
-                            <option value="Analista">Analista</option>
-                            <option value="Colaborador">Colaborador</option>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Rol *</label>
+                        <select id="usr-rol" required class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <option value="admin">Administrador</option>
+                            <option value="project_manager">Project Manager</option>
+                            <option value="colaborador">Colaborador</option>
+                            <option value="invitado">Invitado</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
-                        <input id="usr-area" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Ej: Tecnología">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Empresa</label>
+                        <input id="usr-empresa" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Empresa">
                     </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
+                    <input id="usr-area" type="text" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Ej: Tecnología">
                 </div>
             </div>
             <div class="flex gap-2 pt-3 mt-2 border-t">
@@ -1059,7 +1242,7 @@ let tareaEnEvidencia = null;
 </div>
 
 <!-- ============================================ -->
-<!-- SCRIPT PRINCIPAL - v4.7                      -->
+<!-- SCRIPT PRINCIPAL - v5.1 (Con Supabase Real)  -->
 <!-- ============================================ -->
 <script>
 // ============================================
@@ -1068,8 +1251,8 @@ let tareaEnEvidencia = null;
 async function supabaseFetch(query) {
     try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${query}`, {
-            headers: { 
-                'apikey': SUPABASE_KEY, 
+            headers: {
+                'apikey': SUPABASE_KEY,
                 'Authorization': `Bearer ${SUPABASE_KEY}`,
                 'Content-Type': 'application/json'
             }
@@ -1135,8 +1318,8 @@ async function supabaseDelete(table, id) {
     try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
             method: 'DELETE',
-            headers: { 
-                'apikey': SUPABASE_KEY, 
+            headers: {
+                'apikey': SUPABASE_KEY,
                 'Authorization': `Bearer ${SUPABASE_KEY}`,
                 'Prefer': 'return=representation'
             }
@@ -1150,6 +1333,127 @@ async function supabaseDelete(table, id) {
         console.error('Error en supabaseDelete:', error);
         throw error;
     }
+}
+
+// ============================================
+// CONTROL DE ACCESO
+// ============================================
+function tieneAcceso(usuario, proyecto) {
+    if (!usuario) return false;
+    if (usuario.rol === 'admin') return true;
+    if (usuario.rol === 'project_manager' || usuario.rol === 'colaborador') {
+        return usuario.empresa === proyecto.empresa;
+    }
+    if (usuario.rol === 'invitado') {
+        return proyecto.estado !== 'Crítico' && proyecto.empresa !== 'Confidencial';
+    }
+    return false;
+}
+
+function getProyectosAccesibles(usuario, proyectos) {
+    if (!usuario) return [];
+    return proyectos.filter(p => tieneAcceso(usuario, p));
+}
+
+function getTareasAccesibles(usuario, tareas, proyectos) {
+    if (!usuario) return [];
+    const proyectosAccesibles = getProyectosAccesibles(usuario, proyectos);
+    const idsAccesibles = proyectosAccesibles.map(p => p.id);
+    return tareas.filter(t => idsAccesibles.includes(t.proyecto_id));
+}
+
+function puedeCrearProyecto(usuario) {
+    return usuario && (usuario.rol === 'admin' || usuario.rol === 'project_manager');
+}
+
+function puedeEditarProyecto(usuario, proyecto) {
+    if (!usuario || !proyecto) return false;
+    if (usuario.rol === 'admin') return true;
+    if (usuario.rol === 'project_manager') {
+        return usuario.empresa === proyecto.empresa;
+    }
+    return false;
+}
+
+function puedeEliminarProyecto(usuario, proyecto) {
+    if (!usuario || !proyecto) return false;
+    return usuario.rol === 'admin';
+}
+
+// ============================================
+// LOGIN Y LOGOUT (CON SUPABASE REAL)
+// ============================================
+async function login(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    
+    if (!email) {
+        showToast('❌ Ingresa un email', 'error');
+        return;
+    }
+    
+    try {
+        // Buscar usuario en Supabase por email
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=*`, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error al buscar usuario: ${response.status} - ${errorText}`);
+        }
+        
+        const usuarios = await response.json();
+        const usuario = usuarios[0];
+        
+        if (!usuario) {
+            showToast('❌ Usuario no encontrado. Verifica tu email.', 'error');
+            return;
+        }
+        
+        // Iniciar sesión con el usuario encontrado
+        usuarioActual = usuario;
+        
+        // Ocultar login, mostrar app
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-main').style.display = 'block';
+        
+        // Actualizar información del usuario
+        document.getElementById('user-name-display').textContent = usuario.nombre || usuario.email;
+        const rolLabel = ROLE_LABELS[usuario.rol] || usuario.rol || 'colaborador';
+        const badgeClass = ROLE_BADGE_CLASSES[usuario.rol] || '';
+        document.getElementById('user-role-display').textContent = rolLabel;
+        document.getElementById('user-role-display').className = 'user-role-badge ' + badgeClass;
+        
+        // Mostrar/ocultar elementos según rol
+        const esAdmin = usuario.rol === 'admin';
+        const esPM = usuario.rol === 'project_manager';
+        const puedeCrear = esAdmin || esPM;
+        
+        document.getElementById('btn-nuevo-proyecto').style.display = puedeCrear ? '' : 'none';
+        document.getElementById('btn-agregar-recurso').style.display = esAdmin ? '' : 'none';
+        document.getElementById('btn-agregar-proveedor').style.display = esAdmin || esPM ? '' : 'none';
+        document.getElementById('tab-configuracion').style.display = esAdmin ? '' : 'none';
+        
+        showToast(`✅ Bienvenido ${usuario.nombre || usuario.email} (${rolLabel})`, 'success');
+        
+        cargarDashboard();
+        
+    } catch (error) {
+        console.error('Error en login:', error);
+        showToast('❌ Error al iniciar sesión: ' + error.message, 'error');
+    }
+}
+
+function logout() {
+    usuarioActual = null;
+    document.getElementById('app-main').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'block';
+    document.getElementById('login-email').value = '';
+    showToast('👋 Sesión cerrada', 'info');
 }
 
 // ============================================
@@ -1193,6 +1497,7 @@ function showTab(tab) {
         case 'proveedores': cargarProveedores(); break;
         case 'respaldos': cargarRespaldos(); break;
         case 'proyectos': cargarTodosLosProyectos(); break;
+        case 'configuracion': cargarConfiguracion(); break;
     }
 }
 
@@ -1278,7 +1583,7 @@ function formatDate(dateString) {
 }
 
 // ============================================
-// RENDER TAREA FILA GANTT - CON DÍAS
+// RENDER TAREA FILA GANTT
 // ============================================
 function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const barraClase = getBarraClase(t.estado);
@@ -1287,7 +1592,6 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const responsable = t.responsable_texto || '-';
     const fechaStr = formatDate(t.fecha_vencimiento);
     
-    // ===== CALCULAR DÍAS =====
     let dias = 0;
     let anchoPx = 60;
     
@@ -1313,7 +1617,6 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     }
     anchoPx = Math.min(anchoPx, 600);
     
-    // ===== TEXTO DE DÍAS =====
     let textoDias = dias > 0 ? `${dias}d` : '0d';
     
     let estadoCheck = '';
@@ -1467,39 +1770,45 @@ function renderVistaGanttColapsable(tareas, proyecto) {
 // ============================================
 async function cargarDashboard() {
     try {
-        const [proyectos, tareas, usuarios] = await Promise.all([
+        const [proyectos, tareas] = await Promise.all([
             supabaseFetch('proyectos?order=id.desc'),
-            supabaseFetch('tareas?select=*'),
-            supabaseFetch('usuarios?select=*')
+            supabaseFetch('tareas?select=*')
         ]);
+        
         proyectosCache = proyectos;
         tareasCache = tareas;
-        usuariosCache = usuarios;
-
-        const proyectosConProgreso = proyectosCache.map(p => {
-            const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
+        
+        // Filtrar proyectos según el usuario
+        const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectos);
+        const tareasAccesibles = getTareasAccesibles(usuarioActual, tareas, proyectos);
+        
+        // Calcular progreso solo para proyectos accesibles
+        const proyectosConProgreso = proyectosAccesibles.map(p => {
+            const tareasProyecto = tareas.filter(t => t.proyecto_id === p.id);
             const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
             const total = tareasProyecto.length;
             const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
             return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
         });
 
-        const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
-        const totalTareas = tareasCache.length;
-        const enProgreso = tareasCache.filter(t => t.estado === 'En Progreso').length;
-        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
-        const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
-        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        // KPIs solo con datos accesibles
+        const totalTareas = tareasAccesibles.length;
+        const enProgreso = tareasAccesibles.filter(t => t.estado === 'En Progreso').length;
+        const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
+        const completadasTotal = tareasAccesibles.filter(t => t.estado === 'Completado').length;
+        const vencidas = tareasAccesibles.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
 
-        document.getElementById('kpi-proyectos').textContent = activos;
+        document.getElementById('kpi-proyectos').textContent = proyectosAccesibles.length;
         document.getElementById('kpi-tareas-totales').textContent = totalTareas;
         document.getElementById('kpi-en-progreso').textContent = enProgreso;
         document.getElementById('kpi-tareas').textContent = pendientes;
         document.getElementById('kpi-completadas').textContent = completadasTotal;
         document.getElementById('kpi-vencidas').textContent = vencidas;
+        document.getElementById('proyectos-count-label').textContent = `(${proyectosAccesibles.length})`;
 
+        // Actualizar selects de proyectos (solo accesibles)
         const selectProyecto = document.getElementById('tar-proyecto');
-        selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+        selectProyecto.innerHTML = proyectosAccesibles.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
         renderizarProyectos(proyectosConProgreso);
 
@@ -1542,7 +1851,13 @@ function buscarProyectos() {
 function renderizarProyectos(proyectos) {
     const lista = document.getElementById('lista-proyectos');
     if (proyectos.length === 0) {
-        lista.innerHTML = `<div class="text-center py-6 text-gray-500 text-sm">No hay proyectos aún. Crea uno nuevo.</div>`;
+        lista.innerHTML = `
+            <div class="text-center py-6 text-gray-500 text-sm">
+                <i class="fas fa-lock text-2xl mb-2 block text-gray-300"></i>
+                No tienes acceso a ningún proyecto.
+                ${usuarioActual?.rol === 'invitado' ? '<br><span class="text-xs">Los invitados solo ven proyectos públicos.</span>' : ''}
+            </div>
+        `;
         return;
     }
     let filtrados = proyectos;
@@ -1574,6 +1889,10 @@ function renderizarProyectos(proyectos) {
                             p.estado === 'Crítico' ? 'bg-red-100 text-red-700' : 
                             p.estado === 'Monitoreo' ? 'bg-yellow-100 text-yellow-700' : 
                             'bg-gray-100 text-gray-700';
+        
+        const puedeEditar = puedeEditarProyecto(usuarioActual, p);
+        const puedeEliminar = puedeEliminarProyecto(usuarioActual, p);
+        
         return `
         <div class="proyecto-card border rounded-lg p-3 hover:shadow-md transition ${p.estado === 'Crítico' ? 'border-l-4 border-l-red-500' : ''}">
             <div class="flex flex-wrap justify-between items-start gap-3">
@@ -1582,6 +1901,7 @@ function renderizarProyectos(proyectos) {
                         <h3 class="proyecto-nombre font-semibold text-gray-800 text-sm">${p.nombre}</h3>
                         <span class="status-badge ${estadoClase}">${p.estado || 'Activo'}</span>
                         ${p.metodologia ? `<span class="metodologia-badge">${p.metodologia}</span>` : ''}
+                        <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">${p.empresa || 'Sin empresa'}</span>
                     </div>
                     <div class="proyecto-empresa text-xs text-gray-500 mt-0.5">${p.empresa || 'Sin empresa'}</div>
                     <div class="text-xs text-gray-500">${p.area || 'Sin área'}</div>
@@ -1609,12 +1929,12 @@ function renderizarProyectos(proyectos) {
                 <button onclick="toggleDetalle(${p.id})" class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded hover:bg-blue-100 transition" id="btn-detalle-${p.id}">
                     <i class="fas fa-chevron-down"></i> Detalle
                 </button>
-                <button onclick="editarProyecto(${p.id})" class="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded hover:bg-yellow-100 transition">
+                ${puedeEditar ? `<button onclick="editarProyecto(${p.id})" class="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded hover:bg-yellow-100 transition">
                     <i class="fas fa-edit"></i>
-                </button>
-                <button onclick="eliminarProyecto(${p.id})" class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded hover:bg-red-100 transition">
+                </button>` : ''}
+                ${puedeEliminar ? `<button onclick="eliminarProyecto(${p.id})" class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded hover:bg-red-100 transition">
                     <i class="fas fa-trash"></i>
-                </button>
+                </button>` : ''}
                 <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded ml-auto">
                     <i class="fas fa-tasks"></i> ${p.total_tareas}
                 </span>
@@ -1654,6 +1974,17 @@ async function renderizarDetalle(id) {
             detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Proyecto no encontrado</div>'; 
             return; 
         }
+        
+        if (!tieneAcceso(usuarioActual, proyecto)) {
+            detalleDiv.innerHTML = `
+                <div class="text-center py-4 text-red-500 text-sm">
+                    <i class="fas fa-lock text-2xl block mb-2"></i>
+                    No tienes permiso para ver este proyecto.
+                </div>
+            `;
+            return;
+        }
+        
         let tareas = tareasCache.filter(t => t.proyecto_id === id);
         const progreso = calcularProgresoPorFases(tareas, proyecto.metodologia);
         const total = tareas.length;
@@ -1734,16 +2065,17 @@ async function renderizarDetalle(id) {
                         <button onclick="generarReporteProyecto(${proyecto.id})" class="bg-green-600 text-white text-xs px-2 py-1 rounded hover:bg-green-700 transition" title="Generar reporte">
                             <i class="fas fa-file-pdf mr-1"></i> Reporte
                         </button>
+                        ${puedeEditarProyecto(usuarioActual, proyecto) ? `
                         <button onclick="abrirModalTareaDesdeDetalle(${proyecto.id})" class="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 transition">
                             <i class="fas fa-plus mr-1"></i> Tarea
-                        </button>
+                        </button>` : ''}
                     </div>
                 </div>
                 ${fasesCompactasHTML}
                 <div class="mt-2 pt-2 border-t">
                     <div class="flex justify-between items-center mb-1">
                         <span class="text-xs font-semibold text-gray-600"><i class="fas fa-tasks mr-1"></i>${tareas.length} tareas</span>
-                        <span class="text-xs text-gray-400">Gantt v4.7</span>
+                        <span class="text-xs text-gray-400">Gantt v5.1</span>
                     </div>
                     ${ganttHTML}
                 </div>
@@ -1803,9 +2135,14 @@ async function generarReporteProyecto(proyectoId) {
     try {
         const proyecto = proyectosCache.find(p => p.id === proyectoId);
         if (!proyecto) { showToast('Proyecto no encontrado', 'error'); return; }
+        
+        if (!tieneAcceso(usuarioActual, proyecto)) {
+            showToast('No tienes permiso para ver este proyecto', 'error');
+            return;
+        }
+        
         const tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
         const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
-        const proveedores = await supabaseFetch(`proveedores?select=*,proyectos(nombre)&proyecto_id=eq.${proyectoId}`);
         const totalTareas = tareas.length;
         const completadas = tareas.filter(t => t.estado === 'Completado').length;
         const pendientes = tareas.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
@@ -1861,11 +2198,11 @@ async function generarReporteProyecto(proyectoId) {
             });
         }
         let proveedoresHTML = '';
-        if (proveedores.length > 0) {
+        if (proveedoresData && proveedoresData.length > 0) {
             proveedoresHTML = `
                 <div style="margin-top: 16px; border-top: 2px solid #e5e7eb; padding-top: 12px;">
                     <h3 style="font-weight: 600; font-size: 15px; color: #1f2937;">🏢 Proveedores</h3>
-                    ${proveedores.map(p => `
+                    ${proveedoresData.map(p => `
                         <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">
                             <span>${p.nombre}</span>
                             <span style="color: #6b7280;">${p.contacto || 'Sin contacto'}</span>
@@ -2044,6 +2381,12 @@ async function subirEvidencia() {
 async function eliminarProyecto(id) {
     const proyecto = proyectosCache.find(p => p.id === id);
     if (!proyecto) { showToast('Proyecto no encontrado', 'error'); return; }
+    
+    if (!puedeEliminarProyecto(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para eliminar este proyecto', 'error');
+        return;
+    }
+    
     const confirmar = confirm(`⚠️ ¿ELIMINAR PROYECTO?\n\n📋 Proyecto: ${proyecto.nombre}\n🏢 Empresa: ${proyecto.empresa || 'Sin empresa'}\n📊 Tareas: ${tareasCache.filter(t => t.proyecto_id === id).length}\n\n✅ Se guardará un respaldo antes de eliminar.\n❌ Esta acción NO se puede deshacer.\n\n¿Estás seguro de eliminar este proyecto?`);
     if (!confirmar) { showToast('❌ Eliminación cancelada'); return; }
     const confirmar2 = confirm(`🔄 CONFIRMACIÓN FINAL\n\n¿Realmente deseas eliminar "${proyecto.nombre}"?\nSe guardará un respaldo en la base de datos.`);
@@ -2063,7 +2406,7 @@ async function eliminarProyecto(id) {
             estado: proyecto.estado,
             progreso: proyecto.progreso,
             tareas: JSON.stringify(tareasProyecto),
-            eliminado_por: 'Oscar Castillo'
+            eliminado_por: usuarioActual?.nombre || 'Usuario'
         };
         const insertRes = await supabaseInsert('proyectos_eliminados', respaldo);
         if (!insertRes || insertRes.length === 0) throw new Error('Error al guardar respaldo');
@@ -2072,8 +2415,6 @@ async function eliminarProyecto(id) {
         showToast(`🗑️ Proyecto "${proyecto.nombre}" eliminado. Respaldo guardado.`, 'success');
         detallesAbiertosGlobal = {};
         await cargarDashboard();
-        const recuperar = confirm(`✅ Proyecto eliminado con respaldo.\n\n¿Quieres recuperar el proyecto desde el respaldo ahora?`);
-        if (recuperar) await recuperarProyecto(insertRes[0].id);
     } catch (e) {
         console.error('Error eliminando proyecto:', e);
         showToast('❌ Error al eliminar: ' + e.message, 'error');
@@ -2215,11 +2556,12 @@ async function cargarRespaldos() {
 // ============================================
 function cargarTodosLosProyectos() {
     const container = document.getElementById('lista-proyectos-completa');
-    if (proyectosCache.length === 0) {
-        container.innerHTML = '<div class="text-center py-6 text-gray-500 text-sm">No hay proyectos</div>';
+    const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
+    if (proyectosAccesibles.length === 0) {
+        container.innerHTML = '<div class="text-center py-6 text-gray-500 text-sm">No tienes acceso a ningún proyecto</div>';
         return;
     }
-    container.innerHTML = proyectosCache.map(p => {
+    container.innerHTML = proyectosAccesibles.map(p => {
         const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
         const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
         const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
@@ -2247,6 +2589,13 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
     try {
         const tarea = tareasCache.find(t => t.id === id);
         if (!tarea) { showToast('Tarea no encontrada', 'error'); return; }
+        
+        const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
+        if (!tieneAcceso(usuarioActual, proyecto)) {
+            showToast('No tienes permiso para modificar esta tarea', 'error');
+            return;
+        }
+        
         if (nuevoEstado === 'Completado') {
             if (tarea.evidencia_url) {
                 await supabaseUpdate('tareas', id, { estado: nuevoEstado });
@@ -2277,6 +2626,12 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
 // ============================================
 async function guardarProyecto(e) {
     e.preventDefault();
+    
+    if (!puedeCrearProyecto(usuarioActual)) {
+        showToast('No tienes permiso para crear proyectos', 'error');
+        return;
+    }
+    
     const id = document.getElementById('proy-id').value;
     const nombre = document.getElementById('proy-nombre').value.trim();
     const categoria = document.getElementById('proy-categoria').value;
@@ -2285,8 +2640,23 @@ async function guardarProyecto(e) {
     const area = document.getElementById('proy-area').value.trim();
     const fecha_inicio = document.getElementById('proy-inicio').value;
     const fecha_fin = document.getElementById('proy-fecha').value;
-    if (!nombre || !categoria) { showToast('Nombre y categoría son obligatorios', 'error'); return; }
-    const data = { nombre, categoria, metodologia, empresa: empresa || 'Sin empresa', area: area || 'Sin área', fecha_inicio, fecha_fin, fecha_actualizacion: new Date().toISOString() };
+    
+    if (!nombre || !categoria || !empresa) { 
+        showToast('Nombre, categoría y empresa son obligatorios', 'error'); 
+        return; 
+    }
+    
+    const data = { 
+        nombre, 
+        categoria, 
+        metodologia, 
+        empresa, 
+        area: area || 'Sin área', 
+        fecha_inicio, 
+        fecha_fin, 
+        fecha_actualizacion: new Date().toISOString() 
+    };
+    
     try {
         if (id) {
             await supabaseUpdate('proyectos', id, data);
@@ -2338,8 +2708,26 @@ async function guardarTarea(e) {
     const fase = document.getElementById('tar-fase').value;
     const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
     const descripcion = document.getElementById('tar-descripcion').value.trim();
+    
     if (!titulo || !proyecto_id) { showToast('Título y proyecto son obligatorios', 'error'); return; }
-    const data = { titulo, proyecto_id, responsable_texto: responsable_texto || null, prioridad, fase: fase || null, fecha_vencimiento, descripcion: descripcion || null, fecha_actualizacion: new Date().toISOString() };
+    
+    const proyecto = proyectosCache.find(p => p.id === proyecto_id);
+    if (!tieneAcceso(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para agregar tareas a este proyecto', 'error');
+        return;
+    }
+    
+    const data = { 
+        titulo, 
+        proyecto_id, 
+        responsable_texto: responsable_texto || null, 
+        prioridad, 
+        fase: fase || null, 
+        fecha_vencimiento, 
+        descripcion: descripcion || null, 
+        fecha_actualizacion: new Date().toISOString() 
+    };
+    
     try {
         if (id) {
             await supabaseUpdate('tareas', id, data);
@@ -2361,22 +2749,38 @@ async function guardarTarea(e) {
 }
 
 // ============================================
-// GUARDAR USUARIO
+// GUARDAR USUARIO (solo Admin)
 // ============================================
 async function guardarUsuario(e) {
     e.preventDefault();
+    
+    if (usuarioActual?.rol !== 'admin') {
+        showToast('Solo el administrador puede agregar usuarios', 'error');
+        return;
+    }
+    
     const nombre = document.getElementById('usr-nombre').value.trim();
     const email = document.getElementById('usr-email').value.trim();
     const rol = document.getElementById('usr-rol').value;
+    const empresa = document.getElementById('usr-empresa').value.trim();
     const area = document.getElementById('usr-area').value.trim();
-    if (!nombre) { showToast('El nombre es obligatorio', 'error'); return; }
+    
+    if (!nombre || !email) { showToast('Nombre y email son obligatorios', 'error'); return; }
+    
     try {
-        await supabaseInsert('usuarios', { nombre, email: email || null, rol, area: area || null });
+        await supabaseInsert('usuarios', { 
+            nombre, 
+            email, 
+            rol, 
+            empresa: empresa || 'Sin empresa',
+            area: area || null 
+        });
         showToast('✅ Recurso agregado');
         cerrarModal('modal-usuario');
         document.getElementById('form-usuario').reset();
         await cargarDashboard();
         await cargarRecursos();
+        await cargarConfiguracion();
     } catch (e) {
         console.error('Error guardando usuario:', e);
         showToast('Error: ' + e.message, 'error');
@@ -2390,6 +2794,14 @@ async function eliminarTarea(id) {
     if (!confirm('¿Eliminar esta tarea?')) return;
     try {
         const tarea = tareasCache.find(t => t.id === id);
+        if (!tarea) { showToast('Tarea no encontrada', 'error'); return; }
+        
+        const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
+        if (!tieneAcceso(usuarioActual, proyecto)) {
+            showToast('No tienes permiso para eliminar esta tarea', 'error');
+            return;
+        }
+        
         await supabaseDelete('tareas', id);
         showToast('Tarea eliminada');
         if (tarea) await recargarDatos(tarea.proyecto_id);
@@ -2432,6 +2844,8 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
 // ============================================
 // PROVEEDORES
 // ============================================
+let proveedoresData = [];
+
 async function cargarProveedores() {
     try {
         const [proveedores, criterios, calificaciones] = await Promise.all([
@@ -2439,12 +2853,23 @@ async function cargarProveedores() {
             supabaseFetch('criterios?select=*'),
             supabaseFetch('calificaciones?select=*')
         ]);
+        proveedoresData = proveedores;
         const lista = document.getElementById('lista-proveedores');
         if (proveedores.length === 0) {
             lista.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No hay proveedores registrados</div>';
             return;
         }
-        const ranking = proveedores.map(prov => {
+        // Filtrar proveedores por proyectos accesibles
+        const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
+        const idsAccesibles = proyectosAccesibles.map(p => p.id);
+        const proveedoresFiltrados = proveedores.filter(p => idsAccesibles.includes(p.proyecto_id));
+        
+        if (proveedoresFiltrados.length === 0) {
+            lista.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No hay proveedores para tus proyectos</div>';
+            return;
+        }
+        
+        const ranking = proveedoresFiltrados.map(prov => {
             const califs = calificaciones.filter(c => c.proveedor_id === prov.id);
             let puntajeTotal = 0, pesoTotal = 0;
             califs.forEach(cal => {
@@ -2505,8 +2930,8 @@ async function cargarProveedores() {
         const selectProyecto = document.getElementById('prov-proyecto');
         if (selectProyecto) {
             const currentValue = selectProyecto.value;
-            selectProyecto.innerHTML = proyectosCache.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
-            if (currentValue && proyectosCache.some(p => p.id == currentValue)) selectProyecto.value = currentValue;
+            selectProyecto.innerHTML = proyectosAccesibles.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+            if (currentValue && proyectosAccesibles.some(p => p.id == currentValue)) selectProyecto.value = currentValue;
         }
     } catch (e) {
         console.error('Error cargando proveedores:', e);
@@ -2521,9 +2946,23 @@ async function guardarProveedor(e) {
     const telefono = document.getElementById('prov-telefono').value.trim();
     const email = document.getElementById('prov-email').value.trim();
     const proyecto_id = parseInt(document.getElementById('prov-proyecto').value);
+    
     if (!nombre || !proyecto_id) { showToast('Nombre y proyecto son obligatorios', 'error'); return; }
+    
+    const proyecto = proyectosCache.find(p => p.id === proyecto_id);
+    if (!tieneAcceso(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para agregar proveedores a este proyecto', 'error');
+        return;
+    }
+    
     try {
-        await supabaseInsert('proveedores', { nombre, contacto: contacto || null, telefono: telefono || null, email: email || null, proyecto_id });
+        await supabaseInsert('proveedores', { 
+            nombre, 
+            contacto: contacto || null, 
+            telefono: telefono || null, 
+            email: email || null, 
+            proyecto_id 
+        });
         showToast('✅ Proveedor agregado');
         cerrarModal('modal-proveedor');
         document.getElementById('form-proveedor').reset();
@@ -2554,6 +2993,13 @@ async function calificarProveedor(proveedorId) {
         const proveedores = await supabaseFetch(`proveedores?select=*,proyecto_id&id=eq.${proveedorId}`);
         const proveedor = proveedores[0];
         if (!proveedor) { showToast('Proveedor no encontrado', 'error'); return; }
+        
+        const proyecto = proyectosCache.find(p => p.id === proveedor.proyecto_id);
+        if (!tieneAcceso(usuarioActual, proyecto)) {
+            showToast('No tienes permiso para calificar este proveedor', 'error');
+            return;
+        }
+        
         const criterios = await supabaseFetch(`criterios?proyecto_id=eq.${proveedor.proyecto_id}&select=*`);
         if (criterios.length === 0) { showToast('No hay criterios definidos para este proyecto.', 'error'); return; }
         const calificacionesExistentes = await supabaseFetch(`calificaciones?proveedor_id=eq.${proveedorId}&select=*`);
@@ -2641,6 +3087,13 @@ async function verDetalleProveedor(proveedorId) {
         ]);
         const proveedor = proveedores[0];
         if (!proveedor) { showToast('Proveedor no encontrado', 'error'); return; }
+        
+        const proyecto = proyectosCache.find(p => p.id === proveedor.proyecto_id);
+        if (!tieneAcceso(usuarioActual, proyecto)) {
+            showToast('No tienes permiso para ver este proveedor', 'error');
+            return;
+        }
+        
         let puntajeTotal = 0, pesoTotal = 0, detalles = [];
         calificaciones.forEach(cal => {
             const criterio = criterios.find(c => c.id === cal.criterio_id);
@@ -2719,19 +3172,20 @@ async function cargarRecursos() {
                             <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
                             <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                             <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
-                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Área</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Empresa</th>
                             <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Tareas</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${usuarios.map(u => {
                             const tareasAsignadas = tareasCache.filter(t => t.responsable_texto === u.nombre).length;
+                            const rolLabel = ROLE_LABELS[u.rol] || u.rol;
                             return `
                             <tr class="border-t hover:bg-gray-50 transition">
                                 <td class="px-3 py-1.5 text-xs font-medium">${u.nombre}</td>
                                 <td class="px-3 py-1.5 text-xs text-gray-500">${u.email || '-'}</td>
-                                <td class="px-3 py-1.5 text-xs"><span class="status-badge bg-blue-100 text-blue-700">${u.rol || 'Colaborador'}</span></td>
-                                <td class="px-3 py-1.5 text-xs">${u.area ? `<span class="area-badge">${u.area}</span>` : '-'}</td>
+                                <td class="px-3 py-1.5 text-xs"><span class="user-role-badge ${ROLE_BADGE_CLASSES[u.rol] || ''}">${rolLabel}</span></td>
+                                <td class="px-3 py-1.5 text-xs text-gray-500">${u.empresa || '-'}</td>
                                 <td class="px-3 py-1.5 text-xs text-center">${tareasAsignadas}</td>
                             </tr>
                         `}).join('')}
@@ -2746,21 +3200,84 @@ async function cargarRecursos() {
 }
 
 // ============================================
+// CONFIGURACIÓN (solo Admin)
+// ============================================
+async function cargarConfiguracion() {
+    if (usuarioActual?.rol !== 'admin') {
+        document.getElementById('configuracion-contenido').innerHTML = `
+            <div class="text-center py-8 text-red-500 text-sm">
+                <i class="fas fa-lock text-4xl block mb-3"></i>
+                Acceso restringido. Solo administradores.
+            </div>
+        `;
+        return;
+    }
+    
+    try {
+        const usuarios = await supabaseFetch('usuarios?order=id.desc');
+        const proyectos = await supabaseFetch('proyectos');
+        
+        let html = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-sm mb-2">👥 Usuarios del Sistema</h3>
+                    <div class="space-y-1 text-sm">
+                        ${usuarios.map(u => `
+                            <div class="flex justify-between items-center py-1 border-b">
+                                <span>${u.nombre}</span>
+                                <span class="user-role-badge ${ROLE_BADGE_CLASSES[u.rol] || ''}">${ROLE_LABELS[u.rol] || u.rol}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-sm mb-2">📊 Resumen de Acceso</h3>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between"><span>Total Usuarios:</span><span class="font-semibold">${usuarios.length}</span></div>
+                        <div class="flex justify-between"><span>Total Proyectos:</span><span class="font-semibold">${proyectos.length}</span></div>
+                        <div class="flex justify-between"><span>Administradores:</span><span class="font-semibold">${usuarios.filter(u => u.rol === 'admin').length}</span></div>
+                        <div class="flex justify-between"><span>Project Managers:</span><span class="font-semibold">${usuarios.filter(u => u.rol === 'project_manager').length}</span></div>
+                        <div class="flex justify-between"><span>Colaboradores:</span><span class="font-semibold">${usuarios.filter(u => u.rol === 'colaborador').length}</span></div>
+                        <div class="flex justify-between"><span>Invitados:</span><span class="font-semibold">${usuarios.filter(u => u.rol === 'invitado').length}</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p class="text-xs text-blue-600">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    <strong>Control de Acceso:</strong> 
+                    Admin ve todo • PM ve proyectos de su empresa • Colaborador ve proyectos de su empresa • Invitado ve proyectos públicos
+                </p>
+            </div>
+        `;
+        document.getElementById('configuracion-contenido').innerHTML = html;
+    } catch (e) {
+        console.error('Error cargando configuración:', e);
+        document.getElementById('configuracion-contenido').innerHTML = '<div class="text-red-500 text-sm">Error cargando configuración</div>';
+    }
+}
+
+// ============================================
 // REPORTES
 // ============================================
 function generarReportes() {
     const container = document.getElementById('contenido-reportes');
-    const totalProyectos = proyectosCache.length;
-    const totalTareas = tareasCache.length;
-    const completadas = tareasCache.filter(t => t.estado === 'Completado').length;
-    const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
-    const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
-    const tareasPorProyecto = proyectosCache.map(p => ({
+    const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
+    const tareasAccesibles = getTareasAccesibles(usuarioActual, tareasCache, proyectosCache);
+    
+    const totalProyectos = proyectosAccesibles.length;
+    const totalTareas = tareasAccesibles.length;
+    const completadas = tareasAccesibles.filter(t => t.estado === 'Completado').length;
+    const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
+    const vencidas = tareasAccesibles.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+    
+    const tareasPorProyecto = proyectosAccesibles.map(p => ({
         nombre: p.nombre,
-        total: tareasCache.filter(t => t.proyecto_id === p.id).length,
-        completadas: tareasCache.filter(t => t.proyecto_id === p.id && t.estado === 'Completado').length,
+        total: tareasAccesibles.filter(t => t.proyecto_id === p.id).length,
+        completadas: tareasAccesibles.filter(t => t.proyecto_id === p.id && t.estado === 'Completado').length,
         fases: FASES_POR_METODOLOGIA[p.metodologia]?.fases || []
     }));
+    
     container.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-gray-50 p-3 rounded-lg">
@@ -2796,7 +3313,11 @@ function generarReportes() {
         </div>
         <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <h3 class="font-semibold text-sm text-blue-700 mb-1">💡 Resumen Ejecutivo</h3>
-            <p class="text-xs text-blue-600">Total de ${totalProyectos} proyectos con ${totalTareas} tareas. ${completadas} completadas (${totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0}% de avance). ${vencidas > 0 ? `⚠️ ${vencidas} tareas vencidas requieren atención.` : '✅ Todas las tareas están a tiempo.'}</p>
+            <p class="text-xs text-blue-600">
+                Total de ${totalProyectos} proyectos con ${totalTareas} tareas. 
+                ${completadas} completadas (${totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0}% de avance).
+                ${vencidas > 0 ? `⚠️ ${vencidas} tareas vencidas requieren atención.` : '✅ Todas las tareas están a tiempo.'}
+            </p>
         </div>
     `;
 }
@@ -2807,6 +3328,12 @@ function generarReportes() {
 function editarProyecto(id) {
     const proyecto = proyectosCache.find(p => p.id === id);
     if (!proyecto) { showToast('Proyecto no encontrado', 'error'); return; }
+    
+    if (!puedeEditarProyecto(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para editar este proyecto', 'error');
+        return;
+    }
+    
     document.getElementById('modal-proyecto-titulo').textContent = '✏️ Editar Proyecto';
     document.getElementById('proy-id').value = proyecto.id;
     document.getElementById('proy-nombre').value = proyecto.nombre || '';
@@ -2833,6 +3360,13 @@ function editarProyecto(id) {
 function editarTarea(id) {
     const tarea = tareasCache.find(t => t.id === id);
     if (!tarea) { showToast('Tarea no encontrada', 'error'); return; }
+    
+    const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
+    if (!tieneAcceso(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para editar esta tarea', 'error');
+        return;
+    }
+    
     document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
     document.getElementById('tar-id').value = tarea.id;
     document.getElementById('tar-titulo').value = tarea.titulo || '';
@@ -2842,12 +3376,12 @@ function editarTarea(id) {
     document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
     document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
     document.getElementById('tar-descripcion').value = tarea.descripcion || '';
-    const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
+    const proyecto2 = proyectosCache.find(p => p.id === tarea.proyecto_id);
     const fasesSelect = document.getElementById('tar-fase');
     fasesSelect.innerHTML = '';
     let fasesDisponibles = [];
-    if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
-        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
+    if (proyecto2 && proyecto2.metodologia && FASES_POR_METODOLOGIA[proyecto2.metodologia]) {
+        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto2.metodologia].fases;
     } else {
         const tareasProyecto = tareasCache.filter(t => t.proyecto_id === tarea.proyecto_id);
         const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
@@ -2875,27 +3409,31 @@ function editarTarea(id) {
 // ============================================
 async function recargarDatos(proyectoId) {
     try {
-        const [nuevosProyectos, nuevasTareas, nuevosUsuarios] = await Promise.all([
+        const [nuevosProyectos, nuevasTareas] = await Promise.all([
             supabaseFetch('proyectos?order=id.desc'),
-            supabaseFetch('tareas?select=*'),
-            supabaseFetch('usuarios?select=*')
+            supabaseFetch('tareas?select=*')
         ]);
         proyectosCache = nuevosProyectos;
         tareasCache = nuevasTareas;
-        usuariosCache = nuevosUsuarios;
-        const activos = proyectosCache.filter(p => p.estado !== 'Cerrado' && p.estado !== 'Archivado').length;
-        const totalTareas = tareasCache.length;
-        const enProgreso = tareasCache.filter(t => t.estado === 'En Progreso').length;
-        const pendientes = tareasCache.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
-        const completadasTotal = tareasCache.filter(t => t.estado === 'Completado').length;
-        const vencidas = tareasCache.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
-        document.getElementById('kpi-proyectos').textContent = activos;
+        
+        const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
+        const tareasAccesibles = getTareasAccesibles(usuarioActual, tareasCache, proyectosCache);
+        
+        const totalTareas = tareasAccesibles.length;
+        const enProgreso = tareasAccesibles.filter(t => t.estado === 'En Progreso').length;
+        const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
+        const completadasTotal = tareasAccesibles.filter(t => t.estado === 'Completado').length;
+        const vencidas = tareasAccesibles.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        
+        document.getElementById('kpi-proyectos').textContent = proyectosAccesibles.length;
         document.getElementById('kpi-tareas-totales').textContent = totalTareas;
         document.getElementById('kpi-en-progreso').textContent = enProgreso;
         document.getElementById('kpi-tareas').textContent = pendientes;
         document.getElementById('kpi-completadas').textContent = completadasTotal;
         document.getElementById('kpi-vencidas').textContent = vencidas;
-        const proyectosConProgreso = proyectosCache.map(p => {
+        document.getElementById('proyectos-count-label').textContent = `(${proyectosAccesibles.length})`;
+        
+        const proyectosConProgreso = proyectosAccesibles.map(p => {
             const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
             const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
             const total = tareasProyecto.length;
@@ -2903,6 +3441,7 @@ async function recargarDatos(proyectoId) {
             return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
         });
         renderizarProyectos(proyectosConProgreso);
+        
         if (proyectoId && detallesAbiertosGlobal[proyectoId]) await renderizarDetalle(proyectoId);
     } catch (e) {
         console.error('Error recargando datos:', e);
@@ -2914,7 +3453,10 @@ async function recargarDatos(proyectoId) {
 // INICIALIZAR
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    cargarDashboard();
+    // Mostrar pantalla de login
+    document.getElementById('login-screen').style.display = 'block';
+    document.getElementById('app-main').style.display = 'none';
+    
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -2942,13 +3484,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'proveedores': cargarProveedores(); break;
                 case 'respaldos': cargarRespaldos(); break;
                 case 'proyectos': cargarTodosLosProyectos(); break;
+                case 'configuracion': cargarConfiguracion(); break;
             }
         });
     });
 });
 
-console.log('✅ PM System v4.7 - Gantt con días cargado correctamente');
-console.log('📊 Las barras muestran los días de duración de cada tarea');
+console.log('✅ PM System v5.1 - Con Supabase Real cargado correctamente');
+console.log('🔐 Los usuarios se obtienen desde la base de datos');
 </script>
 
 </body>
