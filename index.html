@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>PM System v5.1 - Control de Acceso</title>
+    <title>PM System v5.2 - Control de Acceso</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
@@ -708,7 +708,7 @@ const PRIORIDAD_COLORS = {
 <!-- ============================================ -->
 <div id="login-screen" class="login-container">
     <h1>🔐 PM System</h1>
-    <p class="subtitle">Control de Acceso v5.1</p>
+    <p class="subtitle">Control de Acceso v5.2</p>
     
     <div class="usuario-info">
         <strong>📝 Instrucciones:</strong><br>
@@ -760,8 +760,7 @@ const PRIORIDAD_COLORS = {
         <!-- TABS -->
         <div class="flex gap-1 mb-4 border-b pb-2 flex-wrap">
             <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn active">
-                <i class="fas fa-chart-pie mr-1"></i> Dashboard
-            </button>
+                <i class="fas fa-chart-pie mr-1"></i> Dashboard            </button>
             <button onclick="showTab('proyectos')" id="tab-proyectos" class="tab-btn">
                 <i class="fas fa-folder-open mr-1"></i> Proyectos
             </button>
@@ -1006,7 +1005,7 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: TAREA -->
+<!-- MODAL: TAREA CON FECHA INICIO EDITABLE -->
 <div id="modal-tarea" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
@@ -1049,8 +1048,17 @@ const PRIORIDAD_COLORS = {
                         </select>
                     </div>
                     <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                        <input id="tar-fecha-inicio" type="date" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
                         <input id="tar-fecha-vencimiento" type="date" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <div>
+                        <!-- espacio -->
                     </div>
                 </div>
                 <div>
@@ -1346,7 +1354,7 @@ async function supabaseDelete(table, id) {
 }
 
 // ============================================
-// TOGGLE FASE - ¡FUNCIÓN CRÍTICA!
+// TOGGLE FASE
 // ============================================
 function toggleFase(element) {
     const row = element.closest('tr');
@@ -1603,7 +1611,7 @@ function formatDate(dateString) {
 }
 
 // ============================================
-// RENDER TAREA FILA GANTT
+// RENDER TAREA FILA GANTT (CON FECHA INICIO)
 // ============================================
 function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const barraClase = getBarraClase(t.estado);
@@ -1615,7 +1623,24 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     let dias = 0;
     let anchoPx = 60;
     
-    if (t.fecha_vencimiento) {
+    // USAR FECHA_INICIO para calcular los días
+    const fechaInicioTarea = t.fecha_inicio || t.creado_en || fechaInicioProyecto;
+    const fechaVencTarea = t.fecha_vencimiento;
+    
+    if (fechaInicioTarea && fechaVencTarea) {
+        const inicio = new Date(fechaInicioTarea);
+        const venc = new Date(fechaVencTarea);
+        const diffDias = Math.ceil((venc - inicio) / (1000 * 60 * 60 * 24));
+        dias = Math.max(0, diffDias);
+        
+        const fechaInicio = fechaInicioProyecto ? new Date(fechaInicioProyecto) : new Date();
+        const fechaFin = fechaFinProyecto ? new Date(fechaFinProyecto) : new Date();
+        fechaFin.setDate(fechaFin.getDate() + 1);
+        
+        const totalDias = Math.max(1, Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)));
+        const escala = Math.max(8, Math.min(15, 800 / totalDias));
+        anchoPx = Math.max(60, dias * escala);
+    } else if (t.fecha_vencimiento) {
         const fechaVenc = new Date(t.fecha_vencimiento);
         const fechaInicio = fechaInicioProyecto ? new Date(fechaInicioProyecto) : new Date();
         const fechaFin = fechaFinProyecto ? new Date(fechaFinProyecto) : new Date();
@@ -2532,7 +2557,7 @@ async function crearCriteriosPorDefecto(proyectoId) {
 }
 
 // ============================================
-// GUARDAR TAREA
+// GUARDAR TAREA (CON FECHA INICIO EDITABLE)
 // ============================================
 async function guardarTarea(e) {
     e.preventDefault();
@@ -2542,6 +2567,7 @@ async function guardarTarea(e) {
     const responsable_texto = document.getElementById('tar-responsable').value.trim();
     const prioridad = document.getElementById('tar-prioridad').value;
     const fase = document.getElementById('tar-fase').value;
+    const fecha_inicio = document.getElementById('tar-fecha-inicio').value || null;
     const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
     const descripcion = document.getElementById('tar-descripcion').value.trim();
     const comentarios = document.getElementById('tar-comentarios').value.trim();
@@ -2559,8 +2585,9 @@ async function guardarTarea(e) {
         proyecto_id, 
         responsable_texto: responsable_texto || null, 
         prioridad, 
-        fase: fase || null, 
-        fecha_vencimiento, 
+        fase: fase || null,
+        fecha_inicio: fecha_inicio || null,
+        fecha_vencimiento: fecha_vencimiento || null,
         descripcion: descripcion || null, 
         comentarios: comentarios || null,
         fecha_actualizacion: new Date().toISOString() 
@@ -2587,7 +2614,7 @@ async function guardarTarea(e) {
 }
 
 // ============================================
-// EDITAR TAREA
+// EDITAR TAREA (CON FECHA INICIO)
 // ============================================
 function editarTarea(id) {
     const tarea = tareasCache.find(t => t.id === id);
@@ -2606,6 +2633,7 @@ function editarTarea(id) {
     document.getElementById('tar-proyecto').disabled = true;
     document.getElementById('tar-responsable').value = tarea.responsable_texto || '';
     document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
+    document.getElementById('tar-fecha-inicio').value = tarea.fecha_inicio || '';
     document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
     document.getElementById('tar-descripcion').value = tarea.descripcion || '';
     document.getElementById('tar-comentarios').value = tarea.comentarios || '';
@@ -2675,9 +2703,11 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
     document.getElementById('tar-titulo').value = '';
     document.getElementById('tar-responsable').value = '';
     document.getElementById('tar-prioridad').value = 'Media';
+    document.getElementById('tar-fecha-inicio').value = '';
     document.getElementById('tar-fecha-vencimiento').value = '';
     document.getElementById('tar-descripcion').value = '';
     document.getElementById('tar-comentarios').value = '';
+    
     const proyecto = proyectosCache.find(p => p.id === proyectoId);
     const fasesSelect = document.getElementById('tar-fase');
     let fasesDisponibles = [];
@@ -3321,6 +3351,7 @@ async function recuperarProyecto(respaldoId) {
                     responsable_texto: tarea.responsable_texto,
                     prioridad: tarea.prioridad,
                     fase: tarea.fase,
+                    fecha_inicio: tarea.fecha_inicio || null,
                     fecha_vencimiento: tarea.fecha_vencimiento,
                     estado: tarea.estado || 'Pendiente',
                     comentarios: tarea.comentarios || null
@@ -3537,7 +3568,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-console.log('✅ PM System v5.1 - Con comentarios cargado correctamente');
+console.log('✅ PM System v5.1 - Con fecha inicio editable cargado correctamente');
 </script>
 </body>
 </html>
