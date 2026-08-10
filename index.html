@@ -1272,51 +1272,6 @@ function toggleFase(element) {
 }
 
 // ============================================
-// CONTROL DE ACCESO
-// ============================================
-function tieneAcceso(usuario, proyecto) {
-    if (!usuario) return false;
-    if (usuario.rol === 'admin') return true;
-    if (usuario.rol === 'project_manager' || usuario.rol === 'colaborador') {
-        return usuario.empresa === proyecto.empresa;
-    }
-    if (usuario.rol === 'invitado') {
-        return proyecto.estado !== 'Crítico' && proyecto.empresa !== 'Confidencial';
-    }
-    return false;
-}
-
-function getProyectosAccesibles(usuario, proyectos) {
-    if (!usuario) return [];
-    return proyectos.filter(p => tieneAcceso(usuario, p));
-}
-
-function getTareasAccesibles(usuario, tareas, proyectos) {
-    if (!usuario) return [];
-    const proyectosAccesibles = getProyectosAccesibles(usuario, proyectos);
-    const idsAccesibles = proyectosAccesibles.map(p => p.id);
-    return tareas.filter(t => idsAccesibles.includes(t.proyecto_id));
-}
-
-function puedeCrearProyecto(usuario) {
-    return usuario && (usuario.rol === 'admin' || usuario.rol === 'project_manager');
-}
-
-function puedeEditarProyecto(usuario, proyecto) {
-    if (!usuario || !proyecto) return false;
-    if (usuario.rol === 'admin') return true;
-    if (usuario.rol === 'project_manager') {
-        return usuario.empresa === proyecto.empresa;
-    }
-    return false;
-}
-
-function puedeEliminarProyecto(usuario, proyecto) {
-    if (!usuario || !proyecto) return false;
-    return usuario.rol === 'admin';
-}
-
-// ============================================
 // LOGIN Y LOGOUT
 // ============================================
 async function login(e) {
@@ -1809,6 +1764,51 @@ async function cargarDashboard() {
 }
 
 // ============================================
+// CONTROL DE ACCESO
+// ============================================
+function tieneAcceso(usuario, proyecto) {
+    if (!usuario) return false;
+    if (usuario.rol === 'admin') return true;
+    if (usuario.rol === 'project_manager' || usuario.rol === 'colaborador') {
+        return usuario.empresa === proyecto.empresa;
+    }
+    if (usuario.rol === 'invitado') {
+        return proyecto.estado !== 'Crítico' && proyecto.empresa !== 'Confidencial';
+    }
+    return false;
+}
+
+function getProyectosAccesibles(usuario, proyectos) {
+    if (!usuario) return [];
+    return proyectos.filter(p => tieneAcceso(usuario, p));
+}
+
+function getTareasAccesibles(usuario, tareas, proyectos) {
+    if (!usuario) return [];
+    const proyectosAccesibles = getProyectosAccesibles(usuario, proyectos);
+    const idsAccesibles = proyectosAccesibles.map(p => p.id);
+    return tareas.filter(t => idsAccesibles.includes(t.proyecto_id));
+}
+
+function puedeCrearProyecto(usuario) {
+    return usuario && (usuario.rol === 'admin' || usuario.rol === 'project_manager');
+}
+
+function puedeEditarProyecto(usuario, proyecto) {
+    if (!usuario || !proyecto) return false;
+    if (usuario.rol === 'admin') return true;
+    if (usuario.rol === 'project_manager') {
+        return usuario.empresa === proyecto.empresa;
+    }
+    return false;
+}
+
+function puedeEliminarProyecto(usuario, proyecto) {
+    if (!usuario || !proyecto) return false;
+    return usuario.rol === 'admin';
+}
+
+// ============================================
 // FILTRAR Y BUSCAR PROYECTOS
 // ============================================
 function filtrarProyectos(filtro) {
@@ -2065,21 +2065,17 @@ async function renderizarDetalle(id) {
                 </div>
             </div>
         `;
-        // Mantener el estado de las fases al recargar
         const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
         if (fasesRows.length > 0) {
             fasesRows.forEach((row, index) => {
                 const toggle = row.querySelector('.fase-toggle');
                 const tareasFila = row.nextElementSibling;
-                // Si no hay estado guardado, solo la primera fase visible
-                if (!proyectoActivoId) {
-                    if (index === 0) {
-                        if (toggle) toggle.classList.remove('collapsed');
-                        if (tareasFila) tareasFila.classList.remove('hidden');
-                    } else {
-                        if (toggle) toggle.classList.add('collapsed');
-                        if (tareasFila) tareasFila.classList.add('hidden');
-                    }
+                if (index === 0) {
+                    if (toggle) toggle.classList.remove('collapsed');
+                    if (tareasFila) tareasFila.classList.remove('hidden');
+                } else {
+                    if (toggle) toggle.classList.add('collapsed');
+                    if (tareasFila) tareasFila.classList.add('hidden');
                 }
             });
         }
@@ -2508,7 +2504,6 @@ async function guardarTarea(e) {
         document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
         document.getElementById('tar-proyecto').disabled = false;
         
-        // Recargar datos pero MANTENER el árbol abierto
         await recargarDatosManteniendoArbol(proyecto_id);
     } catch (e) {
         console.error('Error guardando tarea:', e);
@@ -2554,7 +2549,6 @@ async function recargarDatosManteniendoArbol(proyectoId) {
         });
         renderizarProyectos(proyectosConProgreso);
         
-        // Si hay un proyecto activo, recargar su detalle manteniendo el estado del árbol
         if (proyectoId && detallesAbiertosGlobal[proyectoId]) {
             await renderizarDetalleManteniendoArbol(proyectoId);
         }
@@ -2571,7 +2565,6 @@ async function renderizarDetalleManteniendoArbol(id) {
     const detalleDiv = document.getElementById(`detalle-${id}`);
     if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
     
-    // Guardar el estado actual de las fases
     const fasesState = {};
     const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
     fasesRows.forEach((row, index) => {
@@ -2696,7 +2689,6 @@ async function renderizarDetalleManteniendoArbol(id) {
             </div>
         `;
         
-        // Restaurar el estado de las fases
         const newFasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
         newFasesRows.forEach((row, index) => {
             const toggle = row.querySelector('.fase-toggle');
@@ -2783,7 +2775,6 @@ function editarTarea(id) {
         return;
     }
     
-    // Guardar el proyecto activo para mantener el árbol
     proyectoActivoId = tarea.proyecto_id;
     
     document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
@@ -2868,7 +2859,6 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
     document.getElementById('tar-descripcion').value = '';
     document.getElementById('tar-comentarios').value = '';
     
-    // Guardar el proyecto activo para mantener el árbol
     proyectoActivoId = proyectoId;
     
     const proyecto = proyectosCache.find(p => p.id === proyectoId);
