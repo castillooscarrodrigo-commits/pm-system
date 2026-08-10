@@ -199,7 +199,7 @@
         .kpi-proyectos .kpi-number { color: #0891b2; }
 
         /* ============================================ */
-        /* GANTT                                       */
+        /* GANTT - CON COMENTARIOS                     */
         /* ============================================ */
         .gantt-container {
             overflow-x: auto;
@@ -343,7 +343,15 @@
         .tarea-row { transition: opacity 0.3s ease; }
         .tarea-row.hidden { display: none; }
 
-        .gantt-titulo { font-weight: 600; font-size: 13px; color: #0f172a; }
+        .gantt-titulo {
+            font-weight: 600;
+            font-size: 13px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
         .gantt-responsable { font-size: 12px; color: #475569; display: flex; align-items: center; gap: 4px; }
         .gantt-responsable::before { content: "👤"; font-size: 13px; }
         .gantt-fecha { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
@@ -386,6 +394,36 @@
             outline: none;
             border-color: #3b82f6;
             box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+        }
+
+        /* === COMENTARIOS TAG === */
+        .comentario-tag {
+            background: #fef3c7;
+            color: #d97706;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #fde68a;
+        }
+        .comentario-tag:hover {
+            background: #fde68a;
+            transform: scale(1.05);
+        }
+
+        .comentario-preview {
+            font-size: 11px;
+            color: #6b7280;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
         }
 
         /* ===== ESTILOS ADICIONALES ===== */
@@ -591,6 +629,7 @@
             box-shadow: 0 2px 8px rgba(239,68,68,0.3);
         }
 
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb { background: #c1c7cd; border-radius: 3px; }
@@ -679,7 +718,7 @@ const PRIORIDAD_COLORS = {
 </script>
 
 <!-- ============================================ -->
-<!-- LOGIN / PANTALLA DE ACCESO                    -->
+<!-- LOGIN                                        -->
 <!-- ============================================ -->
 <div id="login-screen" class="login-container">
     <h1>🔐 PM System</h1>
@@ -708,7 +747,7 @@ const PRIORIDAD_COLORS = {
 </div>
 
 <!-- ============================================ -->
-<!-- APP PRINCIPAL (oculta hasta login)           -->
+<!-- APP PRINCIPAL                                -->
 <!-- ============================================ -->
 <div id="app-main" style="display: none;">
 
@@ -756,7 +795,6 @@ const PRIORIDAD_COLORS = {
             <button onclick="showTab('respaldos')" id="tab-respaldos" class="tab-btn">
                 <i class="fas fa-history mr-1"></i> Respaldos
             </button>
-            <!-- Solo Admin ve configuración -->
             <button onclick="showTab('configuracion')" id="tab-configuracion" class="tab-btn" style="display: none;">
                 <i class="fas fa-cog mr-1"></i> Configuración
             </button>
@@ -840,7 +878,6 @@ const PRIORIDAD_COLORS = {
                             <button onclick="filtrarProyectos('Cerrado')" class="filtro-btn" id="filtro-Cerrado">Cerrados</button>
                         </div>
                         <input id="buscar-proyectos" onkeyup="buscarProyectos()" class="buscar-input" placeholder="🔍 Buscar...">
-                        <!-- Solo Admin y PM pueden crear proyectos -->
                         <button onclick="abrirModal('modal-proyecto')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 transition" id="btn-nuevo-proyecto">
                             <i class="fas fa-plus mr-1"></i> Nuevo
                         </button>
@@ -867,7 +904,6 @@ const PRIORIDAD_COLORS = {
             <div class="bg-white rounded-lg shadow p-4">
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="text-lg font-bold"><i class="fas fa-users mr-2"></i>Recursos</h2>
-                    <!-- Solo Admin puede agregar recursos -->
                     <button onclick="abrirModal('modal-usuario')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition" id="btn-agregar-recurso">
                         <i class="fas fa-plus mr-1"></i> Agregar
                     </button>
@@ -902,7 +938,6 @@ const PRIORIDAD_COLORS = {
             </div>
         </div>
 
-        <!-- CONFIGURACIÓN (solo Admin) -->
         <div id="content-configuracion" class="tab-content">
             <div class="bg-white rounded-lg shadow p-4">
                 <h2 class="text-lg font-bold mb-3"><i class="fas fa-cog mr-2"></i>Configuración de Acceso</h2>
@@ -922,9 +957,10 @@ const PRIORIDAD_COLORS = {
 </div>
 
 <!-- ============================================ -->
-<!-- MODALES (simplificados)                     -->
+<!-- MODALES                                      -->
 <!-- ============================================ -->
 
+<!-- MODAL: PROYECTO -->
 <div id="modal-proyecto" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
@@ -996,6 +1032,7 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
+<!-- MODAL: TAREA (CON COMENTARIOS) -->
 <div id="modal-tarea" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
@@ -1045,6 +1082,11 @@ const PRIORIDAD_COLORS = {
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
                     <textarea id="tar-descripcion" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" rows="2" placeholder="Descripción"></textarea>
+                </div>
+                <!-- ===== NUEVO CAMPO: COMENTARIOS ===== -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">💬 Comentarios</label>
+                    <textarea id="tar-comentarios" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" rows="3" placeholder="Notas, observaciones, seguimiento de la tarea..."></textarea>
                 </div>
             </div>
             <div class="flex gap-2 pt-3 mt-2 border-t">
@@ -1109,6 +1151,22 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
+<!-- ===== NUEVO MODAL: VER/EDITAR COMENTARIOS ===== -->
+<div id="modal-ver-comentarios" class="modal">
+    <div class="modal-box" style="max-width: 500px;">
+        <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold">💬 Comentarios de la Tarea</h3>
+            <button onclick="cerrarModal('modal-ver-comentarios')" class="text-gray-400 hover:text-gray-600 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="ver-comentarios-contenido">
+            <div class="text-center py-4 text-gray-500 text-sm">Cargando...</div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: USUARIO -->
 <div id="modal-usuario" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
@@ -1159,6 +1217,7 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
+<!-- MODAL: PROVEEDOR -->
 <div id="modal-proveedor" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
@@ -1204,6 +1263,7 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
+<!-- MODAL: DETALLE PROVEEDOR -->
 <div id="modal-detalle-proveedor" class="modal">
     <div class="modal-box" style="max-width: 600px;">
         <div class="flex justify-between items-start mb-3">
@@ -1218,6 +1278,7 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
+<!-- MODAL: EVIDENCIA EXITO -->
 <div id="modal-evidencia-exito" class="modal modal-evidencia-exito">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
@@ -1242,7 +1303,7 @@ const PRIORIDAD_COLORS = {
 </div>
 
 <!-- ============================================ -->
-<!-- SCRIPT PRINCIPAL - v5.1 (Con Supabase Real)  -->
+<!-- SCRIPT PRINCIPAL - v5.1 (CON COMENTARIOS)    -->
 <!-- ============================================ -->
 <script>
 // ============================================
@@ -1381,7 +1442,7 @@ function puedeEliminarProyecto(usuario, proyecto) {
 }
 
 // ============================================
-// LOGIN Y LOGOUT (CON SUPABASE REAL)
+// LOGIN Y LOGOUT
 // ============================================
 async function login(e) {
     e.preventDefault();
@@ -1393,7 +1454,6 @@ async function login(e) {
     }
     
     try {
-        // Buscar usuario en Supabase por email
         const response = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=*`, {
             headers: {
                 'apikey': SUPABASE_KEY,
@@ -1414,21 +1474,17 @@ async function login(e) {
             return;
         }
         
-        // Iniciar sesión con el usuario encontrado
         usuarioActual = usuario;
         
-        // Ocultar login, mostrar app
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app-main').style.display = 'block';
         
-        // Actualizar información del usuario
         document.getElementById('user-name-display').textContent = usuario.nombre || usuario.email;
         const rolLabel = ROLE_LABELS[usuario.rol] || usuario.rol || 'colaborador';
         const badgeClass = ROLE_BADGE_CLASSES[usuario.rol] || '';
         document.getElementById('user-role-display').textContent = rolLabel;
         document.getElementById('user-role-display').className = 'user-role-badge ' + badgeClass;
         
-        // Mostrar/ocultar elementos según rol
         const esAdmin = usuario.rol === 'admin';
         const esPM = usuario.rol === 'project_manager';
         const puedeCrear = esAdmin || esPM;
@@ -1583,7 +1639,7 @@ function formatDate(dateString) {
 }
 
 // ============================================
-// RENDER TAREA FILA GANTT
+// RENDER TAREA FILA GANTT (CON COMENTARIOS)
 // ============================================
 function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const barraClase = getBarraClase(t.estado);
@@ -1627,13 +1683,28 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     
     let evidenciaHTML = '';
     if (t.evidencia_url) {
-        evidenciaHTML = `<span class="evidencia-tag" onclick="event.stopPropagation(); verEvidencia('${t.evidencia_url}', '${t.evidencia_nombre || 'Evidencia'}')" title="Ver evidencia">📎</span>`;
+        const nombreArchivo = t.evidencia_nombre || '📎 Evidencia';
+        const nombreMostrar = nombreArchivo.length > 20 ? nombreArchivo.substring(0, 18) + '…' : nombreArchivo;
+        evidenciaHTML = `<span class="evidencia-tag" onclick="event.stopPropagation(); verEvidencia('${t.evidencia_url}', '${nombreArchivo}')" title="Ver evidencia: ${nombreArchivo}">📎 ${nombreMostrar}</span>`;
+    }
+    
+    // ===== COMENTARIOS =====
+    let comentariosHTML = '';
+    let comentariosPreview = '';
+    if (t.comentarios && t.comentarios.trim() !== '') {
+        const comentarioCorto = t.comentarios.length > 30 ? t.comentarios.substring(0, 28) + '…' : t.comentarios;
+        comentariosHTML = `<span class="comentario-tag" onclick="event.stopPropagation(); verComentarios(${t.id})" title="Ver/Editar comentarios">💬 ${comentarioCorto}</span>`;
+        comentariosPreview = `<span class="comentario-preview" title="${t.comentarios.replace(/"/g, '&quot;')}">💬 ${comentarioCorto}</span>`;
     }
     
     return `
         <tr>
             <td>
-                <div class="gantt-titulo">${t.titulo} ${evidenciaHTML}</div>
+                <div class="gantt-titulo">
+                    ${t.titulo}
+                    ${evidenciaHTML}
+                    ${comentariosHTML}
+                </div>
                 <div class="gantt-fecha">${fechaStr}</div>
             </td>
             <td><div class="gantt-responsable">${responsable}</div></td>
@@ -1663,106 +1734,142 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     `;
 }
 
-function toggleFase(row) {
-    const toggle = row.querySelector('.fase-toggle');
-    const tareasFila = row.nextElementSibling;
-    if (tareasFila) {
-        tareasFila.classList.toggle('hidden');
-        if (toggle) toggle.classList.toggle('collapsed');
+// ============================================
+// VER COMENTARIOS (NUEVO)
+// ============================================
+function verComentarios(id) {
+    const tarea = tareasCache.find(t => t.id === id);
+    if (!tarea) { 
+        showToast('Tarea no encontrada', 'error'); 
+        return; 
+    }
+    
+    const contenido = document.getElementById('ver-comentarios-contenido');
+    contenido.innerHTML = `
+        <div class="mb-3">
+            <p class="text-sm font-medium text-gray-700">📋 ${tarea.titulo}</p>
+            <p class="text-xs text-gray-500">Proyecto: ${proyectosCache.find(p => p.id === tarea.proyecto_id)?.nombre || 'Sin proyecto'}</p>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg mb-3">
+            <p class="text-sm whitespace-pre-wrap ${tarea.comentarios ? 'text-gray-800' : 'text-gray-400'}">${tarea.comentarios || 'Sin comentarios'}</p>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Editar comentarios</label>
+            <textarea id="editar-comentario" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" rows="4">${tarea.comentarios || ''}</textarea>
+            <div class="flex gap-2 mt-2">
+                <button onclick="guardarComentario(${id})" class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition">
+                    <i class="fas fa-save mr-1"></i> Guardar
+                </button>
+                <button onclick="cerrarModal('modal-ver-comentarios')" class="flex-1 bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-300 transition">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    `;
+    abrirModal('modal-ver-comentarios');
+}
+
+// ============================================
+// GUARDAR COMENTARIO (NUEVO)
+// ============================================
+async function guardarComentario(id) {
+    const comentario = document.getElementById('editar-comentario').value;
+    try {
+        await supabaseUpdate('tareas', id, { comentarios: comentario });
+        showToast('✅ Comentario guardado correctamente');
+        cerrarModal('modal-ver-comentarios');
+        await recargarDatos();
+    } catch (e) {
+        console.error('Error guardando comentario:', e);
+        showToast('Error al guardar comentario: ' + e.message, 'error');
     }
 }
 
-function renderVistaGanttColapsable(tareas, proyecto) {
-    const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto?.metodologia]?.fases || [];
-    if (tareas.length === 0) {
-        return `<div class="text-gray-400 text-xs text-center py-3">📭 Sin tareas</div>`;
-    }
-    const fechaInicioProyecto = proyecto?.fecha_inicio || null;
-    const fechaFinProyecto = proyecto?.fecha_fin || null;
-    const tareasPorFase = {};
-    tareas.forEach(t => {
-        const fase = t.fase || 'Sin fase';
-        if (!tareasPorFase[fase]) tareasPorFase[fase] = [];
-        tareasPorFase[fase].push(t);
-    });
-    let fasesOrdenadas = Object.keys(tareasPorFase);
-    if (fasesMetodologia.length > 0) {
-        fasesOrdenadas = fasesMetodologia.filter(f => tareasPorFase[f] && tareasPorFase[f].length > 0);
-        Object.keys(tareasPorFase).forEach(f => {
-            if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
-        });
+// ============================================
+// VER EVIDENCIA
+// ============================================
+function verEvidencia(url, nombre) {
+    const contenido = document.getElementById('ver-evidencia-contenido');
+    const extensionesImagen = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
+    const extension = url.split('.').pop().toLowerCase();
+    const esImagen = extensionesImagen.includes(extension);
+    if (esImagen) {
+        contenido.innerHTML = `
+            <div class="text-center">
+                <img src="${url}" alt="${nombre}" class="evidencia-preview" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'text-center py-4\\'><div class=\\'text-4xl mb-3\\'>📄</div><div class=\\'font-medium text-sm\\'>${nombre}</div><div class=\\'text-xs text-red-500 mt-1\\'>Error al cargar la imagen</div><a href=\\'${url}\\' target=\\'_blank\\' class=\\'inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition\\'>📥 Descargar archivo</a></div>'">
+                <div class="text-xs text-gray-500 mt-2">${nombre}</div>
+                <a href="${url}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-block">📥 Descargar</a>
+            </div>
+        `;
     } else {
-        fasesOrdenadas.sort();
-    }
-    if (fasesOrdenadas.length === 0 || fasesOrdenadas.every(f => tareasPorFase[f].length === 0)) {
-        return `
-            <div class="gantt-container">
-                <table class="gantt-table">
-                    <thead>
-                        <tr>
-                            <th style="width:22%;">Tarea</th>
-                            <th style="width:14%;">Responsable</th>
-                            <th style="width:8%;">Prioridad</th>
-                            <th style="width:6%;">Estado</th>
-                            <th style="width:40%;">Días</th>
-                            <th style="width:10%;">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tareas.map(t => renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto)).join('')}
-                    </tbody>
-                </table>
+        contenido.innerHTML = `
+            <div class="text-center py-4">
+                <div class="text-4xl mb-3">📄</div>
+                <div class="font-medium text-sm">${nombre}</div>
+                <div class="text-xs text-gray-500 mt-1">Archivo no visualizable directamente</div>
+                <a href="${url}" target="_blank" class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">📥 Descargar archivo</a>
             </div>
         `;
     }
-    let html = `
-        <div class="gantt-container">
-            <table class="gantt-table">
-                <thead>
-                    <tr>
-                        <th style="width:22%;">Tarea</th>
-                        <th style="width:14%;">Responsable</th>
-                        <th style="width:8%;">Prioridad</th>
-                        <th style="width:6%;">Estado</th>
-                        <th style="width:40%;">Días</th>
-                        <th style="width:10%;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-    fasesOrdenadas.forEach((fase, index) => {
-        const tareasFase = tareasPorFase[fase] || [];
-        if (tareasFase.length === 0) return;
-        const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
-        const totalTareasFase = tareasFase.length;
-        const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
-        html += `
-            <tr class="gantt-fila-fase" onclick="toggleFase(this)">
-                <td colspan="6">
-                    <span class="fase-toggle ${index === 0 ? '' : 'collapsed'}">▼</span>
-                    <span class="fase-icon"><i class="fas fa-flag"></i></span>
-                    ${fase}
-                    <span class="fase-estado ${todasCompletas ? 'fase-completa' : 'fase-incompleta'}">
-                        ${todasCompletas ? '✅ Completada' : `⏳ ${completadasFase}/${totalTareasFase}`}
-                    </span>
-                    <span class="fase-tareas-count">(${totalTareasFase} tareas)</span>
-                </td>
-            </tr>
-            <tr class="tarea-row ${index === 0 ? '' : 'hidden'}">
-                <td colspan="6">
-                    <div class="gantt-container" style="border: none; border-radius: 0;">
-                        <table class="gantt-table">
-                            <tbody>
-                                ${tareasFase.map(t => renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto)).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </td>
-            </tr>
-        `;
-    });
-    html += `</tbody></table></div>`;
-    return html;
+    abrirModal('modal-ver-evidencia');
+}
+
+// ============================================
+// SUBIR EVIDENCIA
+// ============================================
+function abrirModalEvidencia(tareaId) {
+    const tarea = tareasCache.find(t => t.id === tareaId);
+    if (!tarea) { showToast('Tarea no encontrada', 'error'); return; }
+    tareaEnEvidencia = tarea;
+    document.getElementById('evidencia-tarea-titulo').textContent = tarea.titulo;
+    document.getElementById('evidencia-archivo').value = '';
+    document.getElementById('evidencia-comentario').value = '';
+    abrirModal('modal-evidencia');
+}
+
+async function subirEvidencia() {
+    const archivoInput = document.getElementById('evidencia-archivo');
+    const comentario = document.getElementById('evidencia-comentario').value;
+    if (!archivoInput.files || archivoInput.files.length === 0) {
+        showToast('Selecciona un archivo', 'error');
+        return;
+    }
+    const archivo = archivoInput.files[0];
+    const tareaId = tareaEnEvidencia.id;
+    const extension = archivo.name.split('.').pop();
+    const nombreArchivo = `tarea_${tareaId}_${Date.now()}.${extension}`;
+    try {
+        showToast('Subiendo archivo...', 'info');
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/evidencias/${nombreArchivo}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'apikey': SUPABASE_KEY,
+                'Content-Type': archivo.type || 'application/octet-stream'
+            },
+            body: archivo
+        });
+        if (!uploadRes.ok) {
+            const errorText = await uploadRes.text();
+            throw new Error(`Error al subir archivo (${uploadRes.status}): ${errorText}`);
+        }
+        const urlPublica = `${SUPABASE_URL}/storage/v1/object/public/evidencias/${nombreArchivo}`;
+        await supabaseUpdate('tareas', tareaId, {
+            evidencia_url: urlPublica,
+            evidencia_nombre: archivo.name,
+            evidencia_tipo: archivo.type,
+            estado: 'Completado'
+        });
+        cerrarModal('modal-evidencia');
+        document.getElementById('exito-archivo').textContent = archivo.name;
+        document.getElementById('exito-tarea').textContent = tareaEnEvidencia.titulo;
+        abrirModal('modal-evidencia-exito');
+        showToast('✅ Evidencia subida correctamente', 'success');
+        await recargarDatos(tareaEnEvidencia.proyecto_id);
+    } catch (e) {
+        console.error('Error subiendo evidencia:', e);
+        showToast('Error al subir evidencia: ' + e.message, 'error');
+    }
 }
 
 // ============================================
@@ -1778,11 +1885,9 @@ async function cargarDashboard() {
         proyectosCache = proyectos;
         tareasCache = tareas;
         
-        // Filtrar proyectos según el usuario
         const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectos);
         const tareasAccesibles = getTareasAccesibles(usuarioActual, tareas, proyectos);
         
-        // Calcular progreso solo para proyectos accesibles
         const proyectosConProgreso = proyectosAccesibles.map(p => {
             const tareasProyecto = tareas.filter(t => t.proyecto_id === p.id);
             const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
@@ -1791,7 +1896,6 @@ async function cargarDashboard() {
             return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
         });
 
-        // KPIs solo con datos accesibles
         const totalTareas = tareasAccesibles.length;
         const enProgreso = tareasAccesibles.filter(t => t.estado === 'En Progreso').length;
         const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
@@ -1806,7 +1910,6 @@ async function cargarDashboard() {
         document.getElementById('kpi-vencidas').textContent = vencidas;
         document.getElementById('proyectos-count-label').textContent = `(${proyectosAccesibles.length})`;
 
-        // Actualizar selects de proyectos (solo accesibles)
         const selectProyecto = document.getElementById('tar-proyecto');
         selectProyecto.innerHTML = proyectosAccesibles.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
@@ -2190,6 +2293,7 @@ async function generarReporteProyecto(proyectoId) {
                                     </span>
                                     ${t.evidencia_url ? `<span style="color: #3b82f6;">📎</span>` : ''}
                                     ${t.responsable_texto ? `<span style="color: #6b7280; font-size: 11px;">👤 ${t.responsable_texto}</span>` : ''}
+                                    ${t.comentarios ? `<span style="color: #d97706;">💬</span>` : ''}
                                 </span>
                             </div>
                         `).join('')}
@@ -2197,34 +2301,7 @@ async function generarReporteProyecto(proyectoId) {
                 `;
             });
         }
-        let proveedoresHTML = '';
-        if (proveedoresData && proveedoresData.length > 0) {
-            proveedoresHTML = `
-                <div style="margin-top: 16px; border-top: 2px solid #e5e7eb; padding-top: 12px;">
-                    <h3 style="font-weight: 600; font-size: 15px; color: #1f2937;">🏢 Proveedores</h3>
-                    ${proveedoresData.map(p => `
-                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">
-                            <span>${p.nombre}</span>
-                            <span style="color: #6b7280;">${p.contacto || 'Sin contacto'}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-        let evidenciaHTML = '';
-        if (tareasConEvidencia.length > 0) {
-            evidenciaHTML = `
-                <div style="margin-top: 16px; border-top: 2px solid #e5e7eb; padding-top: 12px;">
-                    <h3 style="font-weight: 600; font-size: 15px; color: #1f2937;">📎 Evidencia Adjunta</h3>
-                    ${tareasConEvidencia.map(t => `
-                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">
-                            <span>${t.titulo}</span>
-                            <span style="color: #3b82f6;">${t.evidencia_nombre || 'Archivo'}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
+        
         const reporteHTML = `
             <!DOCTYPE html>
             <html>
@@ -2270,8 +2347,6 @@ async function generarReporteProyecto(proyectoId) {
                     <div class="stat-card"><div class="num red">${bloqueadas}</div><div class="label">Bloqueadas</div></div>
                 </div>
                 <div class="section"><h3>📋 Tareas por Fase</h3>${tareasHTML}</div>
-                ${proveedoresHTML}
-                ${evidenciaHTML}
                 <div class="footer">Reporte generado el ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}</div>
                 <div style="text-align: center; margin-top: 16px;" class="no-print">
                     <button onclick="window.print()" style="padding: 8px 24px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">🖨️ Imprimir / Guardar PDF</button>
@@ -2286,300 +2361,6 @@ async function generarReporteProyecto(proyectoId) {
         console.error('Error generando reporte:', e);
         showToast('Error al generar reporte: ' + e.message, 'error');
     }
-}
-
-// ============================================
-// VER EVIDENCIA
-// ============================================
-function verEvidencia(url, nombre) {
-    const contenido = document.getElementById('ver-evidencia-contenido');
-    const extensionesImagen = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
-    const extension = url.split('.').pop().toLowerCase();
-    const esImagen = extensionesImagen.includes(extension);
-    if (esImagen) {
-        contenido.innerHTML = `
-            <div class="text-center">
-                <img src="${url}" alt="${nombre}" class="evidencia-preview" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'text-center py-4\\'><div class=\\'text-4xl mb-3\\'>📄</div><div class=\\'font-medium text-sm\\'>${nombre}</div><div class=\\'text-xs text-red-500 mt-1\\'>Error al cargar la imagen</div><a href=\\'${url}\\' target=\\'_blank\\' class=\\'inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition\\'>📥 Descargar archivo</a></div>'">
-                <div class="text-xs text-gray-500 mt-2">${nombre}</div>
-                <a href="${url}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-block">📥 Descargar</a>
-            </div>
-        `;
-    } else {
-        contenido.innerHTML = `
-            <div class="text-center py-4">
-                <div class="text-4xl mb-3">📄</div>
-                <div class="font-medium text-sm">${nombre}</div>
-                <div class="text-xs text-gray-500 mt-1">Archivo no visualizable directamente</div>
-                <a href="${url}" target="_blank" class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">📥 Descargar archivo</a>
-            </div>
-        `;
-    }
-    abrirModal('modal-ver-evidencia');
-}
-
-// ============================================
-// SUBIR EVIDENCIA
-// ============================================
-function abrirModalEvidencia(tareaId) {
-    const tarea = tareasCache.find(t => t.id === tareaId);
-    if (!tarea) { showToast('Tarea no encontrada', 'error'); return; }
-    tareaEnEvidencia = tarea;
-    document.getElementById('evidencia-tarea-titulo').textContent = tarea.titulo;
-    document.getElementById('evidencia-archivo').value = '';
-    document.getElementById('evidencia-comentario').value = '';
-    abrirModal('modal-evidencia');
-}
-
-async function subirEvidencia() {
-    const archivoInput = document.getElementById('evidencia-archivo');
-    const comentario = document.getElementById('evidencia-comentario').value;
-    if (!archivoInput.files || archivoInput.files.length === 0) {
-        showToast('Selecciona un archivo', 'error');
-        return;
-    }
-    const archivo = archivoInput.files[0];
-    const tareaId = tareaEnEvidencia.id;
-    const extension = archivo.name.split('.').pop();
-    const nombreArchivo = `tarea_${tareaId}_${Date.now()}.${extension}`;
-    try {
-        showToast('Subiendo archivo...', 'info');
-        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/evidencias/${nombreArchivo}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                'apikey': SUPABASE_KEY,
-                'Content-Type': archivo.type || 'application/octet-stream'
-            },
-            body: archivo
-        });
-        if (!uploadRes.ok) {
-            const errorText = await uploadRes.text();
-            throw new Error(`Error al subir archivo (${uploadRes.status}): ${errorText}`);
-        }
-        const urlPublica = `${SUPABASE_URL}/storage/v1/object/public/evidencias/${nombreArchivo}`;
-        await supabaseUpdate('tareas', tareaId, {
-            evidencia_url: urlPublica,
-            evidencia_nombre: archivo.name,
-            evidencia_tipo: archivo.type,
-            estado: 'Completado'
-        });
-        cerrarModal('modal-evidencia');
-        document.getElementById('exito-archivo').textContent = archivo.name;
-        document.getElementById('exito-tarea').textContent = tareaEnEvidencia.titulo;
-        abrirModal('modal-evidencia-exito');
-        showToast('✅ Evidencia subida correctamente', 'success');
-        await recargarDatos(tareaEnEvidencia.proyecto_id);
-    } catch (e) {
-        console.error('Error subiendo evidencia:', e);
-        showToast('Error al subir evidencia: ' + e.message, 'error');
-    }
-}
-
-// ============================================
-// ELIMINAR PROYECTO CON RESPALDO
-// ============================================
-async function eliminarProyecto(id) {
-    const proyecto = proyectosCache.find(p => p.id === id);
-    if (!proyecto) { showToast('Proyecto no encontrado', 'error'); return; }
-    
-    if (!puedeEliminarProyecto(usuarioActual, proyecto)) {
-        showToast('No tienes permiso para eliminar este proyecto', 'error');
-        return;
-    }
-    
-    const confirmar = confirm(`⚠️ ¿ELIMINAR PROYECTO?\n\n📋 Proyecto: ${proyecto.nombre}\n🏢 Empresa: ${proyecto.empresa || 'Sin empresa'}\n📊 Tareas: ${tareasCache.filter(t => t.proyecto_id === id).length}\n\n✅ Se guardará un respaldo antes de eliminar.\n❌ Esta acción NO se puede deshacer.\n\n¿Estás seguro de eliminar este proyecto?`);
-    if (!confirmar) { showToast('❌ Eliminación cancelada'); return; }
-    const confirmar2 = confirm(`🔄 CONFIRMACIÓN FINAL\n\n¿Realmente deseas eliminar "${proyecto.nombre}"?\nSe guardará un respaldo en la base de datos.`);
-    if (!confirmar2) { showToast('❌ Eliminación cancelada'); return; }
-    try {
-        showToast('⏳ Guardando respaldo...', 'info');
-        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === id);
-        const respaldo = {
-            proyecto_id: proyecto.id,
-            nombre: proyecto.nombre,
-            categoria: proyecto.categoria,
-            metodologia: proyecto.metodologia,
-            empresa: proyecto.empresa,
-            area: proyecto.area,
-            fecha_inicio: proyecto.fecha_inicio,
-            fecha_fin: proyecto.fecha_fin,
-            estado: proyecto.estado,
-            progreso: proyecto.progreso,
-            tareas: JSON.stringify(tareasProyecto),
-            eliminado_por: usuarioActual?.nombre || 'Usuario'
-        };
-        const insertRes = await supabaseInsert('proyectos_eliminados', respaldo);
-        if (!insertRes || insertRes.length === 0) throw new Error('Error al guardar respaldo');
-        showToast('✅ Respaldo guardado correctamente', 'success');
-        await supabaseDelete('proyectos', id);
-        showToast(`🗑️ Proyecto "${proyecto.nombre}" eliminado. Respaldo guardado.`, 'success');
-        detallesAbiertosGlobal = {};
-        await cargarDashboard();
-    } catch (e) {
-        console.error('Error eliminando proyecto:', e);
-        showToast('❌ Error al eliminar: ' + e.message, 'error');
-    }
-}
-
-// ============================================
-// RECUPERAR PROYECTO
-// ============================================
-async function recuperarProyecto(respaldoId) {
-    try {
-        const respaldos = await supabaseFetch(`proyectos_eliminados?id=eq.${respaldoId}`);
-        const respaldo = respaldos[0];
-        if (!respaldo) { showToast('❌ Respaldo no encontrado', 'error'); return; }
-        showToast('⏳ Recuperando proyecto...', 'info');
-        const nuevoProyecto = await supabaseInsert('proyectos', {
-            nombre: respaldo.nombre + ' (recuperado)',
-            categoria: respaldo.categoria,
-            metodologia: respaldo.metodologia,
-            empresa: respaldo.empresa,
-            area: respaldo.area,
-            fecha_inicio: respaldo.fecha_inicio,
-            fecha_fin: respaldo.fecha_fin,
-            estado: 'Activo',
-            progreso: 0
-        });
-        if (!nuevoProyecto || nuevoProyecto.length === 0) throw new Error('Error al recuperar proyecto');
-        const proyectoRecuperado = nuevoProyecto[0];
-        if (respaldo.tareas) {
-            const tareas = JSON.parse(respaldo.tareas);
-            for (const tarea of tareas) {
-                await supabaseInsert('tareas', {
-                    titulo: tarea.titulo,
-                    descripcion: tarea.descripcion,
-                    proyecto_id: proyectoRecuperado.id,
-                    responsable_texto: tarea.responsable_texto,
-                    prioridad: tarea.prioridad,
-                    fase: tarea.fase,
-                    fecha_vencimiento: tarea.fecha_vencimiento,
-                    estado: tarea.estado || 'Pendiente'
-                });
-            }
-        }
-        showToast(`✅ Proyecto "${respaldo.nombre}" recuperado exitosamente`, 'success');
-        await supabaseUpdate('proyectos_eliminados', respaldoId, {
-            estado_recuperado: true,
-            fecha_recuperado: new Date().toISOString()
-        });
-        await cargarDashboard();
-    } catch (e) {
-        console.error('Error recuperando proyecto:', e);
-        showToast('❌ Error al recuperar: ' + e.message, 'error');
-    }
-}
-
-// ============================================
-// VER RESPALDOS
-// ============================================
-async function verRespaldos() {
-    try {
-        const respaldos = await supabaseFetch('proyectos_eliminados?order=fecha_eliminacion.desc');
-        if (respaldos.length === 0) { showToast('📭 No hay proyectos eliminados', 'info'); return; }
-        let mensaje = '📋 PROYECTOS ELIMINADOS (RESPALDOS)\n═══════════════════════════════\n\n';
-        respaldos.forEach((r, index) => {
-            const tareas = r.tareas ? JSON.parse(r.tareas) : [];
-            const recuperado = r.estado_recuperado ? '✅ RECUPERADO' : '❌ NO RECUPERADO';
-            mensaje += `${index + 1}. ${r.nombre} ${recuperado}\n   🏢 ${r.empresa || 'Sin empresa'}\n   📊 ${tareas.length} tareas\n   📅 Eliminado: ${new Date(r.fecha_eliminacion).toLocaleDateString('es-ES')}\n   🆔 Respaldo ID: ${r.id}\n\n`;
-        });
-        mensaje += '═══════════════════════════════\n¿Quieres recuperar algún proyecto?\nEscribe el número del proyecto o 0 para cancelar.';
-        const opcion = prompt(mensaje);
-        if (opcion && opcion !== '0') {
-            const index = parseInt(opcion) - 1;
-            if (index >= 0 && index < respaldos.length) {
-                const respaldo = respaldos[index];
-                if (respaldo.estado_recuperado) { showToast('⚠️ Este proyecto ya fue recuperado', 'info'); return; }
-                const confirmar = confirm(`¿Recuperar "${respaldo.nombre}"?\nSe creará como: "${respaldo.nombre} (recuperado)"`);
-                if (confirmar) await recuperarProyecto(respaldo.id);
-            } else { showToast('❌ Opción inválida', 'error'); }
-        }
-    } catch (e) {
-        console.error('Error cargando respaldos:', e);
-        showToast('Error al cargar respaldos: ' + e.message, 'error');
-    }
-}
-
-// ============================================
-// CARGAR RESPALDOS EN TAB
-// ============================================
-async function cargarRespaldos() {
-    try {
-        const respaldos = await supabaseFetch('proyectos_eliminados?order=fecha_eliminacion.desc');
-        const lista = document.getElementById('lista-respaldos');
-        if (respaldos.length === 0) {
-            lista.innerHTML = '<div class="text-center py-8 text-gray-500 text-sm">No hay proyectos eliminados</div>';
-            return;
-        }
-        lista.innerHTML = `
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Proyecto</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Empresa</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tareas</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Eliminado</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${respaldos.map((r, index) => {
-                            const tareas = r.tareas ? JSON.parse(r.tareas) : [];
-                            const recuperado = r.estado_recuperado;
-                            return `
-                            <tr class="border-t hover:bg-gray-50 ${recuperado ? 'bg-green-50' : ''}">
-                                <td class="px-3 py-2 text-xs">${index + 1}</td>
-                                <td class="px-3 py-2 text-xs font-medium">${r.nombre}</td>
-                                <td class="px-3 py-2 text-xs text-gray-500">${r.empresa || '-'}</td>
-                                <td class="px-3 py-2 text-xs text-center">${tareas.length}</td>
-                                <td class="px-3 py-2 text-xs text-gray-500">${new Date(r.fecha_eliminacion).toLocaleDateString('es-ES')}</td>
-                                <td class="px-3 py-2 text-xs">${recuperado ? '<span class="text-green-600 font-medium">✅ Recuperado</span>' : '<span class="text-red-600 font-medium">❌ No recuperado</span>'}</td>
-                                <td class="px-3 py-2 text-xs">${!recuperado ? `<button onclick="recuperarProyecto(${r.id})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700 transition">🔄 Recuperar</button>` : ''}</td>
-                            </tr>
-                        `}).join('')}
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-2 text-xs text-gray-400"><i class="fas fa-info-circle mr-1"></i>${respaldos.length} proyectos eliminados</div>
-        `;
-    } catch (e) {
-        console.error('Error cargando respaldos:', e);
-        document.getElementById('lista-respaldos').innerHTML = '<div class="text-red-500 text-sm">Error cargando respaldos: ' + e.message + '</div>';
-    }
-}
-
-// ============================================
-// CARGAR TODOS LOS PROYECTOS
-// ============================================
-function cargarTodosLosProyectos() {
-    const container = document.getElementById('lista-proyectos-completa');
-    const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
-    if (proyectosAccesibles.length === 0) {
-        container.innerHTML = '<div class="text-center py-6 text-gray-500 text-sm">No tienes acceso a ningún proyecto</div>';
-        return;
-    }
-    container.innerHTML = proyectosAccesibles.map(p => {
-        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
-        const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
-        const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
-        return `
-            <div class="border-b py-2 flex justify-between items-center hover:bg-gray-50 px-2 rounded transition">
-                <div>
-                    <span class="font-medium text-sm">${p.nombre}</span>
-                    <span class="text-xs text-gray-500 ml-2">${p.empresa || ''}</span>
-                    <span class="text-xs text-gray-400 ml-2">${p.metodologia || ''}</span>
-                </div>
-                <div class="flex items-center gap-3 text-xs">
-                    <span>${completadas}/${tareasProyecto.length} tareas</span>
-                    <span class="font-semibold">${progreso}%</span>
-                    <span class="status-badge ${p.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">${p.estado || 'Activo'}</span>
-                </div>
-            </div>
-        `;
-    }).join('');
 }
 
 // ============================================
@@ -2696,7 +2477,7 @@ async function crearCriteriosPorDefecto(proyectoId) {
 }
 
 // ============================================
-// GUARDAR TAREA
+// GUARDAR TAREA (CON COMENTARIOS)
 // ============================================
 async function guardarTarea(e) {
     e.preventDefault();
@@ -2708,6 +2489,7 @@ async function guardarTarea(e) {
     const fase = document.getElementById('tar-fase').value;
     const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
     const descripcion = document.getElementById('tar-descripcion').value.trim();
+    const comentarios = document.getElementById('tar-comentarios').value.trim();
     
     if (!titulo || !proyecto_id) { showToast('Título y proyecto son obligatorios', 'error'); return; }
     
@@ -2725,6 +2507,7 @@ async function guardarTarea(e) {
         fase: fase || null, 
         fecha_vencimiento, 
         descripcion: descripcion || null, 
+        comentarios: comentarios || null,
         fecha_actualizacion: new Date().toISOString() 
     };
     
@@ -2749,42 +2532,55 @@ async function guardarTarea(e) {
 }
 
 // ============================================
-// GUARDAR USUARIO (solo Admin)
+// EDITAR TAREA (CON COMENTARIOS)
 // ============================================
-async function guardarUsuario(e) {
-    e.preventDefault();
+function editarTarea(id) {
+    const tarea = tareasCache.find(t => t.id === id);
+    if (!tarea) { showToast('Tarea no encontrada', 'error'); return; }
     
-    if (usuarioActual?.rol !== 'admin') {
-        showToast('Solo el administrador puede agregar usuarios', 'error');
+    const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
+    if (!tieneAcceso(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para editar esta tarea', 'error');
         return;
     }
     
-    const nombre = document.getElementById('usr-nombre').value.trim();
-    const email = document.getElementById('usr-email').value.trim();
-    const rol = document.getElementById('usr-rol').value;
-    const empresa = document.getElementById('usr-empresa').value.trim();
-    const area = document.getElementById('usr-area').value.trim();
+    document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
+    document.getElementById('tar-id').value = tarea.id;
+    document.getElementById('tar-titulo').value = tarea.titulo || '';
+    document.getElementById('tar-proyecto').value = tarea.proyecto_id || '';
+    document.getElementById('tar-proyecto').disabled = true;
+    document.getElementById('tar-responsable').value = tarea.responsable_texto || '';
+    document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
+    document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
+    document.getElementById('tar-descripcion').value = tarea.descripcion || '';
+    document.getElementById('tar-comentarios').value = tarea.comentarios || '';
     
-    if (!nombre || !email) { showToast('Nombre y email son obligatorios', 'error'); return; }
-    
-    try {
-        await supabaseInsert('usuarios', { 
-            nombre, 
-            email, 
-            rol, 
-            empresa: empresa || 'Sin empresa',
-            area: area || null 
-        });
-        showToast('✅ Recurso agregado');
-        cerrarModal('modal-usuario');
-        document.getElementById('form-usuario').reset();
-        await cargarDashboard();
-        await cargarRecursos();
-        await cargarConfiguracion();
-    } catch (e) {
-        console.error('Error guardando usuario:', e);
-        showToast('Error: ' + e.message, 'error');
+    const proyecto2 = proyectosCache.find(p => p.id === tarea.proyecto_id);
+    const fasesSelect = document.getElementById('tar-fase');
+    fasesSelect.innerHTML = '';
+    let fasesDisponibles = [];
+    if (proyecto2 && proyecto2.metodologia && FASES_POR_METODOLOGIA[proyecto2.metodologia]) {
+        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto2.metodologia].fases;
+    } else {
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === tarea.proyecto_id);
+        const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
+        fasesDisponibles = fasesExistentes.length > 0 ? fasesExistentes : ['Sin fase'];
     }
+    fasesDisponibles.forEach(f => {
+        const option = document.createElement('option');
+        option.value = f;
+        option.textContent = f;
+        if (f === tarea.fase) option.selected = true;
+        fasesSelect.appendChild(option);
+    });
+    if (tarea.fase && !fasesDisponibles.includes(tarea.fase)) {
+        const option = document.createElement('option');
+        option.value = tarea.fase;
+        option.textContent = tarea.fase + ' (actual)';
+        option.selected = true;
+        fasesSelect.appendChild(option);
+    }
+    abrirModal('modal-tarea');
 }
 
 // ============================================
@@ -2826,6 +2622,7 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
     document.getElementById('tar-prioridad').value = 'Media';
     document.getElementById('tar-fecha-vencimiento').value = '';
     document.getElementById('tar-descripcion').value = '';
+    document.getElementById('tar-comentarios').value = '';
     const proyecto = proyectosCache.find(p => p.id === proyectoId);
     const fasesSelect = document.getElementById('tar-fase');
     let fasesDisponibles = [];
@@ -2839,6 +2636,45 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
     fasesSelect.innerHTML = fasesDisponibles.map(f => `<option value="${f}">${f}</option>`).join('');
     if (!fasesDisponibles.includes('Sin fase')) fasesSelect.innerHTML += `<option value="">Sin fase</option>`;
     abrirModal('modal-tarea');
+}
+
+// ============================================
+// GUARDAR USUARIO
+// ============================================
+async function guardarUsuario(e) {
+    e.preventDefault();
+    
+    if (usuarioActual?.rol !== 'admin') {
+        showToast('Solo el administrador puede agregar usuarios', 'error');
+        return;
+    }
+    
+    const nombre = document.getElementById('usr-nombre').value.trim();
+    const email = document.getElementById('usr-email').value.trim();
+    const rol = document.getElementById('usr-rol').value;
+    const empresa = document.getElementById('usr-empresa').value.trim();
+    const area = document.getElementById('usr-area').value.trim();
+    
+    if (!nombre || !email) { showToast('Nombre y email son obligatorios', 'error'); return; }
+    
+    try {
+        await supabaseInsert('usuarios', { 
+            nombre, 
+            email, 
+            rol, 
+            empresa: empresa || 'Sin empresa',
+            area: area || null 
+        });
+        showToast('✅ Recurso agregado');
+        cerrarModal('modal-usuario');
+        document.getElementById('form-usuario').reset();
+        await cargarDashboard();
+        await cargarRecursos();
+        await cargarConfiguracion();
+    } catch (e) {
+        console.error('Error guardando usuario:', e);
+        showToast('Error: ' + e.message, 'error');
+    }
 }
 
 // ============================================
@@ -2859,7 +2695,6 @@ async function cargarProveedores() {
             lista.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No hay proveedores registrados</div>';
             return;
         }
-        // Filtrar proveedores por proyectos accesibles
         const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
         const idsAccesibles = proyectosAccesibles.map(p => p.id);
         const proveedoresFiltrados = proveedores.filter(p => idsAccesibles.includes(p.proyecto_id));
@@ -3200,7 +3035,7 @@ async function cargarRecursos() {
 }
 
 // ============================================
-// CONFIGURACIÓN (solo Admin)
+// CONFIGURACIÓN
 // ============================================
 async function cargarConfiguracion() {
     if (usuarioActual?.rol !== 'admin') {
@@ -3323,85 +3158,211 @@ function generarReportes() {
 }
 
 // ============================================
-// EDITAR PROYECTO
+// CARGAR TODOS LOS PROYECTOS
 // ============================================
-function editarProyecto(id) {
-    const proyecto = proyectosCache.find(p => p.id === id);
-    if (!proyecto) { showToast('Proyecto no encontrado', 'error'); return; }
-    
-    if (!puedeEditarProyecto(usuarioActual, proyecto)) {
-        showToast('No tienes permiso para editar este proyecto', 'error');
+function cargarTodosLosProyectos() {
+    const container = document.getElementById('lista-proyectos-completa');
+    const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
+    if (proyectosAccesibles.length === 0) {
+        container.innerHTML = '<div class="text-center py-6 text-gray-500 text-sm">No tienes acceso a ningún proyecto</div>';
         return;
     }
-    
-    document.getElementById('modal-proyecto-titulo').textContent = '✏️ Editar Proyecto';
-    document.getElementById('proy-id').value = proyecto.id;
-    document.getElementById('proy-nombre').value = proyecto.nombre || '';
-    document.getElementById('proy-categoria').value = proyecto.categoria || '';
-    document.getElementById('proy-metodologia').value = proyecto.metodologia || '';
-    document.getElementById('proy-empresa').value = proyecto.empresa || '';
-    document.getElementById('proy-area').value = proyecto.area || '';
-    document.getElementById('proy-inicio').value = proyecto.fecha_inicio || '';
-    document.getElementById('proy-fecha').value = proyecto.fecha_fin || '';
-    const categoria = proyecto.categoria || '';
-    const metodologiaInfo = METODOLOGIAS[categoria];
-    if (metodologiaInfo) {
-        document.getElementById('metodologia-desc-texto').textContent = metodologiaInfo.desc;
-        document.getElementById('metodologia-desc').style.display = 'block';
-    } else {
-        document.getElementById('metodologia-desc').style.display = 'none';
-    }
-    abrirModal('modal-proyecto');
+    container.innerHTML = proyectosAccesibles.map(p => {
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
+        const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+        const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
+        return `
+            <div class="border-b py-2 flex justify-between items-center hover:bg-gray-50 px-2 rounded transition">
+                <div>
+                    <span class="font-medium text-sm">${p.nombre}</span>
+                    <span class="text-xs text-gray-500 ml-2">${p.empresa || ''}</span>
+                    <span class="text-xs text-gray-400 ml-2">${p.metodologia || ''}</span>
+                </div>
+                <div class="flex items-center gap-3 text-xs">
+                    <span>${completadas}/${tareasProyecto.length} tareas</span>
+                    <span class="font-semibold">${progreso}%</span>
+                    <span class="status-badge ${p.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">${p.estado || 'Activo'}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 // ============================================
-// EDITAR TAREA
+// ELIMINAR PROYECTO CON RESPALDO
 // ============================================
-function editarTarea(id) {
-    const tarea = tareasCache.find(t => t.id === id);
-    if (!tarea) { showToast('Tarea no encontrada', 'error'); return; }
+async function eliminarProyecto(id) {
+    const proyecto = proyectosCache.find(p => p.id === id);
+    if (!proyecto) { showToast('Proyecto no encontrado', 'error'); return; }
     
-    const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
-    if (!tieneAcceso(usuarioActual, proyecto)) {
-        showToast('No tienes permiso para editar esta tarea', 'error');
+    if (!puedeEliminarProyecto(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para eliminar este proyecto', 'error');
         return;
     }
     
-    document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
-    document.getElementById('tar-id').value = tarea.id;
-    document.getElementById('tar-titulo').value = tarea.titulo || '';
-    document.getElementById('tar-proyecto').value = tarea.proyecto_id || '';
-    document.getElementById('tar-proyecto').disabled = true;
-    document.getElementById('tar-responsable').value = tarea.responsable_texto || '';
-    document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
-    document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
-    document.getElementById('tar-descripcion').value = tarea.descripcion || '';
-    const proyecto2 = proyectosCache.find(p => p.id === tarea.proyecto_id);
-    const fasesSelect = document.getElementById('tar-fase');
-    fasesSelect.innerHTML = '';
-    let fasesDisponibles = [];
-    if (proyecto2 && proyecto2.metodologia && FASES_POR_METODOLOGIA[proyecto2.metodologia]) {
-        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto2.metodologia].fases;
-    } else {
-        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === tarea.proyecto_id);
-        const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
-        fasesDisponibles = fasesExistentes.length > 0 ? fasesExistentes : ['Sin fase'];
+    const confirmar = confirm(`⚠️ ¿ELIMINAR PROYECTO?\n\n📋 Proyecto: ${proyecto.nombre}\n🏢 Empresa: ${proyecto.empresa || 'Sin empresa'}\n📊 Tareas: ${tareasCache.filter(t => t.proyecto_id === id).length}\n\n✅ Se guardará un respaldo antes de eliminar.\n❌ Esta acción NO se puede deshacer.\n\n¿Estás seguro de eliminar este proyecto?`);
+    if (!confirmar) { showToast('❌ Eliminación cancelada'); return; }
+    const confirmar2 = confirm(`🔄 CONFIRMACIÓN FINAL\n\n¿Realmente deseas eliminar "${proyecto.nombre}"?\nSe guardará un respaldo en la base de datos.`);
+    if (!confirmar2) { showToast('❌ Eliminación cancelada'); return; }
+    try {
+        showToast('⏳ Guardando respaldo...', 'info');
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === id);
+        const respaldo = {
+            proyecto_id: proyecto.id,
+            nombre: proyecto.nombre,
+            categoria: proyecto.categoria,
+            metodologia: proyecto.metodologia,
+            empresa: proyecto.empresa,
+            area: proyecto.area,
+            fecha_inicio: proyecto.fecha_inicio,
+            fecha_fin: proyecto.fecha_fin,
+            estado: proyecto.estado,
+            progreso: proyecto.progreso,
+            tareas: JSON.stringify(tareasProyecto),
+            eliminado_por: usuarioActual?.nombre || 'Usuario'
+        };
+        const insertRes = await supabaseInsert('proyectos_eliminados', respaldo);
+        if (!insertRes || insertRes.length === 0) throw new Error('Error al guardar respaldo');
+        showToast('✅ Respaldo guardado correctamente', 'success');
+        await supabaseDelete('proyectos', id);
+        showToast(`🗑️ Proyecto "${proyecto.nombre}" eliminado. Respaldo guardado.`, 'success');
+        detallesAbiertosGlobal = {};
+        await cargarDashboard();
+    } catch (e) {
+        console.error('Error eliminando proyecto:', e);
+        showToast('❌ Error al eliminar: ' + e.message, 'error');
     }
-    fasesDisponibles.forEach(f => {
-        const option = document.createElement('option');
-        option.value = f;
-        option.textContent = f;
-        if (f === tarea.fase) option.selected = true;
-        fasesSelect.appendChild(option);
-    });
-    if (tarea.fase && !fasesDisponibles.includes(tarea.fase)) {
-        const option = document.createElement('option');
-        option.value = tarea.fase;
-        option.textContent = tarea.fase + ' (actual)';
-        option.selected = true;
-        fasesSelect.appendChild(option);
+}
+
+// ============================================
+// RECUPERAR PROYECTO
+// ============================================
+async function recuperarProyecto(respaldoId) {
+    try {
+        const respaldos = await supabaseFetch(`proyectos_eliminados?id=eq.${respaldoId}`);
+        const respaldo = respaldos[0];
+        if (!respaldo) { showToast('❌ Respaldo no encontrado', 'error'); return; }
+        showToast('⏳ Recuperando proyecto...', 'info');
+        const nuevoProyecto = await supabaseInsert('proyectos', {
+            nombre: respaldo.nombre + ' (recuperado)',
+            categoria: respaldo.categoria,
+            metodologia: respaldo.metodologia,
+            empresa: respaldo.empresa,
+            area: respaldo.area,
+            fecha_inicio: respaldo.fecha_inicio,
+            fecha_fin: respaldo.fecha_fin,
+            estado: 'Activo',
+            progreso: 0
+        });
+        if (!nuevoProyecto || nuevoProyecto.length === 0) throw new Error('Error al recuperar proyecto');
+        const proyectoRecuperado = nuevoProyecto[0];
+        if (respaldo.tareas) {
+            const tareas = JSON.parse(respaldo.tareas);
+            for (const tarea of tareas) {
+                await supabaseInsert('tareas', {
+                    titulo: tarea.titulo,
+                    descripcion: tarea.descripcion,
+                    proyecto_id: proyectoRecuperado.id,
+                    responsable_texto: tarea.responsable_texto,
+                    prioridad: tarea.prioridad,
+                    fase: tarea.fase,
+                    fecha_vencimiento: tarea.fecha_vencimiento,
+                    estado: tarea.estado || 'Pendiente',
+                    comentarios: tarea.comentarios || null
+                });
+            }
+        }
+        showToast(`✅ Proyecto "${respaldo.nombre}" recuperado exitosamente`, 'success');
+        await supabaseUpdate('proyectos_eliminados', respaldoId, {
+            estado_recuperado: true,
+            fecha_recuperado: new Date().toISOString()
+        });
+        await cargarDashboard();
+    } catch (e) {
+        console.error('Error recuperando proyecto:', e);
+        showToast('❌ Error al recuperar: ' + e.message, 'error');
     }
-    abrirModal('modal-tarea');
+}
+
+// ============================================
+// VER RESPALDOS
+// ============================================
+async function verRespaldos() {
+    try {
+        const respaldos = await supabaseFetch('proyectos_eliminados?order=fecha_eliminacion.desc');
+        if (respaldos.length === 0) { showToast('📭 No hay proyectos eliminados', 'info'); return; }
+        let mensaje = '📋 PROYECTOS ELIMINADOS (RESPALDOS)\n═══════════════════════════════\n\n';
+        respaldos.forEach((r, index) => {
+            const tareas = r.tareas ? JSON.parse(r.tareas) : [];
+            const recuperado = r.estado_recuperado ? '✅ RECUPERADO' : '❌ NO RECUPERADO';
+            mensaje += `${index + 1}. ${r.nombre} ${recuperado}\n   🏢 ${r.empresa || 'Sin empresa'}\n   📊 ${tareas.length} tareas\n   📅 Eliminado: ${new Date(r.fecha_eliminacion).toLocaleDateString('es-ES')}\n   🆔 Respaldo ID: ${r.id}\n\n`;
+        });
+        mensaje += '═══════════════════════════════\n¿Quieres recuperar algún proyecto?\nEscribe el número del proyecto o 0 para cancelar.';
+        const opcion = prompt(mensaje);
+        if (opcion && opcion !== '0') {
+            const index = parseInt(opcion) - 1;
+            if (index >= 0 && index < respaldos.length) {
+                const respaldo = respaldos[index];
+                if (respaldo.estado_recuperado) { showToast('⚠️ Este proyecto ya fue recuperado', 'info'); return; }
+                const confirmar = confirm(`¿Recuperar "${respaldo.nombre}"?\nSe creará como: "${respaldo.nombre} (recuperado)"`);
+                if (confirmar) await recuperarProyecto(respaldo.id);
+            } else { showToast('❌ Opción inválida', 'error'); }
+        }
+    } catch (e) {
+        console.error('Error cargando respaldos:', e);
+        showToast('Error al cargar respaldos: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// CARGAR RESPALDOS EN TAB
+// ============================================
+async function cargarRespaldos() {
+    try {
+        const respaldos = await supabaseFetch('proyectos_eliminados?order=fecha_eliminacion.desc');
+        const lista = document.getElementById('lista-respaldos');
+        if (respaldos.length === 0) {
+            lista.innerHTML = '<div class="text-center py-8 text-gray-500 text-sm">No hay proyectos eliminados</div>';
+            return;
+        }
+        lista.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Proyecto</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Empresa</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tareas</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Eliminado</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${respaldos.map((r, index) => {
+                            const tareas = r.tareas ? JSON.parse(r.tareas) : [];
+                            const recuperado = r.estado_recuperado;
+                            return `
+                            <tr class="border-t hover:bg-gray-50 ${recuperado ? 'bg-green-50' : ''}">
+                                <td class="px-3 py-2 text-xs">${index + 1}</td>
+                                <td class="px-3 py-2 text-xs font-medium">${r.nombre}</td>
+                                <td class="px-3 py-2 text-xs text-gray-500">${r.empresa || '-'}</td>
+                                <td class="px-3 py-2 text-xs text-center">${tareas.length}</td>
+                                <td class="px-3 py-2 text-xs text-gray-500">${new Date(r.fecha_eliminacion).toLocaleDateString('es-ES')}</td>
+                                <td class="px-3 py-2 text-xs">${recuperado ? '<span class="text-green-600 font-medium">✅ Recuperado</span>' : '<span class="text-red-600 font-medium">❌ No recuperado</span>'}</td>
+                                <td class="px-3 py-2 text-xs">${!recuperado ? `<button onclick="recuperarProyecto(${r.id})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700 transition">🔄 Recuperar</button>` : ''}</td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2 text-xs text-gray-400"><i class="fas fa-info-circle mr-1"></i>${respaldos.length} proyectos eliminados</div>
+        `;
+    } catch (e) {
+        console.error('Error cargando respaldos:', e);
+        document.getElementById('lista-respaldos').innerHTML = '<div class="text-red-500 text-sm">Error cargando respaldos: ' + e.message + '</div>';
+    }
 }
 
 // ============================================
@@ -3450,10 +3411,137 @@ async function recargarDatos(proyectoId) {
 }
 
 // ============================================
+// RENDER VISTA GANTT COLAPSABLE
+// ============================================
+function renderVistaGanttColapsable(tareas, proyecto) {
+    const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto?.metodologia]?.fases || [];
+    if (tareas.length === 0) {
+        return `<div class="text-gray-400 text-xs text-center py-3">📭 Sin tareas</div>`;
+    }
+    const fechaInicioProyecto = proyecto?.fecha_inicio || null;
+    const fechaFinProyecto = proyecto?.fecha_fin || null;
+    const tareasPorFase = {};
+    tareas.forEach(t => {
+        const fase = t.fase || 'Sin fase';
+        if (!tareasPorFase[fase]) tareasPorFase[fase] = [];
+        tareasPorFase[fase].push(t);
+    });
+    let fasesOrdenadas = Object.keys(tareasPorFase);
+    if (fasesMetodologia.length > 0) {
+        fasesOrdenadas = fasesMetodologia.filter(f => tareasPorFase[f] && tareasPorFase[f].length > 0);
+        Object.keys(tareasPorFase).forEach(f => {
+            if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
+        });
+    } else {
+        fasesOrdenadas.sort();
+    }
+    if (fasesOrdenadas.length === 0 || fasesOrdenadas.every(f => tareasPorFase[f].length === 0)) {
+        return `
+            <div class="gantt-container">
+                <table class="gantt-table">
+                    <thead>
+                        <tr>
+                            <th style="width:22%;">Tarea</th>
+                            <th style="width:14%;">Responsable</th>
+                            <th style="width:8%;">Prioridad</th>
+                            <th style="width:6%;">Estado</th>
+                            <th style="width:40%;">Días</th>
+                            <th style="width:10%;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tareas.map(t => renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto)).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+    let html = `
+        <div class="gantt-container">
+            <table class="gantt-table">
+                <thead>
+                    <tr>
+                        <th style="width:22%;">Tarea</th>
+                        <th style="width:14%;">Responsable</th>
+                        <th style="width:8%;">Prioridad</th>
+                        <th style="width:6%;">Estado</th>
+                        <th style="width:40%;">Días</th>
+                        <th style="width:10%;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    fasesOrdenadas.forEach((fase, index) => {
+        const tareasFase = tareasPorFase[fase] || [];
+        if (tareasFase.length === 0) return;
+        const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
+        const totalTareasFase = tareasFase.length;
+        const completadasFase = tareasFase.filter(t => t.estado === 'Completado').length;
+        html += `
+            <tr class="gantt-fila-fase" onclick="toggleFase(this)">
+                <td colspan="6">
+                    <span class="fase-toggle ${index === 0 ? '' : 'collapsed'}">▼</span>
+                    <span class="fase-icon"><i class="fas fa-flag"></i></span>
+                    ${fase}
+                    <span class="fase-estado ${todasCompletas ? 'fase-completa' : 'fase-incompleta'}">
+                        ${todasCompletas ? '✅ Completada' : `⏳ ${completadasFase}/${totalTareasFase}`}
+                    </span>
+                    <span class="fase-tareas-count">(${totalTareasFase} tareas)</span>
+                </td>
+            </tr>
+            <tr class="tarea-row ${index === 0 ? '' : 'hidden'}">
+                <td colspan="6">
+                    <div class="gantt-container" style="border: none; border-radius: 0;">
+                        <table class="gantt-table">
+                            <tbody>
+                                ${tareasFase.map(t => renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto)).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    html += `</tbody></table></div>`;
+    return html;
+}
+
+// ============================================
+// EDITAR PROYECTO
+// ============================================
+function editarProyecto(id) {
+    const proyecto = proyectosCache.find(p => p.id === id);
+    if (!proyecto) { showToast('Proyecto no encontrado', 'error'); return; }
+    
+    if (!puedeEditarProyecto(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para editar este proyecto', 'error');
+        return;
+    }
+    
+    document.getElementById('modal-proyecto-titulo').textContent = '✏️ Editar Proyecto';
+    document.getElementById('proy-id').value = proyecto.id;
+    document.getElementById('proy-nombre').value = proyecto.nombre || '';
+    document.getElementById('proy-categoria').value = proyecto.categoria || '';
+    document.getElementById('proy-metodologia').value = proyecto.metodologia || '';
+    document.getElementById('proy-empresa').value = proyecto.empresa || '';
+    document.getElementById('proy-area').value = proyecto.area || '';
+    document.getElementById('proy-inicio').value = proyecto.fecha_inicio || '';
+    document.getElementById('proy-fecha').value = proyecto.fecha_fin || '';
+    const categoria = proyecto.categoria || '';
+    const metodologiaInfo = METODOLOGIAS[categoria];
+    if (metodologiaInfo) {
+        document.getElementById('metodologia-desc-texto').textContent = metodologiaInfo.desc;
+        document.getElementById('metodologia-desc').style.display = 'block';
+    } else {
+        document.getElementById('metodologia-desc').style.display = 'none';
+    }
+    abrirModal('modal-proyecto');
+}
+
+// ============================================
 // INICIALIZAR
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Mostrar pantalla de login
     document.getElementById('login-screen').style.display = 'block';
     document.getElementById('app-main').style.display = 'none';
     
@@ -3490,9 +3578,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-console.log('✅ PM System v5.1 - Con Supabase Real cargado correctamente');
-console.log('🔐 Los usuarios se obtienen desde la base de datos');
+console.log('✅ PM System v5.1 - Con comentarios cargado correctamente');
 </script>
-
 </body>
 </html>
