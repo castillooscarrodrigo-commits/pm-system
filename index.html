@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>PM System v5.2 - Control de Acceso</title>
+    <title>PM System v5.1 - Control de Acceso</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        /* ===== RESET ===== */
         * { box-sizing: border-box; }
         body {
             background: #f3f4f6;
@@ -15,8 +14,6 @@
             margin: 0;
             padding: 0;
         }
-
-        /* ===== TOAST ===== */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -40,8 +37,6 @@
             from { transform: translateX(100px); opacity: 0; }
             to   { transform: translateX(0); opacity: 1; }
         }
-
-        /* ===== LOGIN ===== */
         .login-container {
             max-width: 400px;
             margin: 80px auto;
@@ -112,7 +107,6 @@
             font-size: 13px;
             color: #166534;
         }
-
         .user-role-badge {
             display: inline-block;
             padding: 2px 10px;
@@ -125,7 +119,6 @@
         .badge-colaborador { background: #fef3c7; color: #d97706; }
         .badge-invitado { background: #e5e7eb; color: #6b7280; }
 
-        /* ===== KPI CARDS ===== */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -138,7 +131,6 @@
         @media (max-width: 480px) {
             .kpi-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        
         .kpi-card {
             background: white;
             border-radius: 10px;
@@ -173,32 +165,25 @@
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
-
         .kpi-total { border-left: 3px solid #3b82f6; }
         .kpi-total .kpi-icon { background: #dbeafe; color: #2563eb; }
         .kpi-total .kpi-number { color: #2563eb; }
-
         .kpi-progreso { border-left: 3px solid #8b5cf6; }
         .kpi-progreso .kpi-icon { background: #ede9fe; color: #7c3aed; }
         .kpi-progreso .kpi-number { color: #7c3aed; }
-
         .kpi-pendientes { border-left: 3px solid #f59e0b; }
         .kpi-pendientes .kpi-icon { background: #fef3c7; color: #d97706; }
         .kpi-pendientes .kpi-number { color: #d97706; }
-
         .kpi-completadas { border-left: 3px solid #22c55e; }
         .kpi-completadas .kpi-icon { background: #d1fae5; color: #16a34a; }
         .kpi-completadas .kpi-number { color: #16a34a; }
-
         .kpi-vencidas { border-left: 3px solid #ef4444; }
         .kpi-vencidas .kpi-icon { background: #fee2e2; color: #dc2626; }
         .kpi-vencidas .kpi-number { color: #dc2626; }
-
         .kpi-proyectos { border-left: 3px solid #06b6d4; }
         .kpi-proyectos .kpi-icon { background: #cffafe; color: #0891b2; }
         .kpi-proyectos .kpi-number { color: #0891b2; }
 
-        /* ===== GANTT ===== */
         .gantt-container {
             overflow-x: auto;
             background: #ffffff;
@@ -207,14 +192,12 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             padding: 0;
         }
-        
         .gantt-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
             min-width: 900px;
         }
-        
         .gantt-table th {
             text-align: left;
             padding: 10px 14px;
@@ -229,17 +212,14 @@
             top: 0;
             z-index: 5;
         }
-        
         .gantt-table td {
             padding: 10px 14px;
             border-bottom: 1px solid #e2e8f0;
             vertical-align: middle;
         }
-        
         .gantt-table tr:hover td {
             background: #f8fafc;
         }
-
         .gantt-barra-wrapper {
             position: relative;
             width: 100%;
@@ -250,7 +230,6 @@
             overflow: hidden;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
         }
-
         .gantt-barra {
             position: absolute;
             left: 0;
@@ -278,7 +257,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             z-index: 2;
         }
-
         .gantt-barra.pendiente {
             background: linear-gradient(135deg, #f97316, #ea580c);
             border-color: #c2410c;
@@ -299,7 +277,6 @@
             background: linear-gradient(135deg, #9ca3af, #4b5563);
             border-color: #374151;
         }
-
         .barra-dias {
             font-size: 12px;
             font-weight: 700;
@@ -308,8 +285,6 @@
             align-items: center;
             gap: 3px;
         }
-
-        /* === FILAS DE FASE === */
         .gantt-fila-fase {
             background: #f0fdf4;
             font-weight: 700;
@@ -325,10 +300,8 @@
         .gantt-fila-fase .fase-toggle { font-size: 14px; margin-right: 6px; transition: transform 0.3s ease; display: inline-block; }
         .gantt-fila-fase .fase-toggle.collapsed { transform: rotate(-90deg); }
         .gantt-fila-fase .fase-tareas-count { font-size: 12px; font-weight: 400; color: #6b7280; margin-left: 10px; }
-
         .tarea-row { transition: opacity 0.3s ease; }
         .tarea-row.hidden { display: none; }
-
         .gantt-titulo {
             font-weight: 600;
             font-size: 13px;
@@ -342,13 +315,11 @@
         .gantt-responsable::before { content: "👤"; font-size: 13px; }
         .gantt-fecha { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
         .gantt-fecha::before { content: "📅"; font-size: 12px; }
-
         .gantt-check { width: 36px; text-align: center; font-size: 18px; }
         .gantt-check .completado { color: #22c55e; }
         .gantt-check .pendiente { color: #f97316; }
         .gantt-check .bloqueada { color: #ef4444; }
         .gantt-check .progreso { color: #3b82f6; }
-
         .gantt-acciones {
             display: flex;
             gap: 6px;
@@ -381,8 +352,6 @@
             border-color: #3b82f6;
             box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
         }
-
-        /* === COMENTARIOS TAG === */
         .comentario-tag {
             background: #fef3c7;
             color: #d97706;
@@ -401,7 +370,6 @@
             background: #fde68a;
             transform: scale(1.05);
         }
-
         .comentario-preview {
             font-size: 11px;
             color: #6b7280;
@@ -411,8 +379,6 @@
             text-overflow: ellipsis;
             display: inline-block;
         }
-
-        /* ===== ESTILOS ADICIONALES ===== */
         .tab-btn {
             padding: 6px 14px;
             border-radius: 6px;
@@ -435,7 +401,6 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .modal {
             display: none;
             position: fixed;
@@ -463,7 +428,6 @@
             from { transform: translateY(20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-
         .btn-respaldo {
             background: #6b7280;
             color: white;
@@ -475,7 +439,6 @@
             transition: all 0.2s ease;
         }
         .btn-respaldo:hover { background: #4b5563; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-
         .filtro-btn {
             padding: 3px 12px;
             border-radius: 16px;
@@ -503,7 +466,6 @@
             transition: all 0.2s ease;
         }
         .buscar-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-
         .metodologia-badge {
             padding: 2px 8px;
             border-radius: 10px;
@@ -529,7 +491,6 @@
         .prioridad-media { background: #fef3c7; color: #d97706; }
         .prioridad-alta { background: #fee2e2; color: #dc2626; }
         .prioridad-critica { background: #7f1d1d; color: #fecaca; }
-
         .evidencia-tag {
             background: #dbeafe;
             color: #2563eb;
@@ -542,7 +503,6 @@
             transition: all 0.2s ease;
         }
         .evidencia-tag:hover { background: #bfdbfe; transform: scale(1.05); }
-
         .proyecto-card {
             transition: all 0.3s ease;
             border: 1px solid #e5e7eb;
@@ -550,10 +510,8 @@
         .proyecto-card:hover { border-color: #3b82f6; }
         .proyecto-detalle { display: none; margin-top: 10px; padding-top: 10px; border-top: 2px solid #e5e7eb; }
         .proyecto-detalle.active { display: block; animation: fadeIn 0.3s ease; }
-
         .progress-bar { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; }
         .progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-
         .fases-compactas { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
         .fase-item {
             display: flex;
@@ -569,7 +527,6 @@
         .fase-item.sin-tareas { background: #e5e7eb; color: #6b7280; }
         .fase-item .fase-check { font-size: 10px; }
         .fase-item .fase-detalle { font-size: 9px; opacity: 0.7; }
-
         .orden-btn {
             padding: 2px 10px;
             border-radius: 12px;
@@ -582,7 +539,6 @@
             transition: all 0.2s ease;
         }
         .orden-btn:hover { background: #d1d5db; }
-
         .evidencia-preview {
             max-width: 100%;
             max-height: 300px;
@@ -590,15 +546,6 @@
             margin-top: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .area-badge {
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 500;
-            background: #e0e7ff;
-            color: #4338ca;
-        }
-
         .btn-logout {
             background: #ef4444;
             color: white;
@@ -614,8 +561,6 @@
             transform: translateY(-1px);
             box-shadow: 0 2px 8px rgba(239,68,68,0.3);
         }
-
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb { background: #c1c7cd; border-radius: 3px; }
@@ -624,19 +569,12 @@
 </head>
 <body>
 
-<!-- ===== TOAST ===== -->
 <div id="toast" class="toast toast-success"></div>
 
-<!-- ============================================ -->
-<!-- CONFIGURACIÓN DE SUPABASE                    -->
-<!-- ============================================ -->
 <script>
 const SUPABASE_URL = 'https://ryjbmqmbxeuigojztwym.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5amJtcW1ieGV1aWdvanp0d3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NTYwNzMsImV4cCI6MjEwMTQzMjA3M30.QtdcGM6GegPlHmW9MEdHlsIwXEKsTQKrpUa1Y_B2ORc';
 
-// ============================================
-// CONFIGURACIÓN DE ROLES Y PERMISOS
-// ============================================
 const ROLES = {
     ADMIN: 'admin',
     PROJECT_MANAGER: 'project_manager',
@@ -658,9 +596,6 @@ const ROLE_BADGE_CLASSES = {
     'invitado': 'badge-invitado'
 };
 
-// ============================================
-// VARIABLES GLOBALES
-// ============================================
 let proyectosCache = [];
 let tareasCache = [];
 let usuariosCache = [];
@@ -703,20 +638,15 @@ const PRIORIDAD_COLORS = {
 };
 </script>
 
-<!-- ============================================ -->
-<!-- LOGIN                                        -->
-<!-- ============================================ -->
 <div id="login-screen" class="login-container">
     <h1>🔐 PM System</h1>
-    <p class="subtitle">Control de Acceso v5.2</p>
-    
+    <p class="subtitle">Control de Acceso v5.1</p>
     <div class="usuario-info">
         <strong>📝 Instrucciones:</strong><br>
         <span style="font-size: 12px; color: #6b7280;">
             Ingresa con el email de un usuario registrado en la base de datos.
         </span>
     </div>
-    
     <form id="login-form" onsubmit="login(event)">
         <div class="form-group">
             <label for="login-email">Email</label>
@@ -728,12 +658,8 @@ const PRIORIDAD_COLORS = {
     </form>
 </div>
 
-<!-- ============================================ -->
-<!-- APP PRINCIPAL                                -->
-<!-- ============================================ -->
 <div id="app-main" style="display: none;">
 
-    <!-- ===== NAV ===== -->
     <nav class="bg-white shadow-md border-b sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
             <div class="flex items-center gap-2">
@@ -754,13 +680,12 @@ const PRIORIDAD_COLORS = {
         </div>
     </nav>
 
-    <!-- ===== CONTENIDO PRINCIPAL ===== -->
     <div class="max-w-7xl mx-auto px-4 py-4">
 
-        <!-- TABS -->
         <div class="flex gap-1 mb-4 border-b pb-2 flex-wrap">
             <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn active">
-                <i class="fas fa-chart-pie mr-1"></i> Dashboard            </button>
+                <i class="fas fa-chart-pie mr-1"></i> Dashboard
+            </button>
             <button onclick="showTab('proyectos')" id="tab-proyectos" class="tab-btn">
                 <i class="fas fa-folder-open mr-1"></i> Proyectos
             </button>
@@ -781,10 +706,7 @@ const PRIORIDAD_COLORS = {
             </button>
         </div>
 
-        <!-- DASHBOARD -->
         <div id="content-dashboard" class="tab-content active">
-            
-            <!-- KPIS -->
             <div class="kpi-grid">
                 <div class="kpi-card kpi-proyectos">
                     <div class="flex items-center gap-3">
@@ -842,7 +764,6 @@ const PRIORIDAD_COLORS = {
                 </div>
             </div>
 
-            <!-- LISTA DE PROYECTOS -->
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="px-4 py-2 border-b flex flex-wrap justify-between items-center gap-2">
                     <h2 class="text-sm font-semibold text-gray-800">
@@ -873,7 +794,6 @@ const PRIORIDAD_COLORS = {
             </div>
         </div>
 
-        <!-- OTRAS PESTAÑAS -->
         <div id="content-proyectos" class="tab-content">
             <div class="bg-white rounded-lg shadow p-4">
                 <h2 class="text-lg font-bold mb-3">Todos los Proyectos</h2>
@@ -929,11 +849,6 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- MODALES                                      -->
-<!-- ============================================ -->
-
-<!-- MODAL: PROYECTO -->
 <div id="modal-proyecto" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
@@ -1005,7 +920,6 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: TAREA CON FECHA INICIO EDITABLE -->
 <div id="modal-tarea" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
@@ -1057,9 +971,7 @@ const PRIORIDAD_COLORS = {
                         <label class="block text-xs font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
                         <input id="tar-fecha-vencimiento" type="date" class="w-full border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     </div>
-                    <div>
-                        <!-- espacio -->
-                    </div>
+                    <div></div>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
@@ -1082,7 +994,6 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: SUBIR EVIDENCIA -->
 <div id="modal-evidencia" class="modal">
     <div class="modal-box" style="max-width: 450px;">
         <div class="flex justify-between items-start mb-3">
@@ -1117,7 +1028,6 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: VER EVIDENCIA -->
 <div id="modal-ver-evidencia" class="modal">
     <div class="modal-box" style="max-width: 500px;">
         <div class="flex justify-between items-start mb-3">
@@ -1132,7 +1042,6 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: VER COMENTARIOS -->
 <div id="modal-ver-comentarios" class="modal">
     <div class="modal-box" style="max-width: 500px;">
         <div class="flex justify-between items-start mb-3">
@@ -1147,7 +1056,6 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: USUARIO -->
 <div id="modal-usuario" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
@@ -1198,7 +1106,6 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: PROVEEDOR -->
 <div id="modal-proveedor" class="modal">
     <div class="modal-box">
         <div class="flex justify-between items-start mb-3">
@@ -1244,7 +1151,6 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- MODAL: DETALLE PROVEEDOR -->
 <div id="modal-detalle-proveedor" class="modal">
     <div class="modal-box" style="max-width: 600px;">
         <div class="flex justify-between items-start mb-3">
@@ -1259,9 +1165,6 @@ const PRIORIDAD_COLORS = {
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- SCRIPT PRINCIPAL - v5.1 COMPLETO            -->
-<!-- ============================================ -->
 <script>
 // ============================================
 // FUNCIONES DE SUPABASE
@@ -1611,32 +1514,33 @@ function formatDate(dateString) {
 }
 
 // ============================================
-// RENDER TAREA FILA GANTT (CON FECHA INICIO)
+// RENDER TAREA FILA GANTT
 // ============================================
 function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const barraClase = getBarraClase(t.estado);
     const prioridadClase = getPrioridadClase(t.prioridad);
     const prioridadLabel = t.prioridad || 'Media';
     const responsable = t.responsable_texto || '-';
+    
+    // === MOSTRAR LA FECHA DE VENCIMIENTO ===
     const fechaStr = formatDate(t.fecha_vencimiento);
     
     let dias = 0;
     let anchoPx = 60;
     
-    // USAR FECHA_INICIO para calcular los días
-    const fechaInicioTarea = t.fecha_inicio || t.creado_en || fechaInicioProyecto;
-    const fechaVencTarea = t.fecha_vencimiento;
-    
-    if (fechaInicioTarea && fechaVencTarea) {
-        const inicio = new Date(fechaInicioTarea);
-        const venc = new Date(fechaVencTarea);
+    // === CALCULAR DÍAS usando fecha_inicio y fecha_vencimiento ===
+    if (t.fecha_inicio && t.fecha_vencimiento) {
+        const inicio = new Date(t.fecha_inicio);
+        const venc = new Date(t.fecha_vencimiento);
         const diffDias = Math.ceil((venc - inicio) / (1000 * 60 * 60 * 24));
         dias = Math.max(0, diffDias);
-        
+    }
+    
+    // Calcular ancho de la barra
+    if (dias > 0) {
         const fechaInicio = fechaInicioProyecto ? new Date(fechaInicioProyecto) : new Date();
         const fechaFin = fechaFinProyecto ? new Date(fechaFinProyecto) : new Date();
         fechaFin.setDate(fechaFin.getDate() + 1);
-        
         const totalDias = Math.max(1, Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)));
         const escala = Math.max(8, Math.min(15, 800 / totalDias));
         anchoPx = Math.max(60, dias * escala);
@@ -1645,12 +1549,9 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
         const fechaInicio = fechaInicioProyecto ? new Date(fechaInicioProyecto) : new Date();
         const fechaFin = fechaFinProyecto ? new Date(fechaFinProyecto) : new Date();
         fechaFin.setDate(fechaFin.getDate() + 1);
-        
         const diffDias = Math.ceil((fechaVenc - fechaInicio) / (1000 * 60 * 60 * 24));
         const totalDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24));
-        
         dias = Math.max(0, diffDias);
-        
         if (totalDias > 0) {
             const escala = Math.max(8, Math.min(15, 800 / totalDias));
             anchoPx = Math.max(60, diffDias * escala);
@@ -2167,7 +2068,6 @@ async function renderizarDetalle(id) {
                 </div>
             </div>
         `;
-        // Inicializar colapsado: solo primera fase visible
         const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
         if (fasesRows.length > 0) {
             fasesRows.forEach((row, index) => {
@@ -2557,7 +2457,7 @@ async function crearCriteriosPorDefecto(proyectoId) {
 }
 
 // ============================================
-// GUARDAR TAREA (CON FECHA INICIO EDITABLE)
+// GUARDAR TAREA (CON FECHA INICIO)
 // ============================================
 async function guardarTarea(e) {
     e.preventDefault();
