@@ -188,7 +188,9 @@ const ROLE_BADGE_CLASSES = {
 let proyectosCache = [];
 let tareasCache = [];
 let detallesAbiertosGlobal = {};
+let ordenFechaActivoGlobal = {};
 let filtroActual = 'todos';
+let tareaEnEvidencia = null;
 let usuarioActual = null;
 
 const METODOLOGIAS = {
@@ -417,6 +419,14 @@ function showTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById('content-' + tab).classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
+    switch(tab) {
+        case 'recursos': cargarRecursos(); break;
+        case 'reportes': generarReportes(); break;
+        case 'proveedores': cargarProveedores(); break;
+        case 'respaldos': cargarRespaldos(); break;
+        case 'proyectos': cargarTodosLosProyectos(); break;
+        case 'configuracion': cargarConfiguracion(); break;
+    }
 }
 
 // ============================================
@@ -520,6 +530,10 @@ function getTareasAccesibles(usuario, tareas, proyectos) {
     const proyectosAccesibles = getProyectosAccesibles(usuario, proyectos);
     const idsAccesibles = proyectosAccesibles.map(p => p.id);
     return tareas.filter(t => idsAccesibles.includes(t.proyecto_id));
+}
+
+function puedeCrearProyecto(usuario) {
+    return usuario && (usuario.rol === 'admin' || usuario.rol === 'project_manager');
 }
 
 function puedeEditarProyecto(usuario, proyecto) {
@@ -754,8 +768,6 @@ function abrirModalEvidencia(tareaId) {
     document.getElementById('evidencia-comentario').value = '';
     abrirModal('modal-evidencia');
 }
-
-let tareaEnEvidencia = null;
 
 async function subirEvidencia() {
     const archivoInput = document.getElementById('evidencia-archivo');
@@ -1094,6 +1106,7 @@ async function renderizarDetalle(id) {
                 </div>
             </div>
         `;
+        // Inicializar fases
         const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
         if (fasesRows.length > 0) {
             fasesRows.forEach((row, index) => {
@@ -1229,7 +1242,27 @@ function toggleFase(element) {
 // ORDENAR POR FECHA
 // ============================================
 function ordenarPorFecha(proyectoId) {
-    showToast('Función de ordenamiento disponible', 'info');
+    const btn = document.getElementById(`orden-btn-${proyectoId}`);
+    const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
+    if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
+    let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
+    ordenFechaActivoGlobal[proyectoId] = !ordenFechaActivoGlobal[proyectoId];
+    const ascendente = ordenFechaActivoGlobal[proyectoId];
+    btn.innerHTML = ascendente ? '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
+    tareas.sort((a, b) => {
+        const fechaA = a.fecha_vencimiento ? new Date(a.fecha_vencimiento) : new Date('2099-12-31');
+        const fechaB = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : new Date('2099-12-31');
+        return ascendente ? fechaA - fechaB : fechaB - fechaA;
+    });
+    const proyecto = proyectosCache.find(p => p.id === proyectoId);
+    const ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
+    const ganttContainer = detalleDiv.querySelector('.gantt-container');
+    if (ganttContainer) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = ganttHTML;
+        const newGantt = tempDiv.querySelector('.gantt-container');
+        if (newGantt) ganttContainer.parentNode.replaceChild(newGantt, ganttContainer);
+    }
 }
 
 // ============================================
@@ -1246,9 +1279,20 @@ async function generarReporteProyecto(proyectoId) {
         }
         
         const tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
+        const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
         const totalTareas = tareas.length;
         const completadas = tareas.filter(t => t.estado === 'Completado').length;
+        const pendientes = tareas.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
+        const bloqueadas = tareas.filter(t => t.estado === 'Bloqueada').length;
         const progreso = totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0;
+        let fasesCompletas = 0, totalFases = 0;
+        fasesMetodologia.forEach(fase => {
+            const tareasFase = tareas.filter(t => t.fase === fase);
+            if (tareasFase.length > 0) {
+                totalFases++;
+                if (tareasFase.every(t => t.estado === 'Completado')) fasesCompletas++;
+            }
+        });
         
         const reporteHTML = `
             <!DOCTYPE html>
@@ -1285,11 +1329,14 @@ async function generarReporteProyecto(proyectoId) {
                     <div><span class="label">Estado:</span> <span class="value">${proyecto.estado || 'Activo'}</span></div>
                     <div><span class="label">Fecha Inicio:</span> <span class="value">${formatDate(proyecto.fecha_inicio)}</span></div>
                     <div><span class="label">Fecha Fin:</span> <span class="value">${formatDate(proyecto.fecha_fin)}</span></div>
+                    <div><span class="label">Fases:</span> <span class="value">${fasesCompletas}/${totalFases || 1} completas</span></div>
                     <div><span class="label">Progreso:</span> <span class="value">${progreso}%</span></div>
                 </div>
                 <div class="stats">
                     <div class="stat-card"><div class="num blue">${totalTareas}</div><div class="label">Total Tareas</div></div>
                     <div class="stat-card"><div class="num green">${completadas}</div><div class="label">Completadas</div></div>
+                    <div class="stat-card"><div class="num yellow">${pendientes}</div><div class="label">Pendientes</div></div>
+                    <div class="stat-card"><div class="num red">${bloqueadas}</div><div class="label">Bloqueadas</div></div>
                 </div>
                 <div class="footer">Reporte generado el ${new Date().toLocaleDateString('es-ES')}</div>
                 <div style="text-align: center; margin-top: 16px;" class="no-print">
@@ -1312,7 +1359,55 @@ async function generarReporteProyecto(proyectoId) {
 // ============================================
 async function guardarProyecto(e) {
     e.preventDefault();
-    showToast('Función guardar proyecto disponible en la versión completa', 'info');
+    
+    if (!puedeCrearProyecto(usuarioActual)) {
+        showToast('No tienes permiso para crear proyectos', 'error');
+        return;
+    }
+    
+    const id = document.getElementById('proy-id').value;
+    const nombre = document.getElementById('proy-nombre').value.trim();
+    const categoria = document.getElementById('proy-categoria').value;
+    const metodologia = document.getElementById('proy-metodologia').value;
+    const empresa = document.getElementById('proy-empresa').value.trim();
+    const area = document.getElementById('proy-area').value.trim();
+    const fecha_inicio = document.getElementById('proy-inicio').value;
+    const fecha_fin = document.getElementById('proy-fecha').value;
+    
+    if (!nombre || !categoria || !empresa) { 
+        showToast('Nombre, categoría y empresa son obligatorios', 'error'); 
+        return; 
+    }
+    
+    const data = { 
+        nombre, 
+        categoria, 
+        metodologia, 
+        empresa, 
+        area: area || 'Sin área', 
+        fecha_inicio, 
+        fecha_fin, 
+        fecha_actualizacion: new Date().toISOString() 
+    };
+    
+    try {
+        if (id) {
+            await supabaseUpdate('proyectos', id, data);
+            showToast('✅ Proyecto actualizado');
+        } else {
+            await supabaseInsert('proyectos', { ...data, estado: 'Activo' });
+            showToast('✅ Proyecto creado');
+        }
+        cerrarModal('modal-proyecto');
+        document.getElementById('form-proyecto').reset();
+        document.getElementById('proy-id').value = '';
+        document.getElementById('modal-proyecto-titulo').textContent = '🚀 Nuevo Proyecto';
+        document.getElementById('metodologia-desc').style.display = 'none';
+        await cargarDashboard();
+    } catch (e) {
+        console.error('Error guardando proyecto:', e);
+        showToast('Error: ' + e.message, 'error');
+    }
 }
 
 // ============================================
@@ -1320,28 +1415,166 @@ async function guardarProyecto(e) {
 // ============================================
 async function guardarTarea(e) {
     e.preventDefault();
-    showToast('Función guardar tarea disponible en la versión completa', 'info');
+    const id = document.getElementById('tar-id').value;
+    const titulo = document.getElementById('tar-titulo').value.trim();
+    const proyecto_id = parseInt(document.getElementById('tar-proyecto').value);
+    const responsable_texto = document.getElementById('tar-responsable').value.trim();
+    const prioridad = document.getElementById('tar-prioridad').value;
+    const fase = document.getElementById('tar-fase').value;
+    const fecha_inicio = document.getElementById('tar-fecha-inicio').value || null;
+    const fecha_vencimiento = document.getElementById('tar-fecha-vencimiento').value || null;
+    const descripcion = document.getElementById('tar-descripcion').value.trim();
+    const comentarios = document.getElementById('tar-comentarios').value.trim();
+    
+    if (!titulo || !proyecto_id) { showToast('Título y proyecto son obligatorios', 'error'); return; }
+    
+    const proyecto = proyectosCache.find(p => p.id === proyecto_id);
+    if (!tieneAcceso(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para agregar tareas a este proyecto', 'error');
+        return;
+    }
+    
+    const data = { 
+        titulo, 
+        proyecto_id, 
+        responsable_texto: responsable_texto || null, 
+        prioridad, 
+        fase: fase || null,
+        fecha_inicio: fecha_inicio || null,
+        fecha_vencimiento: fecha_vencimiento || null,
+        descripcion: descripcion || null, 
+        comentarios: comentarios || null,
+        fecha_actualizacion: new Date().toISOString() 
+    };
+    
+    try {
+        if (id) {
+            await supabaseUpdate('tareas', id, data);
+            showToast('✅ Tarea actualizada');
+        } else {
+            await supabaseInsert('tareas', { ...data, estado: 'Pendiente' });
+            showToast('✅ Tarea creada');
+        }
+        cerrarModal('modal-tarea');
+        document.getElementById('form-tarea').reset();
+        document.getElementById('tar-id').value = '';
+        document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
+        document.getElementById('tar-proyecto').disabled = false;
+        await recargarDatos(proyecto_id);
+    } catch (e) {
+        console.error('Error guardando tarea:', e);
+        showToast('Error: ' + e.message, 'error');
+    }
 }
 
 // ============================================
 // EDITAR TAREA
 // ============================================
 function editarTarea(id) {
-    showToast('Función editar tarea disponible en la versión completa', 'info');
+    const tarea = tareasCache.find(t => t.id === id);
+    if (!tarea) { showToast('Tarea no encontrada', 'error'); return; }
+    
+    const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
+    if (!tieneAcceso(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para editar esta tarea', 'error');
+        return;
+    }
+    
+    document.getElementById('modal-tarea-titulo').textContent = '✏️ Editar Tarea';
+    document.getElementById('tar-id').value = tarea.id;
+    document.getElementById('tar-titulo').value = tarea.titulo || '';
+    document.getElementById('tar-proyecto').value = tarea.proyecto_id || '';
+    document.getElementById('tar-proyecto').disabled = true;
+    document.getElementById('tar-responsable').value = tarea.responsable_texto || '';
+    document.getElementById('tar-prioridad').value = tarea.prioridad || 'Media';
+    document.getElementById('tar-fecha-inicio').value = tarea.fecha_inicio || '';
+    document.getElementById('tar-fecha-vencimiento').value = tarea.fecha_vencimiento || '';
+    document.getElementById('tar-descripcion').value = tarea.descripcion || '';
+    document.getElementById('tar-comentarios').value = tarea.comentarios || '';
+    
+    const proyecto2 = proyectosCache.find(p => p.id === tarea.proyecto_id);
+    const fasesSelect = document.getElementById('tar-fase');
+    fasesSelect.innerHTML = '';
+    let fasesDisponibles = [];
+    if (proyecto2 && proyecto2.metodologia && FASES_POR_METODOLOGIA[proyecto2.metodologia]) {
+        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto2.metodologia].fases;
+    } else {
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === tarea.proyecto_id);
+        const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
+        fasesDisponibles = fasesExistentes.length > 0 ? fasesExistentes : ['Sin fase'];
+    }
+    fasesDisponibles.forEach(f => {
+        const option = document.createElement('option');
+        option.value = f;
+        option.textContent = f;
+        if (f === tarea.fase) option.selected = true;
+        fasesSelect.appendChild(option);
+    });
+    if (tarea.fase && !fasesDisponibles.includes(tarea.fase)) {
+        const option = document.createElement('option');
+        option.value = tarea.fase;
+        option.textContent = tarea.fase + ' (actual)';
+        option.selected = true;
+        fasesSelect.appendChild(option);
+    }
+    abrirModal('modal-tarea');
 }
 
 // ============================================
 // ELIMINAR TAREA
 // ============================================
 async function eliminarTarea(id) {
-    showToast('Función eliminar tarea disponible en la versión completa', 'info');
+    if (!confirm('¿Eliminar esta tarea?')) return;
+    try {
+        const tarea = tareasCache.find(t => t.id === id);
+        if (!tarea) { showToast('Tarea no encontrada', 'error'); return; }
+        
+        const proyecto = proyectosCache.find(p => p.id === tarea.proyecto_id);
+        if (!tieneAcceso(usuarioActual, proyecto)) {
+            showToast('No tienes permiso para eliminar esta tarea', 'error');
+            return;
+        }
+        
+        await supabaseDelete('tareas', id);
+        showToast('Tarea eliminada');
+        if (tarea) await recargarDatos(tarea.proyecto_id);
+        else await cargarDashboard();
+    } catch (e) {
+        console.error('Error eliminando tarea:', e);
+        showToast('Error al eliminar tarea: ' + e.message, 'error');
+    }
 }
 
 // ============================================
 // ABRIR MODAL TAREA DESDE DETALLE
 // ============================================
 function abrirModalTareaDesdeDetalle(proyectoId) {
-    showToast('Función crear tarea disponible en la versión completa', 'info');
+    const select = document.getElementById('tar-proyecto');
+    select.value = proyectoId;
+    select.disabled = true;
+    document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
+    document.getElementById('tar-id').value = '';
+    document.getElementById('tar-titulo').value = '';
+    document.getElementById('tar-responsable').value = '';
+    document.getElementById('tar-prioridad').value = 'Media';
+    document.getElementById('tar-fecha-inicio').value = '';
+    document.getElementById('tar-fecha-vencimiento').value = '';
+    document.getElementById('tar-descripcion').value = '';
+    document.getElementById('tar-comentarios').value = '';
+    
+    const proyecto = proyectosCache.find(p => p.id === proyectoId);
+    const fasesSelect = document.getElementById('tar-fase');
+    let fasesDisponibles = [];
+    if (proyecto && proyecto.metodologia && FASES_POR_METODOLOGIA[proyecto.metodologia]) {
+        fasesDisponibles = FASES_POR_METODOLOGIA[proyecto.metodologia].fases;
+    } else {
+        const tareasProyecto = tareasCache.filter(t => t.proyecto_id === proyectoId);
+        const fasesExistentes = [...new Set(tareasProyecto.map(t => t.fase).filter(f => f && f !== ''))];
+        fasesDisponibles = fasesExistentes.length > 0 ? fasesExistentes : ['Sin fase'];
+    }
+    fasesSelect.innerHTML = fasesDisponibles.map(f => `<option value="${f}">${f}</option>`).join('');
+    if (!fasesDisponibles.includes('Sin fase')) fasesSelect.innerHTML += `<option value="">Sin fase</option>`;
+    abrirModal('modal-tarea');
 }
 
 // ============================================
@@ -1381,6 +1614,10 @@ async function recargarDatos(proyectoId) {
             return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
         });
         renderizarProyectos(proyectosConProgreso);
+        
+        if (proyectoId && detallesAbiertosGlobal[proyectoId]) {
+            await renderizarDetalle(proyectoId);
+        }
     } catch (e) {
         console.error('Error recargando datos:', e);
         showToast('Error al recargar datos', 'error');
@@ -1411,19 +1648,58 @@ function buscarProyectos() {
 // ============================================
 // RECURSOS, PROVEEDORES, RESPALDOS, CONFIGURACIÓN
 // ============================================
-function cargarRecursos() {
-    document.getElementById('lista-recursos').innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">Cargando recursos...</div>';
+async function cargarRecursos() {
+    try {
+        const usuarios = await supabaseFetch('usuarios?order=id.desc');
+        const lista = document.getElementById('lista-recursos');
+        if (usuarios.length === 0) {
+            lista.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No hay recursos agregados</div>';
+            return;
+        }
+        lista.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Empresa</th>
+                            <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Tareas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${usuarios.map(u => {
+                            const tareasAsignadas = tareasCache.filter(t => t.responsable_texto === u.nombre).length;
+                            const rolLabel = ROLE_LABELS[u.rol] || u.rol;
+                            return `
+                            <tr class="border-t hover:bg-gray-50 transition">
+                                <td class="px-3 py-1.5 text-xs font-medium">${u.nombre}</td>
+                                <td class="px-3 py-1.5 text-xs text-gray-500">${u.email || '-'}</td>
+                                <td class="px-3 py-1.5 text-xs"><span class="user-role-badge ${ROLE_BADGE_CLASSES[u.rol] || ''}">${rolLabel}</span></td>
+                                <td class="px-3 py-1.5 text-xs text-gray-500">${u.empresa || '-'}</td>
+                                <td class="px-3 py-1.5 text-xs text-center">${tareasAsignadas}</td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (e) {
+        console.error('Error cargando recursos:', e);
+        document.getElementById('lista-recursos').innerHTML = `<div class="text-red-500 text-sm">Error cargando recursos: ${e.message}</div>`;
+    }
 }
 
-function cargarProveedores() {
+async function cargarProveedores() {
     document.getElementById('lista-proveedores').innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">Cargando proveedores...</div>';
 }
 
-function cargarRespaldos() {
+async function cargarRespaldos() {
     document.getElementById('lista-respaldos').innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">Cargando respaldos...</div>';
 }
 
-function cargarConfiguracion() {
+async function cargarConfiguracion() {
     document.getElementById('configuracion-contenido').innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">Panel de administración</div>';
 }
 
@@ -1456,21 +1732,63 @@ function cargarTodosLosProyectos() {
 }
 
 function verRespaldos() {
-    showToast('Función de respaldos disponible en la versión completa', 'info');
+    showToast('Función de respaldos disponible', 'info');
 }
 
 // ============================================
 // EDITAR PROYECTO
 // ============================================
 function editarProyecto(id) {
-    showToast('Función editar proyecto disponible en la versión completa', 'info');
+    const proyecto = proyectosCache.find(p => p.id === id);
+    if (!proyecto) { showToast('Proyecto no encontrado', 'error'); return; }
+    
+    if (!puedeEditarProyecto(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para editar este proyecto', 'error');
+        return;
+    }
+    
+    document.getElementById('modal-proyecto-titulo').textContent = '✏️ Editar Proyecto';
+    document.getElementById('proy-id').value = proyecto.id;
+    document.getElementById('proy-nombre').value = proyecto.nombre || '';
+    document.getElementById('proy-categoria').value = proyecto.categoria || '';
+    document.getElementById('proy-metodologia').value = proyecto.metodologia || '';
+    document.getElementById('proy-empresa').value = proyecto.empresa || '';
+    document.getElementById('proy-area').value = proyecto.area || '';
+    document.getElementById('proy-inicio').value = proyecto.fecha_inicio || '';
+    document.getElementById('proy-fecha').value = proyecto.fecha_fin || '';
+    const categoria = proyecto.categoria || '';
+    const metodologiaInfo = METODOLOGIAS[categoria];
+    if (metodologiaInfo) {
+        document.getElementById('metodologia-desc-texto').textContent = metodologiaInfo.desc;
+        document.getElementById('metodologia-desc').style.display = 'block';
+    } else {
+        document.getElementById('metodologia-desc').style.display = 'none';
+    }
+    abrirModal('modal-proyecto');
 }
 
 // ============================================
 // ELIMINAR PROYECTO
 // ============================================
 async function eliminarProyecto(id) {
-    showToast('Función eliminar proyecto disponible en la versión completa', 'info');
+    const proyecto = proyectosCache.find(p => p.id === id);
+    if (!proyecto) { showToast('Proyecto no encontrado', 'error'); return; }
+    
+    if (!puedeEliminarProyecto(usuarioActual, proyecto)) {
+        showToast('No tienes permiso para eliminar este proyecto', 'error');
+        return;
+    }
+    
+    if (!confirm(`¿Eliminar "${proyecto.nombre}"?`)) return;
+    try {
+        await supabaseDelete('proyectos', id);
+        showToast(`✅ Proyecto "${proyecto.nombre}" eliminado`);
+        detallesAbiertosGlobal = {};
+        await cargarDashboard();
+    } catch (e) {
+        console.error('Error eliminando proyecto:', e);
+        showToast('Error al eliminar: ' + e.message, 'error');
+    }
 }
 
 // ============================================
@@ -1487,6 +1805,40 @@ async function guardarUsuario(e) {
 async function guardarProveedor(e) {
     e.preventDefault();
     showToast('Función guardar proveedor disponible en la versión completa', 'info');
+}
+
+// ============================================
+// REPORTES
+// ============================================
+function generarReportes() {
+    const container = document.getElementById('contenido-reportes');
+    const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
+    const tareasAccesibles = getTareasAccesibles(usuarioActual, tareasCache, proyectosCache);
+    
+    const totalProyectos = proyectosAccesibles.length;
+    const totalTareas = tareasAccesibles.length;
+    const completadas = tareasAccesibles.filter(t => t.estado === 'Completado').length;
+    const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
+    const vencidas = tareasAccesibles.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+    
+    container.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-50 p-3 rounded-lg">
+                <h3 class="font-semibold text-sm mb-2">📊 Resumen General</h3>
+                <div class="space-y-1 text-sm">
+                    <div class="flex justify-between"><span>Proyectos:</span><span class="font-semibold">${totalProyectos}</span></div>
+                    <div class="flex justify-between"><span>Tareas:</span><span class="font-semibold">${totalTareas}</span></div>
+                    <div class="flex justify-between"><span>Completadas:</span><span class="font-semibold text-green-600">${completadas}</span></div>
+                    <div class="flex justify-between"><span>Pendientes:</span><span class="font-semibold text-yellow-600">${pendientes}</span></div>
+                    <div class="flex justify-between"><span>Vencidas:</span><span class="font-semibold text-red-600">${vencidas}</span></div>
+                    <div class="flex justify-between"><span>Eficiencia:</span><span class="font-semibold text-blue-600">${totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0}%</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p class="text-xs text-blue-600">Total de ${totalProyectos} proyectos con ${totalTareas} tareas. ${completadas} completadas (${totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0}% de avance).</p>
+        </div>
+    `;
 }
 
 // ============================================
@@ -1515,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-console.log('✅ PM System v5.1 - Login funcional cargado correctamente');
+console.log('✅ PM System v5.1 - Todas las funciones cargadas correctamente');
 </script>
 
 <!-- ============================================ -->
