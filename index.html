@@ -329,6 +329,20 @@ function showToast(message, type = 'success') {
 }
 
 // ============================================
+// DETECTAR TAREA VENCIDA
+// ============================================
+function isTareaVencida(tarea) {
+    if (!tarea.fecha_vencimiento) return false;
+    if (tarea.estado === 'Completado') return false;
+    if (tarea.estado === 'Bloqueada') return false;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const fechaVenc = new Date(tarea.fecha_vencimiento);
+    fechaVenc.setHours(0, 0, 0, 0);
+    return fechaVenc < hoy;
+}
+
+// ============================================
 // LOGIN CON SESIÓN PERSISTENTE
 // ============================================
 async function login(e) {
@@ -505,11 +519,9 @@ function calcularFechaFin() {
 // ============================================
 // FUNCIONES AUXILIARES
 // ============================================
-// CORREGIDO: Formato de fecha SIN problemas de UTC
 function formatDate(dateString) {
     if (!dateString) return '-';
     try {
-        // Si la fecha viene en formato YYYY-MM-DD, parsear directamente
         const partes = dateString.split('-');
         if (partes.length === 3) {
             const año = parseInt(partes[0]);
@@ -518,7 +530,6 @@ function formatDate(dateString) {
             const fecha = new Date(año, mes, dia);
             return fecha.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
         }
-        // Fallback para otros formatos
         const date = new Date(dateString);
         return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
     } catch { return dateString; }
@@ -601,7 +612,7 @@ function puedeEliminarProyecto(usuario, proyecto) {
 }
 
 // ============================================
-// RENDER TAREA FILA GANTT - CON AMBAS FECHAS
+// RENDER TAREA FILA GANTT - CON INDICADOR DE VENCIDA
 // ============================================
 function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const barraClase = getBarraClase(t.estado);
@@ -609,7 +620,9 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const prioridadLabel = t.prioridad || 'Media';
     const responsable = t.responsable_texto || '-';
     
-    // Usar formatDate corregido
+    const vencida = isTareaVencida(t);
+    const vencidaLabel = vencida ? '<span style="background:#ef4444; color:white; padding:1px 8px; border-radius:10px; font-size:9px; font-weight:600; margin-left:4px;">🔴 VENCIDA</span>' : '';
+    
     const fechaInicioStr = formatDate(t.fecha_inicio);
     const fechaVencStr = formatDate(t.fecha_vencimiento);
     const fechasStr = `📅 ${fechaInicioStr} → ${fechaVencStr}`;
@@ -664,10 +677,14 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
         comentariosHTML = `<span class="comentario-tag" onclick="event.stopPropagation(); verComentarios(${t.id})" title="Ver/Editar comentarios">💬 ${comentarioCorto}</span>`;
     }
     
+    const rowStyle = vencida ? 'style="background-color: #fef2f2; border-left: 4px solid #ef4444;"' : '';
+    
     return `
-        <tr>
+        <tr ${rowStyle}>
             <td>
-                <div class="gantt-titulo">${t.titulo} ${evidenciaHTML} ${comentariosHTML}</div>
+                <div class="gantt-titulo">
+                    ${t.titulo} ${vencidaLabel} ${evidenciaHTML} ${comentariosHTML}
+                </div>
                 <div class="gantt-fecha">${fechasStr}</div>
             </td>
             <td><div class="gantt-responsable">${responsable}</div></td>
@@ -816,7 +833,7 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
 }
 
 // ============================================
-// SUBIR EVIDENCIA
+// SUBIR EVIDENCIA - CORREGIDO
 // ============================================
 function abrirModalEvidencia(tareaId) {
     const tarea = tareasCache.find(t => t.id === tareaId);
@@ -855,12 +872,15 @@ async function subirEvidencia() {
             throw new Error(`Error al subir archivo (${uploadRes.status}): ${errorText}`);
         }
         const urlPublica = `${SUPABASE_URL}/storage/v1/object/public/evidencias/${nombreArchivo}`;
+        
+        // Actualizar los campos de evidencia
         await supabaseUpdate('tareas', tareaId, {
             evidencia_url: urlPublica,
             evidencia_nombre: archivo.name,
             evidencia_tipo: archivo.type,
             estado: 'Completado'
         });
+        
         cerrarModal('modal-evidencia');
         showToast('✅ Evidencia subida correctamente', 'success');
         await recargarDatosManteniendoArbol(tareaEnEvidencia.proyecto_id);
@@ -891,21 +911,22 @@ async function cargarDashboard() {
             const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
             const total = tareasProyecto.length;
             const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
-            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
+            const vencidas = tareasProyecto.filter(t => isTareaVencida(t)).length;
+            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas, vencidas: vencidas };
         });
 
         const totalTareas = tareasAccesibles.length;
         const enProgreso = tareasAccesibles.filter(t => t.estado === 'En Progreso').length;
         const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
         const completadasTotal = tareasAccesibles.filter(t => t.estado === 'Completado').length;
-        const vencidas = tareasAccesibles.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        const vencidasTotal = tareasAccesibles.filter(t => isTareaVencida(t)).length;
 
         document.getElementById('kpi-proyectos').textContent = proyectosAccesibles.length;
         document.getElementById('kpi-tareas-totales').textContent = totalTareas;
         document.getElementById('kpi-en-progreso').textContent = enProgreso;
         document.getElementById('kpi-tareas').textContent = pendientes;
         document.getElementById('kpi-completadas').textContent = completadasTotal;
-        document.getElementById('kpi-vencidas').textContent = vencidas;
+        document.getElementById('kpi-vencidas').textContent = vencidasTotal;
         document.getElementById('proyectos-count-label').textContent = `(${proyectosAccesibles.length})`;
 
         const selectProyecto = document.getElementById('tar-proyecto');
@@ -956,6 +977,7 @@ function renderizarProyectos(proyectos) {
         const duracion = FASES_POR_METODOLOGIA[p.metodologia]?.duracion_total || DURACION_DEFAULT;
         const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
         const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+        const vencidas = tareasProyecto.filter(t => isTareaVencida(t)).length;
         const fasesMetodologia = FASES_POR_METODOLOGIA[p.metodologia]?.fases || [];
         let fasesInfo = '';
         if (fasesMetodologia.length > 0) {
@@ -978,7 +1000,7 @@ function renderizarProyectos(proyectos) {
         const puedeEliminar = puedeEliminarProyecto(usuarioActual, p);
         
         return `
-        <div class="proyecto-card border rounded-lg p-3 hover:shadow-md transition ${p.estado === 'Crítico' ? 'border-l-4 border-l-red-500' : ''}" data-proyecto-id="${p.id}">
+        <div class="proyecto-card border rounded-lg p-3 hover:shadow-md transition ${p.estado === 'Crítico' ? 'border-l-4 border-l-red-500' : ''} ${vencidas > 0 ? 'border-r-4 border-r-red-500' : ''}" data-proyecto-id="${p.id}">
             <div class="flex flex-wrap justify-between items-start gap-3">
                 <div class="flex-1 min-w-[200px]">
                     <div class="flex items-center gap-2 flex-wrap">
@@ -986,6 +1008,7 @@ function renderizarProyectos(proyectos) {
                         <span class="status-badge ${estadoClase}">${p.estado || 'Activo'}</span>
                         ${p.metodologia ? `<span class="metodologia-badge">${p.metodologia}</span>` : ''}
                         <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">${p.empresa || 'Sin empresa'}</span>
+                        ${vencidas > 0 ? `<span class="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded">⚠️ ${vencidas} vencidas</span>` : ''}
                     </div>
                     <div class="proyecto-empresa text-xs text-gray-500 mt-0.5">${p.empresa || 'Sin empresa'}</div>
                     <div class="text-xs text-gray-500">${p.area || 'Sin área'}</div>
@@ -996,7 +1019,9 @@ function renderizarProyectos(proyectos) {
                     </div>
                     <div class="text-xs text-gray-400 mt-0.5 proyecto-tareas-text">
                         <i class="fas fa-tasks mr-1"></i>
-                        ${p.total_tareas} tareas • ${completadas} completadas${fasesInfo}
+                        ${p.total_tareas} tareas • ${completadas} completadas
+                        ${vencidas > 0 ? `• <span class="text-red-500 font-semibold">${vencidas} vencidas</span>` : ''}
+                        ${fasesInfo}
                     </div>
                 </div>
                 <div class="w-40 flex-shrink-0">
@@ -1312,14 +1337,14 @@ async function recargarDatosManteniendoArbol(proyectoId) {
         const enProgreso = tareasAccesibles.filter(t => t.estado === 'En Progreso').length;
         const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
         const completadasTotal = tareasAccesibles.filter(t => t.estado === 'Completado').length;
-        const vencidas = tareasAccesibles.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        const vencidasTotal = tareasAccesibles.filter(t => isTareaVencida(t)).length;
         
         document.getElementById('kpi-proyectos').textContent = proyectosAccesibles.length;
         document.getElementById('kpi-tareas-totales').textContent = totalTareas;
         document.getElementById('kpi-en-progreso').textContent = enProgreso;
         document.getElementById('kpi-tareas').textContent = pendientes;
         document.getElementById('kpi-completadas').textContent = completadasTotal;
-        document.getElementById('kpi-vencidas').textContent = vencidas;
+        document.getElementById('kpi-vencidas').textContent = vencidasTotal;
         document.getElementById('proyectos-count-label').textContent = `(${proyectosAccesibles.length})`;
         
         if (proyectoId) {
@@ -1346,12 +1371,13 @@ function actualizarContadoresTareas() {
             if (proyecto) {
                 const tareasProyecto = tareasCache.filter(t => t.proyecto_id === id);
                 const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+                const vencidas = tareasProyecto.filter(t => isTareaVencida(t)).length;
                 const total = tareasProyecto.length;
                 const progreso = calcularProgresoPorFases(tareasProyecto, proyecto.metodologia);
                 
                 const tareasText = card.querySelector('.proyecto-tareas-text');
                 if (tareasText) {
-                    tareasText.innerHTML = `<i class="fas fa-tasks mr-1"></i> ${total} tareas • ${completadas} completadas`;
+                    tareasText.innerHTML = `<i class="fas fa-tasks mr-1"></i> ${total} tareas • ${completadas} completadas${vencidas > 0 ? ` • <span class="text-red-500 font-semibold">${vencidas} vencidas</span>` : ''}`;
                 }
                 
                 const progressFill = card.querySelector('.progress-fill');
@@ -1363,6 +1389,25 @@ function actualizarContadoresTareas() {
                 const progresoNumber = card.querySelector('.progreso-number');
                 if (progresoNumber) {
                     progresoNumber.textContent = `${progreso}%`;
+                }
+                
+                // Actualizar badge de vencidas
+                let badgeVencidas = card.querySelector('.vencidas-badge');
+                if (vencidas > 0) {
+                    if (badgeVencidas) {
+                        badgeVencidas.textContent = `⚠️ ${vencidas} vencidas`;
+                    } else {
+                        // Crear badge si no existe
+                        const nombreDiv = card.querySelector('.proyecto-nombre')?.parentElement;
+                        if (nombreDiv) {
+                            const badge = document.createElement('span');
+                            badge.className = 'text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded vencidas-badge';
+                            badge.textContent = `⚠️ ${vencidas} vencidas`;
+                            nombreDiv.appendChild(badge);
+                        }
+                    }
+                } else if (badgeVencidas) {
+                    badgeVencidas.remove();
                 }
             }
         }
@@ -1459,6 +1504,7 @@ async function generarReporteProyecto(proyectoId) {
         const completadas = tareas.filter(t => t.estado === 'Completado').length;
         const pendientes = tareas.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
         const bloqueadas = tareas.filter(t => t.estado === 'Bloqueada').length;
+        const vencidas = tareas.filter(t => isTareaVencida(t)).length;
         const progreso = totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0;
         let fasesCompletas = 0, totalFases = 0;
         fasesMetodologia.forEach(fase => {
@@ -1506,12 +1552,15 @@ async function generarReporteProyecto(proyectoId) {
                             const prioridadColor = prioridadColors[t.prioridad] || '#6b7280';
                             const tieneComentarios = t.comentarios && t.comentarios.trim() !== '';
                             const comentariosMostrar = tieneComentarios ? t.comentarios : 'Sin comentarios';
+                            const vencida = isTareaVencida(t);
+                            const vencidaLabel = vencida ? '<span style="color:#ef4444; font-weight:600;">🔴 VENCIDA</span>' : '';
                             
                             return `
-                                <div style="display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">
+                                <div style="display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px; ${vencida ? 'background: #fef2f2;' : ''}">
                                     <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 4px;">
                                         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                             <span style="font-weight: 500;">${t.titulo}</span>
+                                            ${vencidaLabel}
                                             <span style="color: ${estadoColor}; font-weight: 500; font-size: 11px; background: #f3f4f6; padding: 1px 8px; border-radius: 10px;">
                                                 ${t.estado || 'Pendiente'}
                                             </span>
@@ -1551,18 +1600,20 @@ async function generarReporteProyecto(proyectoId) {
                     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
                     .info-grid .label { color: #6b7280; }
                     .info-grid .value { font-weight: 500; }
-                    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+                    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 16px 0; }
                     .stat-card { background: #f9fafb; padding: 12px; border-radius: 8px; text-align: center; }
                     .stat-card .num { font-size: 22px; font-weight: 700; }
                     .stat-card .num.blue { color: #3b82f6; }
                     .stat-card .num.green { color: #22c55e; }
                     .stat-card .num.yellow { color: #f59e0b; }
                     .stat-card .num.red { color: #ef4444; }
+                    .stat-card .num.orange { color: #f97316; }
                     .stat-card .label { font-size: 11px; color: #6b7280; }
                     .section { margin: 16px 0; }
                     .section h3 { font-weight: 600; font-size: 15px; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
                     .comentario-box { background: #fefce8; border-left: 3px solid #d97706; padding: 6px 10px; border-radius: 4px; margin-top: 2px; font-size: 12px; color: #92400e; }
                     .footer { margin-top: 24px; padding-top: 12px; border-top: 2px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center; }
+                    .vencida-row { background: #fef2f2; }
                     @media print { body { background: white; padding: 20px; } .no-print { display: none; } }
                 </style>
             </head>
@@ -1588,6 +1639,7 @@ async function generarReporteProyecto(proyectoId) {
                     <div class="stat-card"><div class="num green">${completadas}</div><div class="label">Completadas</div></div>
                     <div class="stat-card"><div class="num yellow">${pendientes}</div><div class="label">Pendientes</div></div>
                     <div class="stat-card"><div class="num red">${bloqueadas}</div><div class="label">Bloqueadas</div></div>
+                    <div class="stat-card"><div class="num orange">${vencidas}</div><div class="label">Vencidas</div></div>
                 </div>
                 
                 <div class="section">
@@ -1955,6 +2007,7 @@ function cargarTodosLosProyectos() {
     container.innerHTML = proyectosAccesibles.map(p => {
         const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
         const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+        const vencidas = tareasProyecto.filter(t => isTareaVencida(t)).length;
         const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
         return `
             <div class="border-b py-2 flex justify-between items-center hover:bg-gray-50 px-2 rounded transition">
@@ -1962,6 +2015,7 @@ function cargarTodosLosProyectos() {
                     <span class="font-medium text-sm">${p.nombre}</span>
                     <span class="text-xs text-gray-500 ml-2">${p.empresa || ''}</span>
                     <span class="text-xs text-gray-400 ml-2">${p.metodologia || ''}</span>
+                    ${vencidas > 0 ? `<span class="text-xs text-red-500 ml-2">⚠️ ${vencidas} vencidas</span>` : ''}
                 </div>
                 <div class="flex items-center gap-3 text-xs">
                     <span>${completadas}/${tareasProyecto.length} tareas</span>
@@ -2061,7 +2115,7 @@ function generarReportes() {
     const totalTareas = tareasAccesibles.length;
     const completadas = tareasAccesibles.filter(t => t.estado === 'Completado').length;
     const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'En Progreso').length;
-    const vencidas = tareasAccesibles.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+    const vencidas = tareasAccesibles.filter(t => isTareaVencida(t)).length;
     
     container.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2078,7 +2132,7 @@ function generarReportes() {
             </div>
         </div>
         <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <p class="text-xs text-blue-600">Total de ${totalProyectos} proyectos con ${totalTareas} tareas. ${completadas} completadas (${totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0}% de avance).</p>
+            <p class="text-xs text-blue-600">Total de ${totalProyectos} proyectos con ${totalTareas} tareas. ${completadas} completadas (${totalTareas > 0 ? Math.round((completadas / totalTareas) * 100) : 0}% de avance). ${vencidas > 0 ? `⚠️ ${vencidas} tareas vencidas requieren atención.` : '✅ Todas las tareas están a tiempo.'}</p>
         </div>
     `;
 }
