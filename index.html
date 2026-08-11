@@ -329,10 +329,10 @@ function showToast(message, type = 'success') {
 }
 
 // ============================================
-// LOGIN
+// LOGIN CON SESIÓN PERSISTENTE
 // ============================================
 async function login(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     const email = document.getElementById('login-email').value.trim();
     
     if (!email) {
@@ -361,29 +361,11 @@ async function login(e) {
             return;
         }
         
-        usuarioActual = usuario;
+        // Guardar sesión en localStorage
+        localStorage.setItem('pm_user_email', email);
+        localStorage.setItem('pm_user_data', JSON.stringify(usuario));
         
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app-main').style.display = 'block';
-        
-        document.getElementById('user-name-display').textContent = usuario.nombre || usuario.email;
-        const rolLabel = ROLE_LABELS[usuario.rol] || usuario.rol || 'colaborador';
-        const badgeClass = ROLE_BADGE_CLASSES[usuario.rol] || '';
-        document.getElementById('user-role-display').textContent = rolLabel;
-        document.getElementById('user-role-display').className = 'user-role-badge ' + badgeClass;
-        
-        const esAdmin = usuario.rol === 'admin';
-        const esPM = usuario.rol === 'project_manager';
-        const puedeCrear = esAdmin || esPM;
-        
-        document.getElementById('btn-nuevo-proyecto').style.display = puedeCrear ? '' : 'none';
-        document.getElementById('btn-agregar-recurso').style.display = esAdmin ? '' : 'none';
-        document.getElementById('btn-agregar-proveedor').style.display = esAdmin || esPM ? '' : 'none';
-        document.getElementById('tab-configuracion').style.display = esAdmin ? '' : 'none';
-        
-        showToast(`✅ Bienvenido ${usuario.nombre || usuario.email} (${rolLabel})`, 'success');
-        
-        cargarDashboard();
+        await iniciarSesion(usuario);
         
     } catch (error) {
         console.error('Error en login:', error);
@@ -391,7 +373,68 @@ async function login(e) {
     }
 }
 
+async function iniciarSesion(usuario) {
+    usuarioActual = usuario;
+    
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-main').style.display = 'block';
+    
+    document.getElementById('user-name-display').textContent = usuario.nombre || usuario.email;
+    const rolLabel = ROLE_LABELS[usuario.rol] || usuario.rol || 'colaborador';
+    const badgeClass = ROLE_BADGE_CLASSES[usuario.rol] || '';
+    document.getElementById('user-role-display').textContent = rolLabel;
+    document.getElementById('user-role-display').className = 'user-role-badge ' + badgeClass;
+    
+    const esAdmin = usuario.rol === 'admin';
+    const esPM = usuario.rol === 'project_manager';
+    const puedeCrear = esAdmin || esPM;
+    
+    document.getElementById('btn-nuevo-proyecto').style.display = puedeCrear ? '' : 'none';
+    document.getElementById('btn-agregar-recurso').style.display = esAdmin ? '' : 'none';
+    document.getElementById('btn-agregar-proveedor').style.display = esAdmin || esPM ? '' : 'none';
+    document.getElementById('tab-configuracion').style.display = esAdmin ? '' : 'none';
+    
+    showToast(`✅ Bienvenido ${usuario.nombre || usuario.email} (${rolLabel})`, 'success');
+    
+    cargarDashboard();
+}
+
+// Verificar sesión al cargar la página
+async function verificarSesion() {
+    const email = localStorage.getItem('pm_user_email');
+    const userData = localStorage.getItem('pm_user_data');
+    
+    if (email && userData) {
+        try {
+            const usuario = JSON.parse(userData);
+            // Verificar que el usuario aún existe en la base de datos
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=*`, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            
+            if (response.ok) {
+                const usuarios = await response.json();
+                if (usuarios && usuarios.length > 0) {
+                    await iniciarSesion(usuarios[0]);
+                    return;
+                }
+            }
+        } catch (e) {
+            console.log('Sesión expirada, mostrando login');
+        }
+    }
+    
+    // Si no hay sesión, mostrar login
+    document.getElementById('login-screen').style.display = 'block';
+    document.getElementById('app-main').style.display = 'none';
+}
+
 function logout() {
+    localStorage.removeItem('pm_user_email');
+    localStorage.removeItem('pm_user_data');
     usuarioActual = null;
     document.getElementById('app-main').style.display = 'none';
     document.getElementById('login-screen').style.display = 'block';
@@ -551,14 +594,19 @@ function puedeEliminarProyecto(usuario, proyecto) {
 }
 
 // ============================================
-// RENDER TAREA FILA GANTT
+// RENDER TAREA FILA GANTT - CON AMBAS FECHAS
 // ============================================
 function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const barraClase = getBarraClase(t.estado);
     const prioridadClase = getPrioridadClase(t.prioridad);
     const prioridadLabel = t.prioridad || 'Media';
     const responsable = t.responsable_texto || '-';
-    const fechaStr = formatDate(t.fecha_vencimiento);
+    
+    // === MOSTRAR FECHA INICIO Y FECHA VENCIMIENTO ===
+    const fechaInicioStr = formatDate(t.fecha_inicio);
+    const fechaVencStr = formatDate(t.fecha_vencimiento);
+    const fechasStr = `📅 ${fechaInicioStr} → ${fechaVencStr}`;
+    
     let dias = 0, anchoPx = 60;
     if (t.fecha_inicio && t.fecha_vencimiento) {
         const inicio = new Date(t.fecha_inicio);
@@ -589,27 +637,31 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     if (t.estado === 'Completado') anchoPx = Math.max(anchoPx, 80);
     anchoPx = Math.min(anchoPx, 600);
     let textoDias = dias > 0 ? `${dias}d` : '0d';
+    
     let estadoCheck = '';
     if (t.estado === 'Completado') estadoCheck = '✅';
     else if (t.estado === 'Bloqueada') estadoCheck = '🚫';
     else if (t.estado === 'En Progreso') estadoCheck = '🔄';
     else estadoCheck = '⏳';
+    
     let evidenciaHTML = '';
     if (t.evidencia_url) {
         const nombreArchivo = t.evidencia_nombre || '📎 Evidencia';
         const nombreMostrar = nombreArchivo.length > 20 ? nombreArchivo.substring(0, 18) + '…' : nombreArchivo;
         evidenciaHTML = `<span class="evidencia-tag" onclick="event.stopPropagation(); verEvidencia('${t.evidencia_url}', '${nombreArchivo}')" title="Ver evidencia: ${nombreArchivo}">📎 ${nombreMostrar}</span>`;
     }
+    
     let comentariosHTML = '';
     if (t.comentarios && t.comentarios.trim() !== '') {
         const comentarioCorto = t.comentarios.length > 30 ? t.comentarios.substring(0, 28) + '…' : t.comentarios;
         comentariosHTML = `<span class="comentario-tag" onclick="event.stopPropagation(); verComentarios(${t.id})" title="Ver/Editar comentarios">💬 ${comentarioCorto}</span>`;
     }
+    
     return `
         <tr>
             <td>
                 <div class="gantt-titulo">${t.titulo} ${evidenciaHTML} ${comentariosHTML}</div>
-                <div class="gantt-fecha">${fechaStr}</div>
+                <div class="gantt-fecha">${fechasStr}</div>
             </td>
             <td><div class="gantt-responsable">${responsable}</div></td>
             <td><span class="prioridad-badge ${prioridadClase}">${prioridadLabel}</span></td>
@@ -710,7 +762,7 @@ async function guardarComentario(id) {
         await supabaseUpdate('tareas', id, { comentarios: comentario });
         showToast('✅ Comentario guardado correctamente');
         cerrarModal('modal-ver-comentarios');
-        await recargarDatos();
+        await recargarDatosManteniendoArbol();
     } catch (e) {
         console.error('Error guardando comentario:', e);
         showToast('Error al guardar comentario: ' + e.message, 'error');
@@ -718,7 +770,7 @@ async function guardarComentario(id) {
 }
 
 // ============================================
-// CAMBIAR ESTADO DE TAREA
+// CAMBIAR ESTADO DE TAREA - SIN COLAPSAR
 // ============================================
 async function cambiarEstadoTarea(id, nuevoEstado) {
     try {
@@ -735,7 +787,7 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
             if (tarea.evidencia_url) {
                 await supabaseUpdate('tareas', id, { estado: nuevoEstado });
                 showToast('✅ Tarea completada');
-                await recargarDatos(tarea.proyecto_id);
+                await recargarDatosManteniendoArbol(tarea.proyecto_id);
                 return;
             }
             const confirmar = confirm('📎 ¿Quieres subir evidencia para esta tarea?');
@@ -743,13 +795,13 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
             else {
                 await supabaseUpdate('tareas', id, { estado: nuevoEstado });
                 showToast('✅ Tarea completada sin evidencia');
-                await recargarDatos(tarea.proyecto_id);
+                await recargarDatosManteniendoArbol(tarea.proyecto_id);
                 return;
             }
         }
         await supabaseUpdate('tareas', id, { estado: nuevoEstado });
         showToast(`Estado cambiado a "${nuevoEstado}"`);
-        await recargarDatos(tarea.proyecto_id);
+        await recargarDatosManteniendoArbol(tarea.proyecto_id);
     } catch (e) {
         console.error('Error al cambiar estado:', e);
         showToast('Error al actualizar estado: ' + e.message, 'error');
@@ -804,7 +856,7 @@ async function subirEvidencia() {
         });
         cerrarModal('modal-evidencia');
         showToast('✅ Evidencia subida correctamente', 'success');
-        await recargarDatos(tareaEnEvidencia.proyecto_id);
+        await recargarDatosManteniendoArbol(tareaEnEvidencia.proyecto_id);
     } catch (e) {
         console.error('Error subiendo evidencia:', e);
         showToast('Error al subir evidencia: ' + e.message, 'error');
@@ -1239,6 +1291,259 @@ function toggleFase(element) {
 }
 
 // ============================================
+// RECARGAR DATOS MANTENIENDO EL ÁRBOL ABIERTO
+// ============================================
+async function recargarDatosManteniendoArbol(proyectoId) {
+    try {
+        const [nuevosProyectos, nuevasTareas] = await Promise.all([
+            supabaseFetch('proyectos?order=id.desc'),
+            supabaseFetch('tareas?select=*')
+        ]);
+        proyectosCache = nuevosProyectos;
+        tareasCache = nuevasTareas;
+        
+        const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
+        const tareasAccesibles = getTareasAccesibles(usuarioActual, tareasCache, proyectosCache);
+        
+        const totalTareas = tareasAccesibles.length;
+        const enProgreso = tareasAccesibles.filter(t => t.estado === 'En Progreso').length;
+        const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
+        const completadasTotal = tareasAccesibles.filter(t => t.estado === 'Completado').length;
+        const vencidas = tareasAccesibles.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        
+        document.getElementById('kpi-proyectos').textContent = proyectosAccesibles.length;
+        document.getElementById('kpi-tareas-totales').textContent = totalTareas;
+        document.getElementById('kpi-en-progreso').textContent = enProgreso;
+        document.getElementById('kpi-tareas').textContent = pendientes;
+        document.getElementById('kpi-completadas').textContent = completadasTotal;
+        document.getElementById('kpi-vencidas').textContent = vencidas;
+        document.getElementById('proyectos-count-label').textContent = `(${proyectosAccesibles.length})`;
+        
+        const proyectosConProgreso = proyectosAccesibles.map(p => {
+            const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
+            const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
+            const total = tareasProyecto.length;
+            const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
+        });
+        renderizarProyectos(proyectosConProgreso);
+        
+        if (proyectoId && detallesAbiertosGlobal[proyectoId]) {
+            await renderizarDetalleManteniendoArbol(proyectoId);
+        }
+    } catch (e) {
+        console.error('Error recargando datos:', e);
+        showToast('Error al recargar datos', 'error');
+    }
+}
+
+// ============================================
+// RENDERIZAR DETALLE MANTENIENDO EL ÁRBOL
+// ============================================
+async function renderizarDetalleManteniendoArbol(id) {
+    const detalleDiv = document.getElementById(`detalle-${id}`);
+    if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
+    
+    // Guardar el estado actual de las fases
+    const fasesState = {};
+    const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
+    fasesRows.forEach((row, index) => {
+        const toggle = row.querySelector('.fase-toggle');
+        const tareasFila = row.nextElementSibling;
+        if (tareasFila) {
+            fasesState[index] = !tareasFila.classList.contains('hidden');
+        }
+    });
+    
+    try {
+        const proyecto = proyectosCache.find(p => p.id === id);
+        if (!proyecto) { 
+            detalleDiv.innerHTML = '<div class="text-red-500 text-sm">Proyecto no encontrado</div>'; 
+            return; 
+        }
+        
+        if (!tieneAcceso(usuarioActual, proyecto)) {
+            detalleDiv.innerHTML = `
+                <div class="text-center py-4 text-red-500 text-sm">
+                    <i class="fas fa-lock text-2xl block mb-2"></i>
+                    No tienes permiso para ver este proyecto.
+                </div>
+            `;
+            return;
+        }
+        
+        let tareas = tareasCache.filter(t => t.proyecto_id === id);
+        const progreso = calcularProgresoPorFases(tareas, proyecto.metodologia);
+        const total = tareas.length;
+        const completadas = tareas.filter(t => t.estado === 'Completado').length;
+        const fasesMetodologia = FASES_POR_METODOLOGIA[proyecto.metodologia]?.fases || [];
+        let fasesStatus = [];
+        let completasFases = 0, totalFasesConTareas = 0;
+        if (fasesMetodologia.length > 0) {
+            fasesMetodologia.forEach(fase => {
+                const tareasFase = tareas.filter(t => t.fase === fase);
+                const tieneTareas = tareasFase.length > 0;
+                if (tieneTareas) {
+                    totalFasesConTareas++;
+                    const todasCompletas = tareasFase.every(t => t.estado === 'Completado');
+                    if (todasCompletas) completasFases++;
+                    fasesStatus.push({
+                        nombre: fase,
+                        completada: todasCompletas,
+                        total: tareasFase.length,
+                        completadas: tareasFase.filter(t => t.estado === 'Completado').length
+                    });
+                } else {
+                    fasesStatus.push({ nombre: fase, completada: false, total: 0, completadas: 0, sinTareas: true });
+                }
+            });
+        }
+        let fasesCompactasHTML = '';
+        if (fasesStatus.length > 0) {
+            fasesCompactasHTML = `
+                <div class="flex items-center gap-2 flex-wrap bg-gray-50 p-1.5 rounded border border-gray-200">
+                    <span class="text-xs font-semibold text-gray-600">${completasFases}/${totalFasesConTareas} fases</span>
+                    <span class="text-xs text-gray-400">|</span>
+                    <div class="fases-compactas">
+                        ${fasesStatus.map(f => {
+                            let clase = 'sin-tareas', icono = '⚪', detalle = '';
+                            if (f.sinTareas) { clase = 'sin-tareas'; icono = '○'; detalle = 'sin tareas'; }
+                            else if (f.completada) { clase = 'completa'; icono = '✅'; detalle = `${f.completadas}/${f.total}`; }
+                            else { clase = 'incompleta'; icono = '⏳'; detalle = `${f.completadas}/${f.total}`; }
+                            return `<span class="fase-item ${clase}"><span class="fase-check">${icono}</span>${f.nombre} <span class="fase-detalle">${detalle}</span></span>`;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        const ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
+        const estadoClase = proyecto.estado === 'Ejecutando' ? 'bg-green-100 text-green-700' : 
+                            proyecto.estado === 'Crítico' ? 'bg-red-100 text-red-700' : 
+                            proyecto.estado === 'Monitoreo' ? 'bg-yellow-100 text-yellow-700' : 
+                            'bg-gray-100 text-gray-700';
+        detalleDiv.innerHTML = `
+            <div class="bg-gray-50 p-2 rounded-lg mt-2">
+                <div class="flex flex-wrap justify-between items-start gap-2">
+                    <div class="flex-1 min-w-[120px]">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="status-badge ${estadoClase}">${proyecto.estado || 'Activo'}</span>
+                            ${proyecto.metodologia ? `<span class="metodologia-badge">${proyecto.metodologia}</span>` : ''}
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-1 text-xs text-gray-500">
+                            <span>${proyecto.empresa || 'Sin empresa'}</span>
+                            <span>${proyecto.area || 'Sin área'}</span>
+                            <span>${formatDate(proyecto.fecha_inicio)}</span>
+                            <span>${formatDate(proyecto.fecha_fin)}</span>
+                        </div>
+                        <div class="mt-1 max-w-xs">
+                            <div class="flex justify-between text-xs">
+                                <span>Progreso</span>
+                                <span class="font-semibold">${progreso}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill ${progreso < 40 ? 'bg-red-500' : progreso < 70 ? 'bg-yellow-500' : 'bg-blue-600'}" style="width:${progreso}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="ordenarPorFecha(${proyecto.id})" class="orden-btn" id="orden-btn-${proyecto.id}" title="Ordenar por fecha">
+                            <i class="fas fa-sort-amount-down-alt mr-1"></i> Fecha
+                        </button>
+                        <button onclick="generarReporteProyecto(${proyecto.id})" class="bg-green-600 text-white text-xs px-2 py-1 rounded hover:bg-green-700 transition" title="Generar reporte">
+                            <i class="fas fa-file-pdf mr-1"></i> Reporte
+                        </button>
+                        ${puedeEditarProyecto(usuarioActual, proyecto) ? `
+                        <button onclick="abrirModalTareaDesdeDetalle(${proyecto.id})" class="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 transition">
+                            <i class="fas fa-plus mr-1"></i> Tarea
+                        </button>` : ''}
+                    </div>
+                </div>
+                ${fasesCompactasHTML}
+                <div class="mt-2 pt-2 border-t">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-semibold text-gray-600"><i class="fas fa-tasks mr-1"></i>${tareas.length} tareas</span>
+                        <span class="text-xs text-gray-400">Gantt v5.1</span>
+                    </div>
+                    ${ganttHTML}
+                </div>
+            </div>
+        `;
+        
+        // Restaurar el estado de las fases
+        const newFasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
+        newFasesRows.forEach((row, index) => {
+            const toggle = row.querySelector('.fase-toggle');
+            const tareasFila = row.nextElementSibling;
+            if (tareasFila && fasesState[index] !== undefined) {
+                if (fasesState[index]) {
+                    tareasFila.classList.remove('hidden');
+                    if (toggle) toggle.classList.remove('collapsed');
+                } else {
+                    tareasFila.classList.add('hidden');
+                    if (toggle) toggle.classList.add('collapsed');
+                }
+            } else if (index === 0) {
+                if (toggle) toggle.classList.remove('collapsed');
+                if (tareasFila) tareasFila.classList.remove('hidden');
+            } else {
+                if (toggle) toggle.classList.add('collapsed');
+                if (tareasFila) tareasFila.classList.add('hidden');
+            }
+        });
+    } catch (e) {
+        console.error('Error en renderizarDetalleManteniendoArbol:', e);
+        detalleDiv.innerHTML = `<div class="text-red-500 text-sm">Error cargando detalle: ${e.message}</div>`;
+    }
+}
+
+// ============================================
+// RECARGAR DATOS (versión original para otros casos)
+// ============================================
+async function recargarDatos(proyectoId) {
+    try {
+        const [nuevosProyectos, nuevasTareas] = await Promise.all([
+            supabaseFetch('proyectos?order=id.desc'),
+            supabaseFetch('tareas?select=*')
+        ]);
+        proyectosCache = nuevosProyectos;
+        tareasCache = nuevasTareas;
+        
+        const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
+        const tareasAccesibles = getTareasAccesibles(usuarioActual, tareasCache, proyectosCache);
+        
+        const totalTareas = tareasAccesibles.length;
+        const enProgreso = tareasAccesibles.filter(t => t.estado === 'En Progreso').length;
+        const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
+        const completadasTotal = tareasAccesibles.filter(t => t.estado === 'Completado').length;
+        const vencidas = tareasAccesibles.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
+        
+        document.getElementById('kpi-proyectos').textContent = proyectosAccesibles.length;
+        document.getElementById('kpi-tareas-totales').textContent = totalTareas;
+        document.getElementById('kpi-en-progreso').textContent = enProgreso;
+        document.getElementById('kpi-tareas').textContent = pendientes;
+        document.getElementById('kpi-completadas').textContent = completadasTotal;
+        document.getElementById('kpi-vencidas').textContent = vencidas;
+        document.getElementById('proyectos-count-label').textContent = `(${proyectosAccesibles.length})`;
+        
+        const proyectosConProgreso = proyectosAccesibles.map(p => {
+            const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
+            const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
+            const total = tareasProyecto.length;
+            const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
+            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
+        });
+        renderizarProyectos(proyectosConProgreso);
+        
+        if (proyectoId && detallesAbiertosGlobal[proyectoId]) {
+            await renderizarDetalle(proyectoId);
+        }
+    } catch (e) {
+        console.error('Error recargando datos:', e);
+        showToast('Error al recargar datos', 'error');
+    }
+}
+
+// ============================================
 // ORDENAR POR FECHA
 // ============================================
 function ordenarPorFecha(proyectoId) {
@@ -1451,16 +1756,17 @@ async function guardarTarea(e) {
         if (id) {
             await supabaseUpdate('tareas', id, data);
             showToast('✅ Tarea actualizada');
+            await recargarDatosManteniendoArbol(proyecto_id);
         } else {
             await supabaseInsert('tareas', { ...data, estado: 'Pendiente' });
             showToast('✅ Tarea creada');
+            await recargarDatosManteniendoArbol(proyecto_id);
         }
         cerrarModal('modal-tarea');
         document.getElementById('form-tarea').reset();
         document.getElementById('tar-id').value = '';
         document.getElementById('modal-tarea-titulo').textContent = '📋 Nueva Tarea';
         document.getElementById('tar-proyecto').disabled = false;
-        await recargarDatos(proyecto_id);
     } catch (e) {
         console.error('Error guardando tarea:', e);
         showToast('Error: ' + e.message, 'error');
@@ -1537,8 +1843,7 @@ async function eliminarTarea(id) {
         
         await supabaseDelete('tareas', id);
         showToast('Tarea eliminada');
-        if (tarea) await recargarDatos(tarea.proyecto_id);
-        else await cargarDashboard();
+        await recargarDatosManteniendoArbol(tarea.proyecto_id);
     } catch (e) {
         console.error('Error eliminando tarea:', e);
         showToast('Error al eliminar tarea: ' + e.message, 'error');
@@ -1575,53 +1880,6 @@ function abrirModalTareaDesdeDetalle(proyectoId) {
     fasesSelect.innerHTML = fasesDisponibles.map(f => `<option value="${f}">${f}</option>`).join('');
     if (!fasesDisponibles.includes('Sin fase')) fasesSelect.innerHTML += `<option value="">Sin fase</option>`;
     abrirModal('modal-tarea');
-}
-
-// ============================================
-// RECARGAR DATOS
-// ============================================
-async function recargarDatos(proyectoId) {
-    try {
-        const [nuevosProyectos, nuevasTareas] = await Promise.all([
-            supabaseFetch('proyectos?order=id.desc'),
-            supabaseFetch('tareas?select=*')
-        ]);
-        proyectosCache = nuevosProyectos;
-        tareasCache = nuevasTareas;
-        
-        const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
-        const tareasAccesibles = getTareasAccesibles(usuarioActual, tareasCache, proyectosCache);
-        
-        const totalTareas = tareasAccesibles.length;
-        const enProgreso = tareasAccesibles.filter(t => t.estado === 'En Progreso').length;
-        const pendientes = tareasAccesibles.filter(t => t.estado === 'Pendiente' || t.estado === 'Hold').length;
-        const completadasTotal = tareasAccesibles.filter(t => t.estado === 'Completado').length;
-        const vencidas = tareasAccesibles.filter(t => t.fecha_vencimiento && new Date(t.fecha_vencimiento) < new Date() && t.estado !== 'Completado').length;
-        
-        document.getElementById('kpi-proyectos').textContent = proyectosAccesibles.length;
-        document.getElementById('kpi-tareas-totales').textContent = totalTareas;
-        document.getElementById('kpi-en-progreso').textContent = enProgreso;
-        document.getElementById('kpi-tareas').textContent = pendientes;
-        document.getElementById('kpi-completadas').textContent = completadasTotal;
-        document.getElementById('kpi-vencidas').textContent = vencidas;
-        document.getElementById('proyectos-count-label').textContent = `(${proyectosAccesibles.length})`;
-        
-        const proyectosConProgreso = proyectosAccesibles.map(p => {
-            const tareasProyecto = tareasCache.filter(t => t.proyecto_id === p.id);
-            const progreso = calcularProgresoPorFases(tareasProyecto, p.metodologia);
-            const total = tareasProyecto.length;
-            const completadas = tareasProyecto.filter(t => t.estado === 'Completado').length;
-            return { ...p, progreso_calculado: progreso, total_tareas: total, completadas: completadas };
-        });
-        renderizarProyectos(proyectosConProgreso);
-        
-        if (proyectoId && detallesAbiertosGlobal[proyectoId]) {
-            await renderizarDetalle(proyectoId);
-        }
-    } catch (e) {
-        console.error('Error recargando datos:', e);
-        showToast('Error al recargar datos', 'error');
-    }
 }
 
 // ============================================
@@ -1845,8 +2103,8 @@ function generarReportes() {
 // INICIALIZAR
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('login-screen').style.display = 'block';
-    document.getElementById('app-main').style.display = 'none';
+    // Verificar sesión al cargar
+    verificarSesion();
     
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
@@ -1873,7 +2131,7 @@ console.log('✅ PM System v5.1 - Todas las funciones cargadas correctamente');
 <!-- ============================================ -->
 <!-- LOGIN SCREEN                                 -->
 <!-- ============================================ -->
-<div id="login-screen" class="login-container">
+<div id="login-screen" class="login-container" style="display: block;">
     <h1>🔐 PM System</h1>
     <p class="subtitle">Control de Acceso v5.1</p>
     <div class="usuario-info">
