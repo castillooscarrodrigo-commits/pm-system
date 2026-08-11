@@ -505,9 +505,20 @@ function calcularFechaFin() {
 // ============================================
 // FUNCIONES AUXILIARES
 // ============================================
+// CORREGIDO: Formato de fecha SIN problemas de UTC
 function formatDate(dateString) {
     if (!dateString) return '-';
     try {
+        // Si la fecha viene en formato YYYY-MM-DD, parsear directamente
+        const partes = dateString.split('-');
+        if (partes.length === 3) {
+            const año = parseInt(partes[0]);
+            const mes = parseInt(partes[1]) - 1;
+            const dia = parseInt(partes[2]);
+            const fecha = new Date(año, mes, dia);
+            return fecha.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+        // Fallback para otros formatos
         const date = new Date(dateString);
         return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
     } catch { return dateString; }
@@ -598,6 +609,7 @@ function renderTareaFilaGantt(t, fechaInicioProyecto, fechaFinProyecto) {
     const prioridadLabel = t.prioridad || 'Media';
     const responsable = t.responsable_texto || '-';
     
+    // Usar formatDate corregido
     const fechaInicioStr = formatDate(t.fecha_inicio);
     const fechaVencStr = formatDate(t.fecha_vencimiento);
     const fechasStr = `📅 ${fechaInicioStr} → ${fechaVencStr}`;
@@ -1290,11 +1302,9 @@ function toggleFase(element) {
 // ============================================
 async function recargarDatosManteniendoArbol(proyectoId) {
     try {
-        // Recargar tareas
         const nuevasTareas = await supabaseFetch('tareas?select=*');
         tareasCache = nuevasTareas;
         
-        // Actualizar KPIs
         const proyectosAccesibles = getProyectosAccesibles(usuarioActual, proyectosCache);
         const tareasAccesibles = getTareasAccesibles(usuarioActual, tareasCache, proyectosCache);
         
@@ -1312,12 +1322,10 @@ async function recargarDatosManteniendoArbol(proyectoId) {
         document.getElementById('kpi-vencidas').textContent = vencidas;
         document.getElementById('proyectos-count-label').textContent = `(${proyectosAccesibles.length})`;
         
-        // Actualizar solo el detalle si está abierto
         if (proyectoId) {
             await actualizarDetalleSinRecargar(proyectoId);
         }
         
-        // Actualizar contadores en las tarjetas
         actualizarContadoresTareas();
         
     } catch (e) {
@@ -1368,7 +1376,6 @@ async function actualizarDetalleSinRecargar(proyectoId) {
     const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
     if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
     
-    // Guardar el estado actual de las fases
     const fasesState = {};
     const fasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
     fasesRows.forEach((row, index) => {
@@ -1385,7 +1392,6 @@ async function actualizarDetalleSinRecargar(proyectoId) {
     const tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
     const progreso = calcularProgresoPorFases(tareas, proyecto.metodologia);
     
-    // Actualizar solo el contenido del Gantt
     const ganttContainer = detalleDiv.querySelector('.gantt-container');
     if (ganttContainer) {
         const ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
@@ -1397,7 +1403,6 @@ async function actualizarDetalleSinRecargar(proyectoId) {
         }
     }
     
-    // Actualizar progreso en el detalle
     const progresoFill = detalleDiv.querySelector('.progress-fill');
     if (progresoFill) {
         progresoFill.style.width = `${progreso}%`;
@@ -1408,13 +1413,11 @@ async function actualizarDetalleSinRecargar(proyectoId) {
         progresoNumber.textContent = `${progreso}%`;
     }
     
-    // Actualizar contador de tareas
     const tareasCount = detalleDiv.querySelector('.tareas-count');
     if (tareasCount) {
         tareasCount.textContent = tareas.length;
     }
     
-    // Restaurar el estado de las fases
     const newFasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
     newFasesRows.forEach((row, index) => {
         const toggle = row.querySelector('.fase-toggle');
@@ -1438,34 +1441,7 @@ async function actualizarDetalleSinRecargar(proyectoId) {
 }
 
 // ============================================
-// ORDENAR POR FECHA
-// ============================================
-function ordenarPorFecha(proyectoId) {
-    const btn = document.getElementById(`orden-btn-${proyectoId}`);
-    const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
-    if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
-    let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
-    ordenFechaActivoGlobal[proyectoId] = !ordenFechaActivoGlobal[proyectoId];
-    const ascendente = ordenFechaActivoGlobal[proyectoId];
-    btn.innerHTML = ascendente ? '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
-    tareas.sort((a, b) => {
-        const fechaA = a.fecha_vencimiento ? new Date(a.fecha_vencimiento) : new Date('2099-12-31');
-        const fechaB = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : new Date('2099-12-31');
-        return ascendente ? fechaA - fechaB : fechaB - fechaA;
-    });
-    const proyecto = proyectosCache.find(p => p.id === proyectoId);
-    const ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
-    const ganttContainer = detalleDiv.querySelector('.gantt-container');
-    if (ganttContainer) {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = ganttHTML;
-        const newGantt = tempDiv.querySelector('.gantt-container');
-        if (newGantt) ganttContainer.parentNode.replaceChild(newGantt, ganttContainer);
-    }
-}
-
-// ============================================
-// GENERAR REPORTE DEL PROYECTO
+// GENERAR REPORTE DEL PROYECTO CON COMENTARIOS
 // ============================================
 async function generarReporteProyecto(proyectoId) {
     try {
@@ -1493,34 +1469,109 @@ async function generarReporteProyecto(proyectoId) {
             }
         });
         
+        let tareasHTML = '';
+        if (tareas.length === 0) {
+            tareasHTML = '<p class="text-sm text-gray-500">No hay tareas registradas.</p>';
+        } else {
+            const fasesTareas = {};
+            tareas.forEach(t => {
+                const fase = t.fase || 'Sin fase';
+                if (!fasesTareas[fase]) fasesTareas[fase] = [];
+                fasesTareas[fase].push(t);
+            });
+            let fasesOrdenadas = Object.keys(fasesTareas);
+            if (fasesMetodologia.length > 0) {
+                fasesOrdenadas = fasesMetodologia.filter(f => fasesTareas[f] && fasesTareas[f].length > 0);
+                Object.keys(fasesTareas).forEach(f => {
+                    if (!fasesOrdenadas.includes(f)) fasesOrdenadas.push(f);
+                });
+            } else {
+                fasesOrdenadas.sort();
+            }
+            fasesOrdenadas.forEach(fase => {
+                const tareasFase = fasesTareas[fase] || [];
+                tareasHTML += `
+                    <div style="margin-bottom: 16px; border-left: 3px solid #3b82f6; padding-left: 12px;">
+                        <h4 style="font-weight: 600; font-size: 14px; color: #1f2937; margin-bottom: 6px;">${fase}</h4>
+                        ${tareasFase.map(t => {
+                            const fechaInicio = t.fecha_inicio ? formatDate(t.fecha_inicio) : '-';
+                            const fechaVenc = t.fecha_vencimiento ? formatDate(t.fecha_vencimiento) : '-';
+                            const estadoColor = t.estado === 'Completado' ? '#22c55e' : t.estado === 'Bloqueada' ? '#ef4444' : '#f59e0b';
+                            const prioridadColors = {
+                                'Baja': '#6b7280',
+                                'Media': '#d97706',
+                                'Alta': '#dc2626',
+                                'Crítica': '#7f1d1d'
+                            };
+                            const prioridadColor = prioridadColors[t.prioridad] || '#6b7280';
+                            const tieneComentarios = t.comentarios && t.comentarios.trim() !== '';
+                            const comentariosMostrar = tieneComentarios ? t.comentarios : 'Sin comentarios';
+                            
+                            return `
+                                <div style="display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 4px;">
+                                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                            <span style="font-weight: 500;">${t.titulo}</span>
+                                            <span style="color: ${estadoColor}; font-weight: 500; font-size: 11px; background: #f3f4f6; padding: 1px 8px; border-radius: 10px;">
+                                                ${t.estado || 'Pendiente'}
+                                            </span>
+                                            <span style="color: ${prioridadColor}; font-size: 10px; font-weight: 600; background: #f3f4f6; padding: 1px 6px; border-radius: 4px;">
+                                                ${t.prioridad || 'Media'}
+                                            </span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; color: #6b7280; flex-wrap: wrap;">
+                                            <span>📅 ${fechaInicio} → ${fechaVenc}</span>
+                                            ${t.responsable_texto ? `<span>👤 ${t.responsable_texto}</span>` : ''}
+                                            ${t.evidencia_url ? `<span style="color: #3b82f6;">📎</span>` : ''}
+                                        </div>
+                                    </div>
+                                    ${t.descripcion ? `<div style="font-size: 12px; color: #6b7280; margin-top: 2px;">${t.descripcion}</div>` : ''}
+                                    <div style="font-size: 12px; color: #6b7280; margin-top: 2px; background: #fefce8; padding: 4px 8px; border-radius: 4px; border-left: 2px solid #d97706;">
+                                        💬 ${comentariosMostrar}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            });
+        }
+        
         const reporteHTML = `
             <!DOCTYPE html>
             <html>
-            <head><meta charset="UTF-8"><title>Reporte - ${proyecto.nombre}</title>
-            <style>
-                body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 900px; margin: 0 auto; color: #1f2937; background: #fafafa; }
-                .header { border-bottom: 3px solid #3b82f6; padding-bottom: 12px; margin-bottom: 20px; }
-                .header h1 { font-size: 24px; font-weight: 700; color: #1f2937; margin: 0; }
-                .header .sub { font-size: 14px; color: #6b7280; margin-top: 4px; }
-                .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
-                .info-grid .label { color: #6b7280; }
-                .info-grid .value { font-weight: 500; }
-                .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
-                .stat-card { background: #f9fafb; padding: 12px; border-radius: 8px; text-align: center; }
-                .stat-card .num { font-size: 22px; font-weight: 700; }
-                .stat-card .num.blue { color: #3b82f6; }
-                .stat-card .num.green { color: #22c55e; }
-                .stat-card .num.yellow { color: #f59e0b; }
-                .stat-card .num.red { color: #ef4444; }
-                .stat-card .label { font-size: 11px; color: #6b7280; }
-                .section { margin: 16px 0; }
-                .section h3 { font-weight: 600; font-size: 15px; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
-                .footer { margin-top: 24px; padding-top: 12px; border-top: 2px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center; }
-                @media print { body { background: white; padding: 20px; } .no-print { display: none; } }
-            </style>
+            <head>
+                <meta charset="UTF-8">
+                <title>Reporte - ${proyecto.nombre}</title>
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 1000px; margin: 0 auto; color: #1f2937; background: #fafafa; }
+                    .header { border-bottom: 3px solid #3b82f6; padding-bottom: 12px; margin-bottom: 20px; }
+                    .header h1 { font-size: 24px; font-weight: 700; color: #1f2937; margin: 0; }
+                    .header .sub { font-size: 14px; color: #6b7280; margin-top: 4px; }
+                    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
+                    .info-grid .label { color: #6b7280; }
+                    .info-grid .value { font-weight: 500; }
+                    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+                    .stat-card { background: #f9fafb; padding: 12px; border-radius: 8px; text-align: center; }
+                    .stat-card .num { font-size: 22px; font-weight: 700; }
+                    .stat-card .num.blue { color: #3b82f6; }
+                    .stat-card .num.green { color: #22c55e; }
+                    .stat-card .num.yellow { color: #f59e0b; }
+                    .stat-card .num.red { color: #ef4444; }
+                    .stat-card .label { font-size: 11px; color: #6b7280; }
+                    .section { margin: 16px 0; }
+                    .section h3 { font-weight: 600; font-size: 15px; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
+                    .comentario-box { background: #fefce8; border-left: 3px solid #d97706; padding: 6px 10px; border-radius: 4px; margin-top: 2px; font-size: 12px; color: #92400e; }
+                    .footer { margin-top: 24px; padding-top: 12px; border-top: 2px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center; }
+                    @media print { body { background: white; padding: 20px; } .no-print { display: none; } }
+                </style>
             </head>
             <body>
-                <div class="header"><h1>📊 Reporte de Proyecto</h1><div class="sub">${proyecto.nombre}</div></div>
+                <div class="header">
+                    <h1>📊 Reporte de Proyecto</h1>
+                    <div class="sub">${proyecto.nombre}</div>
+                </div>
+                
                 <div class="info-grid">
                     <div><span class="label">Cliente/Empresa:</span> <span class="value">${proyecto.empresa || 'No especificada'}</span></div>
                     <div><span class="label">Área:</span> <span class="value">${proyecto.area || 'No especificada'}</span></div>
@@ -1531,25 +1582,64 @@ async function generarReporteProyecto(proyectoId) {
                     <div><span class="label">Fases:</span> <span class="value">${fasesCompletas}/${totalFases || 1} completas</span></div>
                     <div><span class="label">Progreso:</span> <span class="value">${progreso}%</span></div>
                 </div>
+                
                 <div class="stats">
                     <div class="stat-card"><div class="num blue">${totalTareas}</div><div class="label">Total Tareas</div></div>
                     <div class="stat-card"><div class="num green">${completadas}</div><div class="label">Completadas</div></div>
                     <div class="stat-card"><div class="num yellow">${pendientes}</div><div class="label">Pendientes</div></div>
                     <div class="stat-card"><div class="num red">${bloqueadas}</div><div class="label">Bloqueadas</div></div>
                 </div>
-                <div class="footer">Reporte generado el ${new Date().toLocaleDateString('es-ES')}</div>
+                
+                <div class="section">
+                    <h3>📋 Tareas por Fase</h3>
+                    ${tareasHTML}
+                </div>
+                
+                <div class="footer">
+                    Reporte generado el ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}
+                </div>
+                
                 <div style="text-align: center; margin-top: 16px;" class="no-print">
-                    <button onclick="window.print()" style="padding: 8px 24px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">🖨️ Imprimir / Guardar PDF</button>
+                    <button onclick="window.print()" style="padding: 10px 30px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                        🖨️ Imprimir / Guardar PDF
+                    </button>
                 </div>
             </body>
             </html>
         `;
-        const ventana = window.open('', '_blank', 'width=900,height=800');
+        const ventana = window.open('', '_blank', 'width=1000,height=800');
         ventana.document.write(reporteHTML);
         ventana.document.close();
     } catch (e) {
         console.error('Error generando reporte:', e);
         showToast('Error al generar reporte: ' + e.message, 'error');
+    }
+}
+
+// ============================================
+// ORDENAR POR FECHA
+// ============================================
+function ordenarPorFecha(proyectoId) {
+    const btn = document.getElementById(`orden-btn-${proyectoId}`);
+    const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
+    if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
+    let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
+    ordenFechaActivoGlobal[proyectoId] = !ordenFechaActivoGlobal[proyectoId];
+    const ascendente = ordenFechaActivoGlobal[proyectoId];
+    btn.innerHTML = ascendente ? '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
+    tareas.sort((a, b) => {
+        const fechaA = a.fecha_vencimiento ? new Date(a.fecha_vencimiento) : new Date('2099-12-31');
+        const fechaB = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : new Date('2099-12-31');
+        return ascendente ? fechaA - fechaB : fechaB - fechaA;
+    });
+    const proyecto = proyectosCache.find(p => p.id === proyectoId);
+    const ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
+    const ganttContainer = detalleDiv.querySelector('.gantt-container');
+    if (ganttContainer) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = ganttHTML;
+        const newGantt = tempDiv.querySelector('.gantt-container');
+        if (newGantt) ganttContainer.parentNode.replaceChild(newGantt, ganttContainer);
     }
 }
 
