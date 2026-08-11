@@ -833,7 +833,7 @@ async function cambiarEstadoTarea(id, nuevoEstado) {
 }
 
 // ============================================
-// SUBIR EVIDENCIA - CORREGIDO
+// SUBIR EVIDENCIA
 // ============================================
 function abrirModalEvidencia(tareaId) {
     const tarea = tareasCache.find(t => t.id === tareaId);
@@ -873,7 +873,6 @@ async function subirEvidencia() {
         }
         const urlPublica = `${SUPABASE_URL}/storage/v1/object/public/evidencias/${nombreArchivo}`;
         
-        // Actualizar los campos de evidencia
         await supabaseUpdate('tareas', tareaId, {
             evidencia_url: urlPublica,
             evidencia_nombre: archivo.name,
@@ -1323,6 +1322,64 @@ function toggleFase(element) {
 }
 
 // ============================================
+// ORDENAR POR FECHA - CORREGIDO (ORDENA TODAS LAS TAREAS)
+// ============================================
+function ordenarPorFecha(proyectoId) {
+    const btn = document.getElementById(`orden-btn-${proyectoId}`);
+    const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
+    if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
+    
+    // Cambiar el estado de orden
+    ordenFechaActivoGlobal[proyectoId] = !ordenFechaActivoGlobal[proyectoId];
+    const ascendente = ordenFechaActivoGlobal[proyectoId];
+    btn.innerHTML = ascendente ? 
+        '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : 
+        '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
+    
+    // Obtener todas las tareas del proyecto
+    let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
+    
+    // Ordenar tareas por fecha de vencimiento
+    tareas.sort((a, b) => {
+        const fechaA = a.fecha_vencimiento ? new Date(a.fecha_vencimiento) : new Date('2099-12-31');
+        const fechaB = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : new Date('2099-12-31');
+        return ascendente ? fechaA - fechaB : fechaB - fechaA;
+    });
+    
+    // Obtener el proyecto
+    const proyecto = proyectosCache.find(p => p.id === proyectoId);
+    if (!proyecto) return;
+    
+    // Re-generar el Gantt completo con las tareas ordenadas
+    const ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
+    
+    // Reemplazar SOLO el contenedor del Gantt dentro del detalle
+    const ganttContainer = detalleDiv.querySelector('.gantt-container');
+    if (ganttContainer) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = ganttHTML;
+        const newGantt = tempDiv.querySelector('.gantt-container');
+        if (newGantt) {
+            ganttContainer.parentNode.replaceChild(newGantt, ganttContainer);
+        }
+    }
+    
+    // Guardar el estado de las fases (todas expandidas por defecto después de ordenar)
+    const newFasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
+    if (newFasesRows.length > 0) {
+        newFasesRows.forEach((row, index) => {
+            const toggle = row.querySelector('.fase-toggle');
+            const tareasFila = row.nextElementSibling;
+            // Mostrar todas las fases expandidas
+            if (toggle) toggle.classList.remove('collapsed');
+            if (tareasFila) tareasFila.classList.remove('hidden');
+        });
+    }
+    
+    showToast(`📅 Ordenado por fecha ${ascendente ? 'ascendente' : 'descendente'}`, 'info');
+}
+
+// ============================================
 // RECARGAR DATOS MANTENIENDO EL ÁRBOL ABIERTO
 // ============================================
 async function recargarDatosManteniendoArbol(proyectoId) {
@@ -1391,13 +1448,11 @@ function actualizarContadoresTareas() {
                     progresoNumber.textContent = `${progreso}%`;
                 }
                 
-                // Actualizar badge de vencidas
                 let badgeVencidas = card.querySelector('.vencidas-badge');
                 if (vencidas > 0) {
                     if (badgeVencidas) {
                         badgeVencidas.textContent = `⚠️ ${vencidas} vencidas`;
                     } else {
-                        // Crear badge si no existe
                         const nombreDiv = card.querySelector('.proyecto-nombre')?.parentElement;
                         if (nombreDiv) {
                             const badge = document.createElement('span');
@@ -1611,7 +1666,6 @@ async function generarReporteProyecto(proyectoId) {
                     .stat-card .label { font-size: 11px; color: #6b7280; }
                     .section { margin: 16px 0; }
                     .section h3 { font-weight: 600; font-size: 15px; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
-                    .comentario-box { background: #fefce8; border-left: 3px solid #d97706; padding: 6px 10px; border-radius: 4px; margin-top: 2px; font-size: 12px; color: #92400e; }
                     .footer { margin-top: 24px; padding-top: 12px; border-top: 2px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center; }
                     .vencida-row { background: #fef2f2; }
                     @media print { body { background: white; padding: 20px; } .no-print { display: none; } }
@@ -1665,33 +1719,6 @@ async function generarReporteProyecto(proyectoId) {
     } catch (e) {
         console.error('Error generando reporte:', e);
         showToast('Error al generar reporte: ' + e.message, 'error');
-    }
-}
-
-// ============================================
-// ORDENAR POR FECHA
-// ============================================
-function ordenarPorFecha(proyectoId) {
-    const btn = document.getElementById(`orden-btn-${proyectoId}`);
-    const detalleDiv = document.getElementById(`detalle-${proyectoId}`);
-    if (!detalleDiv || !detalleDiv.classList.contains('active')) return;
-    let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
-    ordenFechaActivoGlobal[proyectoId] = !ordenFechaActivoGlobal[proyectoId];
-    const ascendente = ordenFechaActivoGlobal[proyectoId];
-    btn.innerHTML = ascendente ? '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
-    tareas.sort((a, b) => {
-        const fechaA = a.fecha_vencimiento ? new Date(a.fecha_vencimiento) : new Date('2099-12-31');
-        const fechaB = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : new Date('2099-12-31');
-        return ascendente ? fechaA - fechaB : fechaB - fechaA;
-    });
-    const proyecto = proyectosCache.find(p => p.id === proyectoId);
-    const ganttHTML = renderVistaGanttColapsable(tareas, proyecto);
-    const ganttContainer = detalleDiv.querySelector('.gantt-container');
-    if (ganttContainer) {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = ganttHTML;
-        const newGantt = tempDiv.querySelector('.gantt-container');
-        if (newGantt) ganttContainer.parentNode.replaceChild(newGantt, ganttContainer);
     }
 }
 
