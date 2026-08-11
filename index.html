@@ -1322,7 +1322,7 @@ function toggleFase(element) {
 }
 
 // ============================================
-// ORDENAR POR FECHA - CORREGIDO (ORDENA TODAS LAS TAREAS)
+// ORDENAR POR FECHA DE INICIO
 // ============================================
 function ordenarPorFecha(proyectoId) {
     const btn = document.getElementById(`orden-btn-${proyectoId}`);
@@ -1333,16 +1333,16 @@ function ordenarPorFecha(proyectoId) {
     ordenFechaActivoGlobal[proyectoId] = !ordenFechaActivoGlobal[proyectoId];
     const ascendente = ordenFechaActivoGlobal[proyectoId];
     btn.innerHTML = ascendente ? 
-        '<i class="fas fa-sort-amount-down mr-1"></i> Fecha ↑' : 
-        '<i class="fas fa-sort-amount-up-alt mr-1"></i> Fecha ↓';
+        '<i class="fas fa-sort-amount-down mr-1"></i> Inicio ↑' : 
+        '<i class="fas fa-sort-amount-up-alt mr-1"></i> Inicio ↓';
     
     // Obtener todas las tareas del proyecto
     let tareas = tareasCache.filter(t => t.proyecto_id === proyectoId);
     
-    // Ordenar tareas por fecha de vencimiento
+    // Ordenar tareas por fecha de INICIO
     tareas.sort((a, b) => {
-        const fechaA = a.fecha_vencimiento ? new Date(a.fecha_vencimiento) : new Date('2099-12-31');
-        const fechaB = b.fecha_vencimiento ? new Date(b.fecha_vencimiento) : new Date('2099-12-31');
+        const fechaA = a.fecha_inicio ? new Date(a.fecha_inicio) : new Date('2099-12-31');
+        const fechaB = b.fecha_inicio ? new Date(b.fecha_inicio) : new Date('2099-12-31');
         return ascendente ? fechaA - fechaB : fechaB - fechaA;
     });
     
@@ -1364,22 +1364,20 @@ function ordenarPorFecha(proyectoId) {
         }
     }
     
-    // Guardar el estado de las fases (todas expandidas por defecto después de ordenar)
+    // Mostrar todas las fases expandidas después de ordenar
     const newFasesRows = detalleDiv.querySelectorAll('.gantt-fila-fase');
     if (newFasesRows.length > 0) {
-        newFasesRows.forEach((row, index) => {
+        newFasesRows.forEach((row) => {
             const toggle = row.querySelector('.fase-toggle');
             const tareasFila = row.nextElementSibling;
-            // Mostrar todas las fases expandidas
             if (toggle) toggle.classList.remove('collapsed');
             if (tareasFila) tareasFila.classList.remove('hidden');
         });
     }
     
-    showToast(`📅 Ordenado por fecha ${ascendente ? 'ascendente' : 'descendente'}`, 'info');
+    showToast(`📅 Ordenado por fecha de inicio ${ascendente ? 'ascendente' : 'descendente'}`, 'info');
 }
-
-// ============================================
+    // ============================================
 // RECARGAR DATOS MANTENIENDO EL ÁRBOL ABIERTO
 // ============================================
 async function recargarDatosManteniendoArbol(proyectoId) {
